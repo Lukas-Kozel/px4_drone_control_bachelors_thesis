@@ -1,0 +1,4 @@
+source;share/load_imu_subscriber/local_setup.bash
+source;share/load_imu_subscriber/local_setup.dsv
+source;share/load_imu_subscriber/local_setup.sh
+source;share/load_imu_subscriber/local_setup.zsh

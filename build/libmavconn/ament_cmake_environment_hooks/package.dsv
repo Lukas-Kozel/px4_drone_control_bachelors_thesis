@@ -1,0 +1,4 @@
+source;share/libmavconn/local_setup.bash
+source;share/libmavconn/local_setup.dsv
+source;share/libmavconn/local_setup.sh
+source;share/libmavconn/local_setup.zsh

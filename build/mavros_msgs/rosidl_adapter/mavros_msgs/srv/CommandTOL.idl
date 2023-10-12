@@ -1,0 +1,29 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/CommandTOL.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Common type for Take Off and Landing")
+    struct CommandTOL_Request {
+      @verbatim (language="comment", text=
+        "used by takeoff")
+      float min_pitch;
+
+      float yaw;
+
+      float latitude;
+
+      float longitude;
+
+      float altitude;
+    };
+    struct CommandTOL_Response {
+      boolean success;
+
+      uint8 result;
+    };
+  };
+};

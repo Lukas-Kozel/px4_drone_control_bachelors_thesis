@@ -1,0 +1,55 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/DebugValue.msg
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    module DebugValue_Constants {
+      const uint8 TYPE_DEBUG = 0;
+      const uint8 TYPE_DEBUG_VECT = 1;
+      const uint8 TYPE_DEBUG_FLOAT_ARRAY = 2;
+      const uint8 TYPE_NAMED_VALUE_FLOAT = 3;
+      const uint8 TYPE_NAMED_VALUE_INT = 4;
+    };
+    @verbatim (language="comment", text=
+      "Msg for Debug MAVLink API" "\n"
+      "" "\n"
+      "Supported types:" "\n"
+      "DEBUG   https://mavlink.io/en/messages/common.html#DEBUG" "\n"
+      "DEBUG_VECTOR   https://mavlink.io/en/messages/common.html#DEBUG_VECT" "\n"
+      "DEBUG_FLOAT_ARRAY      https://mavlink.io/en/messages/common.html#DEBUG_FLOAT_ARRAY" "\n"
+      "NAMED_VALUE_FLOAT  https://mavlink.io/en/messages/common.html#NAMED_VALUE_FLOAT" "\n"
+      "NAMED_VALUE_INT  https://mavlink.io/en/messages/common.html#NAMED_VALUE_INT")
+    struct DebugValue {
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "index value of DEBUG value (-1 if not indexed)")
+      int32 index;
+
+      @verbatim (language="comment", text=
+        "Unique ID used to discriminate between DEBUG_FLOAT_ARRAYS (-1 if not used)")
+      int32 array_id;
+
+      @verbatim (language="comment", text=
+        "value name/key")
+      string name;
+
+      @verbatim (language="comment", text=
+        "float value for NAMED_VALUE_FLOAT and DEBUG")
+      float value_float;
+
+      @verbatim (language="comment", text=
+        "int value for NAMED_VALUE_INT")
+      int32 value_int;
+
+      @verbatim (language="comment", text=
+        "DEBUG vector or array")
+      sequence<float> data;
+
+      uint8 type;
+    };
+  };
+};

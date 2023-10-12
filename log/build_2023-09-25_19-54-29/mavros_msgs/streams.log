@@ -1,0 +1,99 @@
+[0.026s] Invoking command in '/home/luky/mavros_ros2_ws/src/build/mavros_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/mavros_msgs -- -j8 -l8
+[0.164s] [  0%] Built target ament_cmake_python_copy_mavros_msgs
+[0.165s] [  0%] [34m[1mGenerating C code for ROS interfaces[0m
+[0.173s] [  0%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[0.488s] running egg_info
+[0.493s] creating mavros_msgs.egg-info
+[0.541s] writing mavros_msgs.egg-info/PKG-INFO
+[0.542s] writing dependency_links to mavros_msgs.egg-info/dependency_links.txt
+[0.542s] writing top-level names to mavros_msgs.egg-info/top_level.txt
+[0.542s] writing manifest file 'mavros_msgs.egg-info/SOURCES.txt'
+[0.629s] reading manifest file 'mavros_msgs.egg-info/SOURCES.txt'
+[0.630s] writing manifest file 'mavros_msgs.egg-info/SOURCES.txt'
+[0.659s] [  0%] Built target ament_cmake_python_build_mavros_msgs_egg
+[2.873s] Traceback (most recent call last):
+[2.873s] Traceback (most recent call last):
+[2.873s] gmake[2]: *** Deleting file 'rosidl_generator_c/mavros_msgs/msg/adsb_vehicle.h'
+[2.873s] gmake[2]: *** Deleting file 'rosidl_generator_cpp/mavros_msgs/msg/adsb_vehicle.hpp'
+[2.873s]   File "/opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c", line 38, in <module>
+[2.874s]   File "/opt/ros/humble/share/rosidl_generator_cpp/cmake/../../../lib/rosidl_generator_cpp/rosidl_generator_cpp", line 38, in <module>
+[2.874s]     sys.exit(main())
+[2.874s]     sys.exit(main())
+[2.874s]   File "/opt/ros/humble/share/rosidl_generator_cpp/cmake/../../../lib/rosidl_generator_cpp/rosidl_generator_cpp", line 34, in main
+[2.874s]   File "/opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c", line 34, in main
+[2.874s]     generate_c(args.generator_arguments_file)
+[2.874s]     generate_cpp(args.generator_arguments_file)
+[2.874s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_c/__init__.py", line 37, in generate_c
+[2.874s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_cpp/__init__.py", line 38, in generate_cpp
+[2.874s]     return generate_files(
+[2.874s]     return generate_files(
+[2.874s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_cmake/__init__.py", line 74, in generate_files
+[2.874s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_cmake/__init__.py", line 74, in generate_files
+[2.874s]     idl_file = parse_idl_file(locator)
+[2.874s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 64, in parse_idl_file
+[2.874s]     idl_file = parse_idl_file(locator)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 64, in parse_idl_file
+[2.875s]     content = parse_idl_string(string, png_file=png_file)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 73, in parse_idl_string
+[2.875s]     content = parse_idl_string(string, png_file=png_file)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 73, in parse_idl_string
+[2.875s]     content = extract_content_from_ast(tree)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 108, in extract_content_from_ast
+[2.875s]     content = extract_content_from_ast(tree)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 108, in extract_content_from_ast
+[2.875s]     module_identifiers = get_module_identifier_values(tree, const_dcl)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 312, in get_module_identifier_values
+[2.875s]     module_identifiers = get_module_identifier_values(tree, const_dcl)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 312, in get_module_identifier_values
+[2.875s]     path = _find_path(tree, target)
+[2.875s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+[2.876s]     path = _find_path(tree, target)
+[2.876s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+[2.876s]     tail = _find_path(c, target)
+[2.876s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+[2.876s]     tail = _find_path(c, target)
+[2.876s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+[2.876s]     tail = _find_path(c, target)
+[2.876s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+[2.876s]     tail = _find_path(c, target)
+[2.876s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+[2.876s]     tail = _find_path(c, target)
+[2.877s]   [Previous line repeated 17 more times]
+[2.877s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 319, in _find_path
+[2.877s]     tail = _find_path(c, target)
+[2.877s]   [Previous line repeated 5 more times]
+[2.877s]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 319, in _find_path
+[2.877s]     if node == target:
+[2.877s] KeyboardInterrupt
+[2.877s]     if node == target:
+[2.877s]   File "/usr/lib/python3/dist-packages/lark/tree.py", line 91, in __eq__
+[2.883s]     return self.data == other.data and self.children == other.children
+[2.883s]   File "/usr/lib/python3/dist-packages/lark/tree.py", line 91, in __eq__
+[2.883s]     return self.data == other.data and self.children == other.children
+[2.883s]   File "/usr/lib/python3/dist-packages/lark/tree.py", line 91, in __eq__
+[2.883s]     return self.data == other.data and self.children == other.children
+[2.883s]   [Previous line repeated 13 more times]
+[2.883s]   File "/usr/lib/python3/dist-packages/lark/lexer.py", line 195, in __eq__
+[2.884s]     return str.__eq__(self, other)
+[2.884s] KeyboardInterrupt
+[2.955s] gmake[2]: *** [CMakeFiles/mavros_msgs__rosidl_generator_c.dir/build.make:319: rosidl_generator_c/mavros_msgs/msg/adsb_vehicle.h] Interrupt
+[2.955s] gmake[1]: *** [CMakeFiles/Makefile2:212: CMakeFiles/mavros_msgs__rosidl_generator_c.dir/all] Interrupt
+[2.963s] gmake[2]: *** [CMakeFiles/mavros_msgs__cpp.dir/build.make:743: rosidl_generator_cpp/mavros_msgs/msg/adsb_vehicle.hpp] Interrupt
+[2.963s] gmake[1]: *** [CMakeFiles/Makefile2:317: CMakeFiles/mavros_msgs__cpp.dir/all] Interrupt
+[2.963s] gmake: *** [Makefile:146: all] Interrupt
+[2.987s] Traceback (most recent call last):
+[2.987s]   File "/home/luky/.local/bin/cmake", line 8, in <module>
+[2.987s]     sys.exit(cmake())
+[2.987s]   File "/home/luky/.local/lib/python3.10/site-packages/cmake/__init__.py", line 43, in cmake
+[2.987s]     raise SystemExit(_program('cmake', sys.argv[1:]))
+[2.987s]   File "/home/luky/.local/lib/python3.10/site-packages/cmake/__init__.py", line 39, in _program
+[2.987s]     return subprocess.call([os.path.join(CMAKE_BIN_DIR, name)] + args, close_fds=False)
+[2.987s]   File "/usr/lib/python3.10/subprocess.py", line 347, in call
+[2.987s]     return p.wait(timeout=timeout)
+[2.987s]   File "/usr/lib/python3.10/subprocess.py", line 1209, in wait
+[2.987s]     return self._wait(timeout=timeout)
+[2.987s]   File "/usr/lib/python3.10/subprocess.py", line 1959, in _wait
+[2.987s]     (pid, sts) = self._try_wait(0)
+[2.987s]   File "/usr/lib/python3.10/subprocess.py", line 1917, in _try_wait
+[2.987s]     (pid, sts) = os.waitpid(self.pid, wait_flags)
+[2.987s] KeyboardInterrupt

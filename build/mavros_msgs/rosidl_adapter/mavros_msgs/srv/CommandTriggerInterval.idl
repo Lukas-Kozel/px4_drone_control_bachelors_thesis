@@ -1,0 +1,25 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/CommandTriggerInterval.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Type for controlling camera trigger interval and integration time")
+    struct CommandTriggerInterval_Request {
+      @verbatim (language="comment", text=
+        "Trigger cycle_time (interval between to triggers) - set to 0 to ignore command")
+      float cycle_time;
+
+      @verbatim (language="comment", text=
+        "Camera shutter integration_time - set to 0 to ignore command")
+      float integration_time;
+    };
+    struct CommandTriggerInterval_Response {
+      boolean success;
+
+      uint8 result;
+    };
+  };
+};

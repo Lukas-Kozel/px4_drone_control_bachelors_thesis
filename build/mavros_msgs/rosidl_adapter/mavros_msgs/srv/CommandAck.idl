@@ -1,0 +1,27 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/CommandAck.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Generic COMMAND_ACK")
+    struct CommandAck_Request {
+      uint16 command;
+
+      uint8 result;
+
+      uint8 progress;
+
+      uint32 result_param2;
+    };
+    struct CommandAck_Response {
+      boolean success;
+
+      @verbatim (language="comment", text=
+        "raw result returned by COMMAND_ACK")
+      uint8 result;
+    };
+  };
+};

@@ -1,0 +1,50 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 1.3.5 (/opt/ros/humble/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3.10 (found version "3.10.12") found components: Interpreter 
+-- Found ASIO: /usr/include  
+-- Copy mavlink_dialect.hpp to source tree
+-- Found ament_cmake_gtest: 1.3.5 (/opt/ros/humble/share/ament_cmake_gtest/cmake)
+-- Found ament_lint_auto: 0.12.7 (/opt/ros/humble/share/ament_lint_auto/cmake)
+-- Found gtest sources under '/opt/ros/humble/src/gtest_vendor': C++ tests using 'Google Test' will be built
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Added test 'cppcheck' to perform static code analysis on C / C++ code
+-- Configured cppcheck include dirs: /home/luky/mavros_ros2_ws/src/mavros/libmavconn/include
+-- Configured cppcheck exclude dirs and/or files: 
+-- Added test 'cpplint' to check C / C++ code against the Google style
+-- Configured cpplint exclude dirs and/or files: 
+-- Added test 'lint_cmake' to check CMake code style
+-- Added test 'uncrustify' to check C / C++ code style
+-- Configured uncrustify additional arguments: 
+-- Added test 'xmllint' to check XML markup files
+-- Configuring done (1.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/luky/mavros_ros2_ws/src/build/libmavconn
+[  8%] [32mBuilding CXX object CMakeFiles/mavconn.dir/generated/src/mavlink_helpers.cpp.o[0m
+[ 16%] [32mBuilding CXX object gtest/CMakeFiles/gtest_main.dir/src/gtest_main.cc.o[0m
+[ 25%] [32mBuilding CXX object CMakeFiles/mavconn.dir/src/serial.cpp.o[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/mavconn.dir/src/interface.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/mavconn.dir/src/tcp.cpp.o[0m
+[ 50%] [32mBuilding CXX object gtest/CMakeFiles/gtest.dir/src/gtest-all.cc.o[0m
+[ 58%] [32mBuilding CXX object CMakeFiles/mavconn.dir/src/udp.cpp.o[0m
+[ 66%] [32m[1mLinking CXX static library libgtest_main.a[0m
+[ 66%] Built target gtest_main
+[ 75%] [32m[1mLinking CXX static library libgtest.a[0m
+[ 75%] Built target gtest
+[ 83%] [32m[1mLinking CXX shared library libmavconn.so[0m
+[ 83%] Built target mavconn
+[ 91%] [32mBuilding CXX object CMakeFiles/test_mavconn.dir/test/test_mavconn.cpp.o[0m
+[100%] [32m[1mLinking CXX executable test_mavconn[0m
+[100%] Built target test_mavconn

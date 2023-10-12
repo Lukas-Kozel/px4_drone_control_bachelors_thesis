@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/RCIn.msg
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    @verbatim (language="comment", text=
+      "RAW RC input state")
+    struct RCIn {
+      std_msgs::msg::Header header;
+
+      uint8 rssi;
+
+      sequence<uint16> channels;
+    };
+  };
+};

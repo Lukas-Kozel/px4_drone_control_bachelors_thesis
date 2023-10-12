@@ -1,0 +1,25 @@
+[0.142s] Invoking command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/angle_calculator -- -j8 -l8
+[0.220s] [ 50%] [32mBuilding CXX object CMakeFiles/angle_calculator_node.dir/src/angle_calculator_node.cpp.o[0m
+[10.078s] [100%] [32m[1mLinking CXX executable angle_calculator_node[0m
+[10.749s] [100%] Built target angle_calculator_node
+[10.762s] Invoked command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/angle_calculator -- -j8 -l8
+[10.874s] Invoking command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --install /home/luky/mavros_ros2_ws/src/build/angle_calculator
+[10.909s] -- Install configuration: ""
+[10.909s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/lib/angle_calculator/angle_calculator_node
+[10.912s] -- Set runtime path of "/home/luky/mavros_ros2_ws/src/install/angle_calculator/lib/angle_calculator/angle_calculator_node" to ""
+[10.913s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/ament_index/resource_index/package_run_dependencies/angle_calculator
+[10.913s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/ament_index/resource_index/parent_prefix_path/angle_calculator
+[10.913s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/ament_prefix_path.sh
+[10.913s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/ament_prefix_path.dsv
+[10.913s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/path.sh
+[10.914s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/path.dsv
+[10.914s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.bash
+[10.914s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.sh
+[10.914s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.zsh
+[10.915s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.dsv
+[10.915s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.dsv
+[10.915s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/ament_index/resource_index/packages/angle_calculator
+[10.915s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/cmake/angle_calculatorConfig.cmake
+[10.915s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/cmake/angle_calculatorConfig-version.cmake
+[10.915s] -- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.xml
+[10.925s] Invoked command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --install /home/luky/mavros_ros2_ws/src/build/angle_calculator

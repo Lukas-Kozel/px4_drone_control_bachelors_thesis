@@ -1,0 +1,21 @@
+[ 50%] [32mBuilding CXX object CMakeFiles/angle_calculator_node.dir/src/angle_calculator_node.cpp.o[0m
+[100%] [32m[1mLinking CXX executable angle_calculator_node[0m
+[100%] Built target angle_calculator_node
+-- Install configuration: ""
+-- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/lib/angle_calculator/angle_calculator_node
+-- Set runtime path of "/home/luky/mavros_ros2_ws/src/install/angle_calculator/lib/angle_calculator/angle_calculator_node" to ""
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/ament_index/resource_index/package_run_dependencies/angle_calculator
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/ament_index/resource_index/parent_prefix_path/angle_calculator
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/ament_prefix_path.sh
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/ament_prefix_path.dsv
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/path.sh
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/environment/path.dsv
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.bash
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.sh
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.zsh
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/local_setup.dsv
+-- Installing: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.dsv
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/ament_index/resource_index/packages/angle_calculator
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/cmake/angle_calculatorConfig.cmake
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/cmake/angle_calculatorConfig-version.cmake
+-- Up-to-date: /home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.xml

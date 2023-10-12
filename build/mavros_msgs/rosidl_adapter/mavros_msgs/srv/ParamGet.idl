@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/ParamGet.srv
+// generated code does not contain a copyright notice
+
+#include "mavros_msgs/msg/ParamValue.idl"
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Request parameter from attached device")
+    struct ParamGet_Request {
+      @verbatim (language="comment", text=
+        "XXX DEPRECATED: use ros2 parameters api instead")
+      string param_id;
+    };
+    struct ParamGet_Response {
+      boolean success;
+
+      mavros_msgs::msg::ParamValue value;
+    };
+  };
+};

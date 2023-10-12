@@ -1,0 +1,232 @@
+[1.275s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build', '--packages-select', 'angle_calculator']
+[1.275s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=8, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=['angle_calculator'], packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0x7fbd6ce7f250>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0x7fbd6ce7ee00>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0x7fbd6ce7ee00>>)
+[1.342s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[1.343s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[1.343s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[1.343s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[1.343s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[1.343s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[1.343s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/luky/mavros_ros2_ws/src'
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[1.343s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[1.358s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[1.358s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[1.358s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[1.358s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[1.358s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extensions ['ignore', 'ignore_ament_install']
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extension 'ignore'
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extension 'ignore_ament_install'
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extensions ['colcon_pkg']
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extension 'colcon_pkg'
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extensions ['colcon_meta']
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extension 'colcon_meta'
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extensions ['ros']
+[1.359s] Level 1:colcon.colcon_core.package_identification:_identify(angle_calculator) by extension 'ros'
+[1.362s] DEBUG:colcon.colcon_core.package_identification:Package 'angle_calculator' with type 'ros.ament_cmake' and name 'angle_calculator'
+[1.362s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[1.362s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[1.362s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[1.362s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extensions ['ignore', 'ignore_ament_install']
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extension 'ignore'
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extension 'ignore_ament_install'
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extensions ['colcon_pkg']
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extension 'colcon_pkg'
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extensions ['colcon_meta']
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extension 'colcon_meta'
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extensions ['ros']
+[1.363s] Level 1:colcon.colcon_core.package_identification:_identify(controller_prototype) by extension 'ros'
+[1.364s] DEBUG:colcon.colcon_core.package_identification:Package 'controller_prototype' with type 'ros.ament_cmake' and name 'controller_prototype'
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extensions ['ignore', 'ignore_ament_install']
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extension 'ignore'
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extension 'ignore_ament_install'
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extensions ['colcon_pkg']
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extension 'colcon_pkg'
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extensions ['colcon_meta']
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extension 'colcon_meta'
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extensions ['ros']
+[1.364s] Level 1:colcon.colcon_core.package_identification:_identify(gps_converter) by extension 'ros'
+[1.365s] DEBUG:colcon.colcon_core.package_identification:Package 'gps_converter' with type 'ros.ament_cmake' and name 'gps_converter'
+[1.365s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[1.365s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[1.365s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[1.365s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extensions ['ignore', 'ignore_ament_install']
+[1.365s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extension 'ignore'
+[1.365s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extension 'ignore_ament_install'
+[1.366s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extensions ['colcon_pkg']
+[1.366s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extension 'colcon_pkg'
+[1.366s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extensions ['colcon_meta']
+[1.366s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extension 'colcon_meta'
+[1.366s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extensions ['ros']
+[1.366s] Level 1:colcon.colcon_core.package_identification:_identify(load_imu_subscriber) by extension 'ros'
+[1.367s] DEBUG:colcon.colcon_core.package_identification:Package 'load_imu_subscriber' with type 'ros.ament_cmake' and name 'load_imu_subscriber'
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extensions ['ignore', 'ignore_ament_install']
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'ignore'
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'ignore_ament_install'
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extensions ['colcon_pkg']
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'colcon_pkg'
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extensions ['colcon_meta']
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'colcon_meta'
+[1.367s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extensions ['ros']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'ros'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extensions ['cmake', 'python']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'cmake'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'python'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extensions ['python_setup_py']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros) by extension 'python_setup_py'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extensions ['ignore', 'ignore_ament_install']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extension 'ignore'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extension 'ignore_ament_install'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extensions ['colcon_pkg']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extension 'colcon_pkg'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extensions ['colcon_meta']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extension 'colcon_meta'
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extensions ['ros']
+[1.368s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/libmavconn) by extension 'ros'
+[1.369s] DEBUG:colcon.colcon_core.package_identification:Package 'mavros/libmavconn' with type 'ros.ament_cmake' and name 'libmavconn'
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extensions ['ignore', 'ignore_ament_install']
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extension 'ignore'
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extension 'ignore_ament_install'
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extensions ['colcon_pkg']
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extension 'colcon_pkg'
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extensions ['colcon_meta']
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extension 'colcon_meta'
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extensions ['ros']
+[1.369s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros) by extension 'ros'
+[1.372s] DEBUG:colcon.colcon_core.package_identification:Package 'mavros/mavros' with type 'ros.ament_cmake' and name 'mavros'
+[1.372s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extensions ['ignore', 'ignore_ament_install']
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extension 'ignore'
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extension 'ignore_ament_install'
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extensions ['colcon_pkg']
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extension 'colcon_pkg'
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extensions ['colcon_meta']
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extension 'colcon_meta'
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extensions ['ros']
+[1.373s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_extras) by extension 'ros'
+[1.376s] DEBUG:colcon.colcon_core.package_identification:Package 'mavros/mavros_extras' with type 'ros.ament_cmake' and name 'mavros_extras'
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extensions ['ignore', 'ignore_ament_install']
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extension 'ignore'
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extension 'ignore_ament_install'
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extensions ['colcon_pkg']
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extension 'colcon_pkg'
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extensions ['colcon_meta']
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extension 'colcon_meta'
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extensions ['ros']
+[1.376s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/mavros_msgs) by extension 'ros'
+[1.377s] DEBUG:colcon.colcon_core.package_identification:Package 'mavros/mavros_msgs' with type 'ros.ament_cmake' and name 'mavros_msgs'
+[1.377s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/test_mavros) by extensions ['ignore', 'ignore_ament_install']
+[1.377s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/test_mavros) by extension 'ignore'
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(mavros/test_mavros) ignored
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extensions ['ignore', 'ignore_ament_install']
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extension 'ignore'
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extension 'ignore_ament_install'
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extensions ['colcon_pkg']
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extension 'colcon_pkg'
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extensions ['colcon_meta']
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extension 'colcon_meta'
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extensions ['ros']
+[1.378s] Level 1:colcon.colcon_core.package_identification:_identify(move_forward) by extension 'ros'
+[1.379s] DEBUG:colcon.colcon_core.package_identification:Package 'move_forward' with type 'ros.ament_cmake' and name 'move_forward'
+[1.379s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extensions ['ignore', 'ignore_ament_install']
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extension 'ignore'
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extension 'ignore_ament_install'
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extensions ['colcon_pkg']
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extension 'colcon_pkg'
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extensions ['colcon_meta']
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extension 'colcon_meta'
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extensions ['ros']
+[1.380s] Level 1:colcon.colcon_core.package_identification:_identify(pid_prototype) by extension 'ros'
+[1.381s] DEBUG:colcon.colcon_core.package_identification:Package 'pid_prototype' with type 'ros.ament_cmake' and name 'pid_prototype'
+[1.381s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['ignore', 'ignore_ament_install']
+[1.381s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'ignore'
+[1.381s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'ignore_ament_install'
+[1.381s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['colcon_pkg']
+[1.382s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'colcon_pkg'
+[1.382s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['colcon_meta']
+[1.382s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'colcon_meta'
+[1.382s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extensions ['ros']
+[1.382s] Level 1:colcon.colcon_core.package_identification:_identify(px4_msgs) by extension 'ros'
+[1.383s] DEBUG:colcon.colcon_core.package_identification:Package 'px4_msgs' with type 'ros.ament_cmake' and name 'px4_msgs'
+[1.383s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[1.383s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[1.383s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[1.383s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[1.383s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'controller_prototype' in 'controller_prototype'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'gps_converter' in 'gps_converter'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'libmavconn' in 'mavros/libmavconn'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'load_imu_subscriber' in 'load_imu_subscriber'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'mavros_msgs' in 'mavros/mavros_msgs'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'pid_prototype' in 'pid_prototype'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'px4_msgs' in 'px4_msgs'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'mavros' in 'mavros/mavros'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'move_forward' in 'move_forward'
+[1.469s] INFO:colcon.colcon_core.package_selection:Skipping not selected package 'mavros_extras' in 'mavros/mavros_extras'
+[1.512s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[1.512s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[1.553s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 11 installed packages in /home/luky/mavros_ros2_ws/install
+[1.572s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/luky/ros2_ws/install
+[1.593s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 300 installed packages in /opt/ros/humble
+[1.595s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'cmake_args' from command line to 'None'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'cmake_target' from command line to 'None'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'cmake_clean_cache' from command line to 'False'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'cmake_clean_first' from command line to 'False'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'cmake_force_configure' from command line to 'False'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'ament_cmake_args' from command line to 'None'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'catkin_cmake_args' from command line to 'None'
+[1.717s] Level 5:colcon.colcon_core.verb:set package 'angle_calculator' build argument 'catkin_skip_building_tests' from command line to 'False'
+[1.717s] DEBUG:colcon.colcon_core.verb:Building package 'angle_calculator' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/luky/mavros_ros2_ws/src/build/angle_calculator', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/luky/mavros_ros2_ws/src/install/angle_calculator', 'merge_install': False, 'path': '/home/luky/mavros_ros2_ws/src/angle_calculator', 'symlink_install': False, 'test_result_base': None}
+[1.741s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[1.766s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[1.767s] INFO:colcon.colcon_ros.task.ament_cmake.build:Building ROS package in '/home/luky/mavros_ros2_ws/src/angle_calculator' with build type 'ament_cmake'
+[1.767s] INFO:colcon.colcon_cmake.task.cmake.build:Building CMake package in '/home/luky/mavros_ros2_ws/src/angle_calculator'
+[1.802s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[1.802s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[1.802s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[1.907s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake /home/luky/mavros_ros2_ws/src/angle_calculator -DCMAKE_INSTALL_PREFIX=/home/luky/mavros_ros2_ws/src/install/angle_calculator
+[4.485s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake /home/luky/mavros_ros2_ws/src/angle_calculator -DCMAKE_INSTALL_PREFIX=/home/luky/mavros_ros2_ws/src/install/angle_calculator
+[4.487s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/angle_calculator -- -j8 -l8
+[10.268s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/luky/mavros_ros2_ws/src/build/angle_calculator' returned '2': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/angle_calculator -- -j8 -l8
+[10.336s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(angle_calculator)
+[10.356s] Level 1:colcon.colcon_core.environment:checking '/home/luky/mavros_ros2_ws/src/install/angle_calculator' for CMake module files
+[10.357s] Level 1:colcon.colcon_core.environment:checking '/home/luky/mavros_ros2_ws/src/install/angle_calculator' for CMake config files
+[10.357s] Level 1:colcon.colcon_core.environment:checking '/home/luky/mavros_ros2_ws/src/install/angle_calculator/bin'
+[10.357s] Level 1:colcon.colcon_core.environment:checking '/home/luky/mavros_ros2_ws/src/install/angle_calculator/lib/pkgconfig/angle_calculator.pc'
+[10.358s] Level 1:colcon.colcon_core.environment:checking '/home/luky/mavros_ros2_ws/src/install/angle_calculator/lib/python3.10/site-packages'
+[10.358s] Level 1:colcon.colcon_core.environment:checking '/home/luky/mavros_ros2_ws/src/install/angle_calculator/bin'
+[10.376s] INFO:colcon.colcon_core.shell:Creating package script '/home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.ps1'
+[10.377s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.dsv'
+[10.378s] INFO:colcon.colcon_core.shell:Creating package script '/home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.sh'
+[10.378s] INFO:colcon.colcon_core.shell:Creating package script '/home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.bash'
+[10.379s] INFO:colcon.colcon_core.shell:Creating package script '/home/luky/mavros_ros2_ws/src/install/angle_calculator/share/angle_calculator/package.zsh'
+[10.380s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/luky/mavros_ros2_ws/src/install/angle_calculator/share/colcon-core/packages/angle_calculator)
+[10.390s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[10.390s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[10.390s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '2'
+[10.390s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[10.417s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[10.417s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[10.417s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[10.434s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[10.457s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/luky/mavros_ros2_ws/src/install/local_setup.ps1'
+[10.458s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/luky/mavros_ros2_ws/src/install/_local_setup_util_ps1.py'
+[10.459s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/luky/mavros_ros2_ws/src/install/setup.ps1'
+[10.480s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/luky/mavros_ros2_ws/src/install/local_setup.sh'
+[10.481s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/luky/mavros_ros2_ws/src/install/_local_setup_util_sh.py'
+[10.481s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/luky/mavros_ros2_ws/src/install/setup.sh'
+[10.502s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/luky/mavros_ros2_ws/src/install/local_setup.bash'
+[10.503s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/luky/mavros_ros2_ws/src/install/setup.bash'
+[10.527s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/luky/mavros_ros2_ws/src/install/local_setup.zsh'
+[10.528s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/luky/mavros_ros2_ws/src/install/setup.zsh'

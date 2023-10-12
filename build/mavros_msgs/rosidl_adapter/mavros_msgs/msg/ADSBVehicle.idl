@@ -1,0 +1,108 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/ADSBVehicle.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Duration.idl"
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    module ADSBVehicle_Constants {
+      @verbatim (language="comment", text=
+        "[[[cog:" "\n"        "import mavros_cog" "\n"        "mavros_cog.idl_decl_enum('ADSB_ALTITUDE_TYPE', 'ALT_')" "\n"        "mavros_cog.idl_decl_enum('ADSB_EMITTER_TYPE', 'EMITTER_')" "\n"        "mavros_cog.idl_decl_enum('ADSB_FLAGS', 'FLAG_', 16)" "\n"        "]]]" "\n"        "ADSB_ALTITUDE_TYPE" "\n"        "Altitude reported from a Baro source using QNH reference")
+      const uint8 ALT_PRESSURE_QNH = 0;
+      @verbatim (language="comment", text=
+        "Altitude reported from a GNSS source")
+      const uint8 ALT_GEOMETRIC = 1;
+      @verbatim (language="comment", text=
+        "ADSB_EMITTER_TYPE")
+      const uint8 EMITTER_NO_INFO = 0;
+      const uint8 EMITTER_LIGHT = 1;
+      const uint8 EMITTER_SMALL = 2;
+      const uint8 EMITTER_LARGE = 3;
+      const uint8 EMITTER_HIGH_VORTEX_LARGE = 4;
+      const uint8 EMITTER_HEAVY = 5;
+      const uint8 EMITTER_HIGHLY_MANUV = 6;
+      const uint8 EMITTER_ROTOCRAFT = 7;
+      const uint8 EMITTER_UNASSIGNED = 8;
+      const uint8 EMITTER_GLIDER = 9;
+      const uint8 EMITTER_LIGHTER_AIR = 10;
+      const uint8 EMITTER_PARACHUTE = 11;
+      const uint8 EMITTER_ULTRA_LIGHT = 12;
+      const uint8 EMITTER_UNASSIGNED2 = 13;
+      const uint8 EMITTER_UAV = 14;
+      const uint8 EMITTER_SPACE = 15;
+      const uint8 EMITTER_UNASSGINED3 = 16;
+      const uint8 EMITTER_EMERGENCY_SURFACE = 17;
+      const uint8 EMITTER_SERVICE_SURFACE = 18;
+      const uint8 EMITTER_POINT_OBSTACLE = 19;
+      @verbatim (language="comment", text=
+        "ADSB_FLAGS")
+      const uint16 FLAG_VALID_COORDS = 1;
+      const uint16 FLAG_VALID_ALTITUDE = 2;
+      const uint16 FLAG_VALID_HEADING = 4;
+      const uint16 FLAG_VALID_VELOCITY = 8;
+      const uint16 FLAG_VALID_CALLSIGN = 16;
+      const uint16 FLAG_VALID_SQUAWK = 32;
+      const uint16 FLAG_SIMULATED = 64;
+      const uint16 FLAG_VERTICAL_VELOCITY_VALID = 128;
+      const uint16 FLAG_BARO_VALID = 256;
+      const uint16 FLAG_SOURCE_UAT = 32768;
+    };
+    @verbatim (language="comment", text=
+      "The location and information of an ADSB vehicle" "\n"
+      "" "\n"
+      "https://mavlink.io/en/messages/common.html#ADSB_VEHICLE")
+    struct ADSBVehicle {
+      @verbatim (language="comment", text=
+        "]] (checksum: a34f2a081739921b6e3e443ed0516d8d)")
+      @unit (value="[[end")
+      std_msgs::msg::Header header;
+
+      uint32 icao_address;
+
+      string callsign;
+
+      double latitude;
+
+      double longitude;
+
+      @verbatim (language="comment", text=
+        "AMSL")
+      float altitude;
+
+      @verbatim (language="comment", text=
+        "deg [0..360)")
+      float heading;
+
+      @verbatim (language="comment", text=
+        "m/s")
+      float hor_velocity;
+
+      @verbatim (language="comment", text=
+        "m/s")
+      float ver_velocity;
+
+      @verbatim (language="comment", text=
+        "Type from ADSB_ALTITUDE_TYPE enum")
+      uint8 altitude_type;
+
+      @verbatim (language="comment", text=
+        "Type from ADSB_EMITTER_TYPE enum")
+      uint8 emitter_type;
+
+      @verbatim (language="comment", text=
+        "Duration from last communication, seconds")
+      @unit (value="0..255")
+      builtin_interfaces::msg::Duration tslc;
+
+      @verbatim (language="comment", text=
+        "ADSB_FLAGS bit field")
+      uint16 flags;
+
+      @verbatim (language="comment", text=
+        "Squawk code")
+      uint16 squawk;
+    };
+  };
+};

@@ -1,0 +1,86 @@
+Traceback (most recent call last):
+Traceback (most recent call last):
+gmake[2]: *** Deleting file 'rosidl_generator_c/mavros_msgs/msg/adsb_vehicle.h'
+gmake[2]: *** Deleting file 'rosidl_generator_cpp/mavros_msgs/msg/adsb_vehicle.hpp'
+  File "/opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c", line 38, in <module>
+  File "/opt/ros/humble/share/rosidl_generator_cpp/cmake/../../../lib/rosidl_generator_cpp/rosidl_generator_cpp", line 38, in <module>
+    sys.exit(main())
+    sys.exit(main())
+  File "/opt/ros/humble/share/rosidl_generator_cpp/cmake/../../../lib/rosidl_generator_cpp/rosidl_generator_cpp", line 34, in main
+  File "/opt/ros/humble/share/rosidl_generator_c/cmake/../../../lib/rosidl_generator_c/rosidl_generator_c", line 34, in main
+    generate_c(args.generator_arguments_file)
+    generate_cpp(args.generator_arguments_file)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_c/__init__.py", line 37, in generate_c
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_generator_cpp/__init__.py", line 38, in generate_cpp
+    return generate_files(
+    return generate_files(
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_cmake/__init__.py", line 74, in generate_files
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_cmake/__init__.py", line 74, in generate_files
+    idl_file = parse_idl_file(locator)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 64, in parse_idl_file
+    idl_file = parse_idl_file(locator)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 64, in parse_idl_file
+    content = parse_idl_string(string, png_file=png_file)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 73, in parse_idl_string
+    content = parse_idl_string(string, png_file=png_file)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 73, in parse_idl_string
+    content = extract_content_from_ast(tree)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 108, in extract_content_from_ast
+    content = extract_content_from_ast(tree)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 108, in extract_content_from_ast
+    module_identifiers = get_module_identifier_values(tree, const_dcl)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 312, in get_module_identifier_values
+    module_identifiers = get_module_identifier_values(tree, const_dcl)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 312, in get_module_identifier_values
+    path = _find_path(tree, target)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+    path = _find_path(tree, target)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+    tail = _find_path(c, target)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+    tail = _find_path(c, target)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+    tail = _find_path(c, target)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+    tail = _find_path(c, target)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 324, in _find_path
+    tail = _find_path(c, target)
+  [Previous line repeated 17 more times]
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 319, in _find_path
+    tail = _find_path(c, target)
+  [Previous line repeated 5 more times]
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/rosidl_parser/parser.py", line 319, in _find_path
+    if node == target:
+KeyboardInterrupt
+    if node == target:
+  File "/usr/lib/python3/dist-packages/lark/tree.py", line 91, in __eq__
+    return self.data == other.data and self.children == other.children
+  File "/usr/lib/python3/dist-packages/lark/tree.py", line 91, in __eq__
+    return self.data == other.data and self.children == other.children
+  File "/usr/lib/python3/dist-packages/lark/tree.py", line 91, in __eq__
+    return self.data == other.data and self.children == other.children
+  [Previous line repeated 13 more times]
+  File "/usr/lib/python3/dist-packages/lark/lexer.py", line 195, in __eq__
+    return str.__eq__(self, other)
+KeyboardInterrupt
+gmake[2]: *** [CMakeFiles/mavros_msgs__rosidl_generator_c.dir/build.make:319: rosidl_generator_c/mavros_msgs/msg/adsb_vehicle.h] Interrupt
+gmake[1]: *** [CMakeFiles/Makefile2:212: CMakeFiles/mavros_msgs__rosidl_generator_c.dir/all] Interrupt
+gmake[2]: *** [CMakeFiles/mavros_msgs__cpp.dir/build.make:743: rosidl_generator_cpp/mavros_msgs/msg/adsb_vehicle.hpp] Interrupt
+gmake[1]: *** [CMakeFiles/Makefile2:317: CMakeFiles/mavros_msgs__cpp.dir/all] Interrupt
+gmake: *** [Makefile:146: all] Interrupt
+Traceback (most recent call last):
+  File "/home/luky/.local/bin/cmake", line 8, in <module>
+    sys.exit(cmake())
+  File "/home/luky/.local/lib/python3.10/site-packages/cmake/__init__.py", line 43, in cmake
+    raise SystemExit(_program('cmake', sys.argv[1:]))
+  File "/home/luky/.local/lib/python3.10/site-packages/cmake/__init__.py", line 39, in _program
+    return subprocess.call([os.path.join(CMAKE_BIN_DIR, name)] + args, close_fds=False)
+  File "/usr/lib/python3.10/subprocess.py", line 347, in call
+    return p.wait(timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1209, in wait
+    return self._wait(timeout=timeout)
+  File "/usr/lib/python3.10/subprocess.py", line 1959, in _wait
+    (pid, sts) = self._try_wait(0)
+  File "/usr/lib/python3.10/subprocess.py", line 1917, in _try_wait
+    (pid, sts) = os.waitpid(self.pid, wait_flags)
+KeyboardInterrupt

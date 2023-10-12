@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/LogRequestList.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Request a list of available logs" "\n"
+      "" "\n"
+      " :start: - first log id (0 for first available)" "\n"
+      " :end: - last log id (0xffff for last available)")
+    struct LogRequestList_Request {
+      uint16 start;
+
+      uint16 end;
+    };
+    struct LogRequestList_Response {
+      boolean success;
+    };
+  };
+};

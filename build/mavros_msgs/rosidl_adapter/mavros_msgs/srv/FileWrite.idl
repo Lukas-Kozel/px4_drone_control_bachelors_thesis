@@ -1,0 +1,27 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/FileWrite.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "FTP::Write" "\n"
+      "" "\n"
+      "Call FTP::Open first." "\n"
+      ":success: indicates success end of request" "\n"
+      ":r_errno: remote errno if applicapable")
+    struct FileWrite_Request {
+      string file_path;
+
+      uint64 offset;
+
+      sequence<uint8> data;
+    };
+    struct FileWrite_Response {
+      boolean success;
+
+      int32 r_errno;
+    };
+  };
+};

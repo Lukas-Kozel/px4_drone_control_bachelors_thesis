@@ -1,0 +1,47 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/CommandLong.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Generic COMMAND_LONG")
+    struct CommandLong_Request {
+      @verbatim (language="comment", text=
+        "send this command in broadcast mode")
+      boolean broadcast;
+
+      uint16 command;
+
+      uint8 confirmation;
+
+      float param1;
+
+      float param2;
+
+      float param3;
+
+      float param4;
+
+      @verbatim (language="comment", text=
+        "x_lat")
+      float param5;
+
+      @verbatim (language="comment", text=
+        "y_lon")
+      float param6;
+
+      @verbatim (language="comment", text=
+        "z_alt")
+      float param7;
+    };
+    struct CommandLong_Response {
+      boolean success;
+
+      @verbatim (language="comment", text=
+        "raw result returned by COMMAND_ACK")
+      uint8 result;
+    };
+  };
+};

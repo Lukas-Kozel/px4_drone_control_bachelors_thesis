@@ -1,0 +1,30 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/ParamSetV2.srv
+// generated code does not contain a copyright notice
+
+#include "rcl_interfaces/msg/ParameterValue.idl"
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Request set parameter value" "\n"
+      "" "\n"
+      "That interface allow to bypass some checks" "\n"
+      "and send value as is to the FCU if force_set is true." "\n"
+      "" "\n"
+      "Use that api only if ROS2 Parameter API is not sufficient" "\n"
+      "for your application.")
+    struct ParamSetV2_Request {
+      boolean force_set;
+
+      string param_id;
+
+      rcl_interfaces::msg::ParameterValue value;
+    };
+    struct ParamSetV2_Response {
+      boolean success;
+
+      rcl_interfaces::msg::ParameterValue value;
+    };
+  };
+};

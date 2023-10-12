@@ -1,0 +1,24 @@
+[0.017s] Invoking command in '/home/luky/mavros_ros2_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/px4_msgs -- -j8 -l8
+[0.316s] [  0%] Built target px4_msgs__cpp
+[0.329s] [  0%] Built target ament_cmake_python_copy_px4_msgs
+[0.412s] [ 12%] Built target px4_msgs__rosidl_generator_c
+[0.533s] [ 25%] Built target px4_msgs__rosidl_typesupport_c
+[0.547s] [ 37%] Built target px4_msgs__rosidl_typesupport_cpp
+[0.597s] [ 50%] Built target px4_msgs__rosidl_typesupport_introspection_cpp
+[0.600s] [ 63%] Built target px4_msgs__rosidl_typesupport_introspection_c
+[0.611s] [ 75%] Built target px4_msgs__rosidl_typesupport_fastrtps_cpp
+[0.615s] running egg_info
+[0.641s] writing px4_msgs.egg-info/PKG-INFO
+[0.642s] writing dependency_links to px4_msgs.egg-info/dependency_links.txt
+[0.642s] writing top-level names to px4_msgs.egg-info/top_level.txt
+[0.691s] [ 88%] Built target px4_msgs__rosidl_typesupport_fastrtps_c
+[0.698s] [ 88%] Built target px4_msgs
+[0.713s] [ 88%] Built target px4_msgs__py
+[0.727s] reading manifest file 'px4_msgs.egg-info/SOURCES.txt'
+[0.730s] writing manifest file 'px4_msgs.egg-info/SOURCES.txt'
+[0.757s] [ 88%] Built target ament_cmake_python_build_px4_msgs_egg
+[0.863s] [100%] Built target px4_msgs__rosidl_generator_py
+[0.879s] [100%] Built target px4_msgs__rosidl_typesupport_fastrtps_c__pyext
+[0.883s] [100%] Built target px4_msgs__rosidl_typesupport_introspection_c__pyext
+[0.885s] [100%] Built target px4_msgs__rosidl_typesupport_c__pyext
+[0.893s] Invoked command in '/home/luky/mavros_ros2_ws/src/build/px4_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/px4_msgs -- -j8 -l8

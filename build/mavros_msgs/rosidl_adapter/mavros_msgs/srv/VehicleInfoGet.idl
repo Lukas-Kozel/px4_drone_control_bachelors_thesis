@@ -1,0 +1,30 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/VehicleInfoGet.srv
+// generated code does not contain a copyright notice
+
+#include "mavros_msgs/msg/VehicleInfo.idl"
+
+module mavros_msgs {
+  module srv {
+    module VehicleInfoGet_Request_Constants {
+      const uint8 GET_MY_SYSID = 0;
+      const uint8 GET_MY_COMPID = 0;
+    };
+    @verbatim (language="comment", text=
+      "Request the Vehicle Info" "\n"
+      "use this to request the current target sysid / compid defined in mavros" "\n"
+      "set get_all = True to request all available vehicles")
+    struct VehicleInfoGet_Request {
+      uint8 sysid;
+
+      uint8 compid;
+
+      boolean get_all;
+    };
+    struct VehicleInfoGet_Response {
+      boolean success;
+
+      sequence<mavros_msgs::msg::VehicleInfo> vehicles;
+    };
+  };
+};

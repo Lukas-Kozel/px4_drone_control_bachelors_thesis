@@ -1,0 +1,33 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/CommandVtolTransition.srv
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module srv {
+    module CommandVtolTransition_Request_Constants {
+      @verbatim (language="comment", text=
+        "MAV_VTOL_STATE")
+      const uint8 STATE_MC = 3;
+      const uint8 STATE_FW = 4;
+    };
+    struct CommandVtolTransition_Request {
+      @verbatim (language="comment", text=
+        "MAVLink command: DO_VTOL_TRANSITION" "\n"
+        "https://mavlink.io/en/messages/common.html#MAV_CMD_DO_VTOL_TRANSITION")
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "See enum MAV_VTOL_STATE.")
+      uint8 state;
+    };
+    struct CommandVtolTransition_Response {
+      boolean success;
+
+      @verbatim (language="comment", text=
+        "Raw result returned by COMMAND_ACK")
+      uint8 result;
+    };
+  };
+};

@@ -1,0 +1,25 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/FileList.srv
+// generated code does not contain a copyright notice
+
+#include "mavros_msgs/msg/FileEntry.idl"
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "FTP::List" "\n"
+      "" "\n"
+      ":success: indicates success end of request" "\n"
+      ":r_errno: remote errno if applicapable")
+    struct FileList_Request {
+      string dir_path;
+    };
+    struct FileList_Response {
+      sequence<mavros_msgs::msg::FileEntry> list;
+
+      boolean success;
+
+      int32 r_errno;
+    };
+  };
+};

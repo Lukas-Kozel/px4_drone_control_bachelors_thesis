@@ -1,0 +1,6 @@
+# Request set parameter value
+
+# XXX DEPRECATED: replaced by ParamSetV2
+
+string param_id
+mavros_msgs/ParamValue value

@@ -1,0 +1,21 @@
+[0.024s] Invoking command in '/home/luky/mavros_ros2_ws/src/build/load_imu_subscriber': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/load_imu_subscriber -- -j8 -l8
+[0.065s] [ 50%] [32mBuilding CXX object CMakeFiles/listener.dir/src/subscriber.cpp.o[0m
+[2.871s] gmake[2]: *** [CMakeFiles/listener.dir/build.make:76: CMakeFiles/listener.dir/src/subscriber.cpp.o] Interrupt
+[2.871s] gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/listener.dir/all] Interrupt
+[2.871s] gmake: *** [Makefile:146: all] Interrupt
+[2.872s] Traceback (most recent call last):
+[2.872s]   File "/home/luky/.local/bin/cmake", line 8, in <module>
+[2.872s]     sys.exit(cmake())
+[2.872s]   File "/home/luky/.local/lib/python3.10/site-packages/cmake/__init__.py", line 43, in cmake
+[2.878s]     raise SystemExit(_program('cmake', sys.argv[1:]))
+[2.878s]   File "/home/luky/.local/lib/python3.10/site-packages/cmake/__init__.py", line 39, in _program
+[2.878s]     return subprocess.call([os.path.join(CMAKE_BIN_DIR, name)] + args, close_fds=False)
+[2.878s]   File "/usr/lib/python3.10/subprocess.py", line 347, in call
+[2.879s]     return p.wait(timeout=timeout)
+[2.879s]   File "/usr/lib/python3.10/subprocess.py", line 1209, in wait
+[2.879s]     return self._wait(timeout=timeout)
+[2.879s]   File "/usr/lib/python3.10/subprocess.py", line 1959, in _wait
+[2.879s]     (pid, sts) = self._try_wait(0)
+[2.879s]   File "/usr/lib/python3.10/subprocess.py", line 1917, in _try_wait
+[2.879s]     (pid, sts) = os.waitpid(self.pid, wait_flags)
+[2.879s] KeyboardInterrupt

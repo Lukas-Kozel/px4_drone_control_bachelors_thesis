@@ -1,0 +1,29 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/ESCInfo.msg
+// generated code does not contain a copyright notice
+
+#include "mavros_msgs/msg/ESCInfoItem.idl"
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    @verbatim (language="comment", text=
+      "ESCInfo.msg" "\n"
+      "" "\n"
+      "See mavlink message documentation here:" "\n"
+      "https://mavlink.io/en/messages/common.html#ESC_INFO")
+    struct ESCInfo {
+      std_msgs::msg::Header header;
+
+      uint16 counter;
+
+      uint8 count;
+
+      uint8 connection_type;
+
+      uint8 info;
+
+      sequence<mavros_msgs::msg::ESCInfoItem> esc_info;
+    };
+  };
+};

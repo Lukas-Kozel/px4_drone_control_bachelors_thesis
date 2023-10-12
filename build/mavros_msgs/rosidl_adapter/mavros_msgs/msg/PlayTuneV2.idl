@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/PlayTuneV2.msg
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module msg {
+    module PlayTuneV2_Constants {
+      @verbatim (language="comment", text=
+        "TUNE_FORMAT enum")
+      const uint8 QBASIC1_1 = 1;
+      const uint8 MML_MODERN = 2;
+    };
+    @verbatim (language="comment", text=
+      "Play tune V2" "\n"
+      "" "\n"
+      "https://mavlink.io/en/messages/common.html#PLAY_TUNE_V2")
+    struct PlayTuneV2 {
+      uint8 format;
+
+      string tune;
+    };
+  };
+};

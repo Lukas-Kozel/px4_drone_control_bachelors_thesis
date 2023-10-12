@@ -1,0 +1,65 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/GPSRTK.msg
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    @verbatim (language="comment", text=
+      "FCU GPS RTK message for the gps_status plugin" "\n"
+      "A copy of <a href=\"https://mavlink.io/en/messages/common.html#GPS_RTK\">mavlink GPS_RTK message</a>")
+    struct GPSRTK {
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "Identification of connected RTK receiver.")
+      uint8 rtk_receiver_id;
+
+      @verbatim (language="comment", text=
+        "GPS Week Number of last baseline.")
+      int16 wn;
+
+      @verbatim (language="comment", text=
+        "GPS Time of Week of last baseline.")
+      @unit (value="ms")
+      uint32 tow;
+
+      @verbatim (language="comment", text=
+        "GPS-specific health report for RTK data.")
+      uint8 rtk_health;
+
+      @verbatim (language="comment", text=
+        "Rate of baseline messages being received by GPS.")
+      @unit (value="Hz")
+      uint8 rtk_rate;
+
+      @verbatim (language="comment", text=
+        "Current number of sats used for RTK calculation.")
+      uint8 nsats;
+
+      @verbatim (language="comment", text=
+        "Current baseline in ECEF x or NED north component, depends on header.frame_id.")
+      @unit (value="mm")
+      int32 baseline_a;
+
+      @verbatim (language="comment", text=
+        "Current baseline in ECEF y or NED east component, depends on header.frame_id.")
+      @unit (value="mm")
+      int32 baseline_b;
+
+      @verbatim (language="comment", text=
+        "Current baseline in ECEF z or NED down component, depends on header.frame_id.")
+      @unit (value="mm")
+      int32 baseline_c;
+
+      @verbatim (language="comment", text=
+        "Current estimate of baseline accuracy.")
+      uint32 accuracy;
+
+      @verbatim (language="comment", text=
+        "Current number of integer ambiguity hypotheses.")
+      int32 iar_num_hypotheses;
+    };
+  };
+};

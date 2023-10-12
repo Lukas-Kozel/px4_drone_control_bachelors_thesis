@@ -1,0 +1,22 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/FileRemoveDir.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "FTP::RemoveDir" "\n"
+      "" "\n"
+      ":success: indicates success end of request" "\n"
+      ":r_errno: remote errno if applicapable")
+    struct FileRemoveDir_Request {
+      string dir_path;
+    };
+    struct FileRemoveDir_Response {
+      boolean success;
+
+      int32 r_errno;
+    };
+  };
+};

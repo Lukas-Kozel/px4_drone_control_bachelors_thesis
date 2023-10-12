@@ -1,0 +1,40 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/CameraImageCaptured.msg
+// generated code does not contain a copyright notice
+
+#include "geographic_msgs/msg/GeoPoint.idl"
+#include "geometry_msgs/msg/Quaternion.idl"
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    @verbatim (language="comment", text=
+      "MAVLink message: CAMERA_IMAGE_CAPTURED" "\n"
+      "https://mavlink.io/en/messages/common.html#CAMERA_IMAGE_CAPTURED")
+    struct CameraImageCaptured {
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "Quaternion of camera orientation (w, x, y, z order, zero-rotation is 1, 0, 0, 0)")
+      geometry_msgs::msg::Quaternion orientation;
+
+      geographic_msgs::msg::GeoPoint geo;
+
+      @verbatim (language="comment", text=
+        "mm Altitude above ground")
+      float relative_alt;
+
+      @verbatim (language="comment", text=
+        "Zero based index of this image (i.e. a new image will have index CAMERA_CAPTURE_STATUS.image count -1)")
+      int32 image_index;
+
+      @verbatim (language="comment", text=
+        "Boolean indicating success (1) or failure (0) while capturing this image.")
+      int8 capture_result;
+
+      @verbatim (language="comment", text=
+        "URL of image taken. Either local storage or http://foo.jpg if camera provides an HTTP interface.")
+      string file_url;
+    };
+  };
+};

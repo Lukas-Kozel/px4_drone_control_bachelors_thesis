@@ -1,0 +1,41 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/EstimatorStatus.msg
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    @verbatim (language="comment", text=
+      "Current autopilot estimator state" "\n"
+      "" "\n"
+      "https://mavlink.io/en/messages/common.html#ESTIMATOR_STATUS_FLAGS")
+    struct EstimatorStatus {
+      std_msgs::msg::Header header;
+
+      boolean attitude_status_flag;
+
+      boolean velocity_horiz_status_flag;
+
+      boolean velocity_vert_status_flag;
+
+      boolean pos_horiz_rel_status_flag;
+
+      boolean pos_horiz_abs_status_flag;
+
+      boolean pos_vert_abs_status_flag;
+
+      boolean pos_vert_agl_status_flag;
+
+      boolean const_pos_mode_status_flag;
+
+      boolean pred_pos_horiz_rel_status_flag;
+
+      boolean pred_pos_horiz_abs_status_flag;
+
+      boolean gps_glitch_status_flag;
+
+      boolean accel_error_status_flag;
+    };
+  };
+};

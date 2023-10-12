@@ -1,0 +1,1 @@
+Invoking command in '/home/luky/mavros_ros2_ws/src/build/mavros_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake /home/luky/mavros_ros2_ws/src/mavros/mavros_msgs -DCMAKE_INSTALL_PREFIX=/home/luky/mavros_ros2_ws/src/install/mavros_msgs

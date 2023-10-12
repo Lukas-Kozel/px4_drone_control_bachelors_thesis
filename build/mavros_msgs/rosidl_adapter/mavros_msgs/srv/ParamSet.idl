@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/ParamSet.srv
+// generated code does not contain a copyright notice
+
+#include "mavros_msgs/msg/ParamValue.idl"
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Request set parameter value")
+    struct ParamSet_Request {
+      @verbatim (language="comment", text=
+        "XXX DEPRECATED: replaced by ParamSetV2")
+      string param_id;
+
+      mavros_msgs::msg::ParamValue value;
+    };
+    struct ParamSet_Response {
+      boolean success;
+
+      mavros_msgs::msg::ParamValue value;
+    };
+  };
+};

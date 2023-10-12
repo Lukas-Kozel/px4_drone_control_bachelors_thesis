@@ -1,0 +1,19 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/CommandBool.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Common type for switch commands")
+    struct CommandBool_Request {
+      boolean value;
+    };
+    struct CommandBool_Response {
+      boolean success;
+
+      uint8 result;
+    };
+  };
+};

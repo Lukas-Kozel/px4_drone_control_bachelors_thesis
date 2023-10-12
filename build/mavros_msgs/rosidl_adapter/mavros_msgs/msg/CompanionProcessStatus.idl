@@ -1,0 +1,36 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/CompanionProcessStatus.msg
+// generated code does not contain a copyright notice
+
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    module CompanionProcessStatus_Constants {
+      const uint8 MAV_STATE_UNINIT = 0;
+      const uint8 MAV_STATE_BOOT = 1;
+      const uint8 MAV_STATE_CALIBRATING = 2;
+      const uint8 MAV_STATE_STANDBY = 3;
+      const uint8 MAV_STATE_ACTIVE = 4;
+      const uint8 MAV_STATE_CRITICAL = 5;
+      const uint8 MAV_STATE_EMERGENCY = 6;
+      const uint8 MAV_STATE_POWEROFF = 7;
+      const uint8 MAV_STATE_FLIGHT_TERMINATION = 8;
+      const uint8 MAV_COMP_ID_OBSTACLE_AVOIDANCE = 196;
+      const uint8 MAV_COMP_ID_VISUAL_INERTIAL_ODOMETRY = 197;
+    };
+    @verbatim (language="comment", text=
+      "Mavros message: COMPANIONPROCESSSTATUS")
+    struct CompanionProcessStatus {
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "See enum COMPANION_PROCESS_STATE")
+      uint8 state;
+
+      @verbatim (language="comment", text=
+        "See enum MAV_COMPONENT")
+      uint8 component;
+    };
+  };
+};

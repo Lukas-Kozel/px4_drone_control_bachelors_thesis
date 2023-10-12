@@ -1,0 +1,50 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from mavros_msgs/msg/Trajectory.msg
+// generated code does not contain a copyright notice
+
+#include "mavros_msgs/msg/PositionTarget.idl"
+#include "std_msgs/msg/Header.idl"
+
+module mavros_msgs {
+  module msg {
+    typedef uint8 uint8__5[5];
+    typedef uint16 uint16__5[5];
+    typedef float float__5[5];
+    module Trajectory_Constants {
+      const uint8 MAV_TRAJECTORY_REPRESENTATION_WAYPOINTS = 0;
+      const uint8 MAV_TRAJECTORY_REPRESENTATION_BEZIER = 1;
+    };
+    @verbatim (language="comment", text=
+      "MAVLink message: TRAJECTORY" "\n"
+      "https://mavlink.io/en/messages/common.html#TRAJECTORY")
+    struct Trajectory {
+      std_msgs::msg::Header header;
+
+      @verbatim (language="comment", text=
+        "See enum MAV_TRAJECTORY_REPRESENTATION.")
+      uint8 type;
+
+      mavros_msgs::msg::PositionTarget point_1;
+
+      mavros_msgs::msg::PositionTarget point_2;
+
+      mavros_msgs::msg::PositionTarget point_3;
+
+      mavros_msgs::msg::PositionTarget point_4;
+
+      mavros_msgs::msg::PositionTarget point_5;
+
+      @verbatim (language="comment", text=
+        "States if respective point is valid.")
+      uint8__5 point_valid;
+
+      @verbatim (language="comment", text=
+        "MAV_CMD associated with each point. UINT16_MAX if unused.")
+      uint16__5 command;
+
+      @verbatim (language="comment", text=
+        "if type MAV_TRAJECTORY_REPRESENTATION_BEZIER, it represents the time horizon for each point, otherwise set to NaN")
+      float__5 time_horizon;
+    };
+  };
+};

@@ -1,0 +1,2 @@
+Invoking command in '/home/luky/mavros_ros2_ws/src/build/px4_msgs': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/px4_msgs -- -j8 -l8
+Invoked command in '/home/luky/mavros_ros2_ws/src/build/px4_msgs' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/px4_msgs -- -j8 -l8

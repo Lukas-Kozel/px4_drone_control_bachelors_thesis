@@ -1,0 +1,29 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/FileRead.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "FTP::Read" "\n"
+      "" "\n"
+      "Call FTP::Open first." "\n"
+      ":success: indicates success end of request" "\n"
+      ":r_errno: remote errno if applicapable")
+    struct FileRead_Request {
+      string file_path;
+
+      uint64 offset;
+
+      uint64 size;
+    };
+    struct FileRead_Response {
+      sequence<uint8> data;
+
+      boolean success;
+
+      int32 r_errno;
+    };
+  };
+};

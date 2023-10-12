@@ -1,0 +1,38 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/EndpointAdd.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    module EndpointAdd_Request_Constants {
+      const uint8 TYPE_FCU = 0;
+      const uint8 TYPE_GCS = 1;
+      const uint8 TYPE_UAS = 2;
+    };
+    @verbatim (language="comment", text=
+      "Adds endpoint to router")
+    struct EndpointAdd_Request {
+      @verbatim (language="comment", text=
+        "mavconn URL or topic prefix for TYPE_UAS")
+      string url;
+
+      @verbatim (language="comment", text=
+        "should be set to one of the TYPE_xxx")
+      uint8 type;
+    };
+    struct EndpointAdd_Response {
+      @verbatim (language="comment", text=
+        "true if endpoint added and opened")
+      boolean successful;
+
+      @verbatim (language="comment", text=
+        "returns error description if open fails")
+      string reason;
+
+      @verbatim (language="comment", text=
+        "ID of new endpoint, should be > 0 if endpoint created")
+      uint32 id;
+    };
+  };
+};

@@ -1,0 +1,21 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from mavros_msgs/srv/ParamPush.srv
+// generated code does not contain a copyright notice
+
+
+module mavros_msgs {
+  module srv {
+    @verbatim (language="comment", text=
+      "Send current send" "\n"
+      "" "\n"
+      "Returns success status and param_transfered count")
+    struct ParamPush_Request {
+      uint8 structure_needs_at_least_one_member;
+    };
+    struct ParamPush_Response {
+      boolean success;
+
+      uint32 param_transfered;
+    };
+  };
+};

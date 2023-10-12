@@ -1,0 +1,6 @@
+# Send current send
+#
+# Returns success status and param_transfered count
+
+# XXX DEPRECATED: not used. param plugin listen to parameter changes
+
