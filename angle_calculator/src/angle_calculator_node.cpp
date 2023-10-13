@@ -64,18 +64,18 @@ private:
         double theta_y_rad = std::atan2(adjusted_z, adjusted_y);
         double theta_z_rad = std::atan2(projection_xy_magnitude, -adjusted_z);
 
-        double theta_x_deg = theta_x_rad * (180.0 / M_PI) + 90;
-        double theta_y_deg = theta_y_rad * (180.0 / M_PI) + 90;
-        double theta_z_deg = theta_z_rad * (180.0 / M_PI);
+        theta_x_rad = theta_x_rad + 90;
+        theta_y_rad = theta_y_rad + 90;
+        theta_z_rad = theta_z_rad;
 
         RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f degrees, θ_y = %.2f degrees, θ_z = %.2f degrees",
-                    theta_x_deg, theta_y_deg, theta_z_deg);
+                    theta_x_rad, theta_y_rad, theta_z_rad);
 
 
         auto angle_msg = geometry_msgs::msg::Vector3();
-        angle_msg.x = theta_x_deg;
-        angle_msg.y = theta_y_deg;
-        angle_msg.z = theta_z_deg;
+        angle_msg.x = theta_x_rad;
+        angle_msg.y = theta_y_rad;
+        angle_msg.z = theta_z_rad;
         load_angle_publisher_->publish(angle_msg);
     }
 
