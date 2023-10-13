@@ -64,11 +64,11 @@ private:
         double theta_y_rad = std::atan2(adjusted_z, adjusted_y);
         double theta_z_rad = std::atan2(projection_xy_magnitude, -adjusted_z);
 
-        theta_x_rad = theta_x_rad + 90;
-        theta_y_rad = theta_y_rad + 90;
+        theta_x_rad = theta_x_rad + M_PI/2;
+        theta_y_rad = theta_y_rad + M_PI/2;
         theta_z_rad = theta_z_rad;
 
-        RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f degrees, θ_y = %.2f degrees, θ_z = %.2f degrees",
+        RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f rad, θ_y = %.2f rad, θ_z = %.2f rad",
                     theta_x_rad, theta_y_rad, theta_z_rad);
 
 

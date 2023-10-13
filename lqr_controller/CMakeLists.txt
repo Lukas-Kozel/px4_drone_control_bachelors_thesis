@@ -7,7 +7,7 @@ endif()
 include_directories(
     include
     ${Eigen_INCLUDE_DIRS}
-    /home/luky/mavros_ros2_ws/install/mavros_msgs
+    #/home/luky/mavros_ros2_ws/install/mavros_msgs/include
 )
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -34,4 +34,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+install(TARGETS
+  lqr_controller_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 ament_package()

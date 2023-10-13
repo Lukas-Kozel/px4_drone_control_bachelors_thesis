@@ -7,6 +7,7 @@
 #include "sensor_msgs/msg/imu.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "mavros_msgs/srv/set_mode.hpp"
+#include "mavros_msgs/msg/state.hpp"
 
 class LQRController : public rclcpp::Node
 {
@@ -26,6 +27,9 @@ public:
         drone_imu_subscriber_ = this->create_subscription<sensor_msgs::msg::Imu>(
             "/drone_imu", 10, std::bind(&LQRController::on_drone_imu_received, this, std::placeholders::_1));
         attitude_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("mavros/setpoint_attitude/attitude", 10);
+        drone_state_subscriber_ = this->create_subscription<mavros_msgs::msg::State>(
+            "/mavros/state", 10, std::bind(&LQRController::on_drone_state_received, this, std::placeholders::_1));
+
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
         K_x_ = (Eigen::MatrixXd(4, 1) << 14.9071, 14.6655, 23.0584, 4.0895).finished();
@@ -35,37 +39,69 @@ public:
             std::chrono::milliseconds(100),  
             std::bind(&LQRController::control, this)
         );
-        offboard_timer_ = this->create_wall_timer(std::chrono::milliseconds(100),
+      /*  offboard_timer_ = this->create_wall_timer(std::chrono::milliseconds(100),
             std::bind(&LQRController::maintain_offboard_mode, this));
+            */
     }
 
 private:
     void on_load_pose_received(const geometry_msgs::msg::Pose::SharedPtr msg)
-    {
-        load_pose_ = msg;
+{
+    if (msg == nullptr) {
+        RCLCPP_ERROR(this->get_logger(), "Received null message in on_load_pose_received");
+        return;
     }
+    load_pose_ = msg;
+    RCLCPP_INFO(this->get_logger(), "Received load pose message");
+}
     void on_drone_pose_received(const geometry_msgs::msg::Pose::SharedPtr msg)
-    {
-        drone_pose_ = msg;
+{
+    if (msg == nullptr) {
+        RCLCPP_ERROR(this->get_logger(), "Received null message in on_drone_pose_received");
+        return;
     }
+    drone_pose_ = msg;
+    RCLCPP_INFO(this->get_logger(), "Received drone pose message");
+}
     void on_load_imu_received(const sensor_msgs::msg::Imu::SharedPtr msg)
-    {
-        load_imu_ = msg;
-        compute_load_angular_acceleration();
+    {        
+    if (msg == nullptr) {
+        RCLCPP_ERROR(this->get_logger(), "Received null message in on_load_imu_received");
+        return;
+    }
+    load_imu_ = msg;
+    RCLCPP_INFO(this->get_logger(), "Received load imu message");
+
+    compute_load_angular_acceleration();
     
     }
     void on_load_angle_received(const geometry_msgs::msg::Vector3::SharedPtr msg)
-    {
-        load_angle_ = msg;
+{
+    if (msg == nullptr) {
+        RCLCPP_ERROR(this->get_logger(), "Received null message in on_load_angle_received");
+        return;
     }
+    load_angle_ = msg;
+    RCLCPP_INFO(this->get_logger(), "Received load angle message");
+}
     void on_drone_velocity_received(const geometry_msgs::msg::Twist::SharedPtr msg)
-    {
-        drone_velocity_ = msg;
+{
+    if (msg == nullptr) {
+        RCLCPP_ERROR(this->get_logger(), "Received null message in on_drone_velocity_received");
+        return;
     }
+    drone_velocity_ = msg;
+    RCLCPP_INFO(this->get_logger(), "Received drone velocity message");
+}
     void on_drone_imu_received(const sensor_msgs::msg::Imu::SharedPtr msg)
-    {
-        drone_imu_ = msg;
+{
+    if (msg == nullptr) {
+        RCLCPP_ERROR(this->get_logger(), "Received null message in on_drone_imu_received");
+        return;
     }
+    drone_imu_ = msg;
+    RCLCPP_INFO(this->get_logger(), "Received drone imu message");
+}
 
     void compute_load_angular_acceleration(){
         double dt = (this->get_clock()->now() - last_time_).seconds();
@@ -121,13 +157,17 @@ private:
     }
 
     void control(){
+        RCLCPP_WARN(this->get_logger(), " offboard: %.2f, statesloaded: %.2f",offboard_mode_,are_states_loaded());
+        if (!offboard_mode_ || !are_states_loaded()) {
+            RCLCPP_INFO(this->get_logger(), "Waiting for offboard mode and/or all states to be loaded...");
+            return;  // Exit early if not in offboard mode or states not loaded
+        }
         create_state_vector();
         control_input_x = (-K_x_ * state_x).coeff(0,0);
         control_input_y = (-K_y_ * state_y).coeff(0,0);
         RCLCPP_INFO(this->get_logger(), "Control input x: %.2f",control_input_x);
         RCLCPP_INFO(this->get_logger(), "Control input y: %.2f",control_input_y);
         compute_attitude();
-
     }
 
     void publish_control(double roll, double pitch){
@@ -145,7 +185,7 @@ private:
     attitude_publisher_->publish(pose_msg);
    
     }
-
+/*
     void maintain_offboard_mode()
     {
         auto now = this->get_clock()->now();
@@ -156,17 +196,35 @@ private:
             last_offboard_request_time_ = now;
         }
     }
-    void set_offboard_mode()
+void set_offboard_mode()
+{
+    auto set_mode_client = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
+    if (!set_mode_client->wait_for_service(std::chrono::seconds(3))) {
+        RCLCPP_ERROR(this->get_logger(), "Set mode service not available");
+        return;
+    }
+
+    auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
+    request->custom_mode = "OFFBOARD";
+    auto future_result = set_mode_client->async_send_request(request);
+    future_result.wait();  // Wait for the result
+
+}*/
+
+    bool are_states_loaded() {
+        // Assuming that a position x of 0 is not valid, adjust as necessary
+        return load_pose_ != nullptr && drone_pose_ != nullptr &&
+               load_pose_->position.x != 0 && drone_pose_->position.x != 0 &&
+               drone_velocity_ != nullptr && load_imu_ != nullptr && drone_imu_ != nullptr &&
+               load_angle_ != nullptr;
+    }
+     void on_drone_state_received(const mavros_msgs::msg::State::SharedPtr msg)
     {
-        auto set_mode_client = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
-        if (!set_mode_client->wait_for_service(std::chrono::seconds(3))) {
-            RCLCPP_ERROR(this->get_logger(), "Set mode service not available");
+        if (msg == nullptr) {
+            RCLCPP_ERROR(this->get_logger(), "Received null message in on_drone_state_received");
             return;
         }
-
-        auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
-        request->custom_mode = "OFFBOARD";
-        auto future_result = set_mode_client->async_send_request(request);
+        offboard_mode_ = (msg->mode == "OFFBOARD");
     }
 
 
@@ -177,6 +235,7 @@ private:
     rclcpp::Subscription<geometry_msgs::msg::Vector3>::SharedPtr load_angle_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr drone_velocity_subscriber_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr drone_imu_subscriber_;
+    rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr drone_state_subscriber_;
     geometry_msgs::msg::Pose::SharedPtr load_pose_;
     geometry_msgs::msg::Pose::SharedPtr drone_pose_;
     geometry_msgs::msg::Vector3::SharedPtr load_angle_;
@@ -196,7 +255,7 @@ private:
     rclcpp::Time last_time_ = this->get_clock()->now();  // Initialize with current time
     rclcpp::TimerBase::SharedPtr offboard_timer_;
     rclcpp::Time last_offboard_request_time_ = this->get_clock()->now();  // Initialize with current time
-
+    bool offboard_mode_ = false;
 };
 
 
