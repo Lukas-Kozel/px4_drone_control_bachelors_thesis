@@ -3,6 +3,8 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2/LinearMath/Matrix3x3.h"
 #include "geometry_msgs/msg/vector3.hpp"
+#include "angle_stamped_msg/msg/angle_stamped.hpp"
+#include "rosgraph_msgs/msg/clock.hpp"
 
 class AngleCalculator : public rclcpp::Node
 {
@@ -13,7 +15,9 @@ public:
             "/load_pose", 10, std::bind(&AngleCalculator::on_load_pose_received, this, std::placeholders::_1));
         drone_pose_subscriber_ = this->create_subscription<geometry_msgs::msg::Pose>(
             "/drone_pose", 10, std::bind(&AngleCalculator::on_drone_pose_received, this, std::placeholders::_1));
-        load_angle_publisher_ = this->create_publisher<geometry_msgs::msg::Vector3>("load_angle", 10);
+        load_angle_publisher_ = this->create_publisher<angle_stamped_msg::msg::AngleStamped>("load_angle", 10);
+        clock_subscriber_ = this->create_subscription<rosgraph_msgs::msg::Clock>(
+            "/clock", 10, std::bind(&AngleCalculator::on_clock_received, this, std::placeholders::_1));
     }
 
 private:
@@ -29,6 +33,17 @@ private:
         calculate_angles();
     }
 
+    void on_clock_received(const rosgraph_msgs::msg::Clock::SharedPtr msg)
+    {
+        latest_clock_ = msg->clock;
+    }
+        angle_stamped_msg::msg::AngleStamp convert_to_angle_stamp(const builtin_interfaces::msg::Time& time)
+    {
+        angle_stamped_msg::msg::AngleStamp angle_stamp;
+        angle_stamp.sec = time.sec;
+        angle_stamp.nsec = time.nanosec;
+        return angle_stamp;
+    }
     void calculate_angles()
     {
         if (!load_pose_ || !drone_pose_) {
@@ -71,19 +86,21 @@ private:
         RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f rad, θ_y = %.2f rad, θ_z = %.2f rad",
                     theta_x_rad, theta_y_rad, theta_z_rad);
 
-
-        auto angle_msg = geometry_msgs::msg::Vector3();
-        angle_msg.x = theta_x_rad;
-        angle_msg.y = theta_y_rad;
-        angle_msg.z = theta_z_rad;
+        auto angle_msg = angle_stamped_msg::msg::AngleStamped();
+        angle_msg.header.stamp = convert_to_angle_stamp(latest_clock_);
+        angle_msg.angle.angle_x = theta_x_rad;
+        angle_msg.angle.angle_y = theta_y_rad;
+        angle_msg.angle.angle_z = theta_z_rad;
         load_angle_publisher_->publish(angle_msg);
     }
 
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr load_pose_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr drone_pose_subscriber_;
-    rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr load_angle_publisher_;
+    rclcpp::Subscription<rosgraph_msgs::msg::Clock>::SharedPtr clock_subscriber_;
+    rclcpp::Publisher<angle_stamped_msg::msg::AngleStamped>::SharedPtr load_angle_publisher_;
     geometry_msgs::msg::Pose::SharedPtr load_pose_;
     geometry_msgs::msg::Pose::SharedPtr drone_pose_;
+    builtin_interfaces::msg::Time latest_clock_;
 };
 
 int main(int argc, char * argv[])

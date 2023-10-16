@@ -13,6 +13,7 @@
   <build_depend>libgz-cmake3-dev</build_depend>
   <build_depend>libgz-sim7-dev</build_depend>
   <depend>load_pose_stamped</depend>
+  <depend>drone_pose_stamped</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>

@@ -7,22 +7,23 @@
 #include "geometry_msgs/msg/vector3.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "state_vector_msg/msg/state_vector.hpp"
-
-
+#include "load_pose_stamped/msg/load_pose_stamped.hpp"
+#include "drone_pose_stamped/msg/drone_pose_stamped.hpp"
+#include "angle_stamped_msg/msg/angle_stamped.hpp"
 class StateSyncNode : public rclcpp::Node
 {
 public:
-  typedef message_filters::sync_policies::ApproximateTime<geometry_msgs::msg::Pose, geometry_msgs::msg::Pose, sensor_msgs::msg::Imu, geometry_msgs::msg::Vector3, geometry_msgs::msg::TwistStamped, sensor_msgs::msg::Imu> MySyncPolicy;
+  typedef message_filters::sync_policies::ApproximateTime<load_pose_stamped::msg::LoadPoseStamped, drone_pose_stamped::msg::DronePoseStamped, sensor_msgs::msg::Imu, angle_stamped_msg::msg::AngleStamped, geometry_msgs::msg::TwistStamped, sensor_msgs::msg::Imu> MySyncPolicy;
   StateSyncNode() : Node("state_sync_node")
   {
     auto custom_qos = rclcpp::QoS(rclcpp::KeepLast(20));
     custom_qos.best_effort();
     auto rmw_qos = custom_qos.get_rmw_qos_profile();
     // Initialize subscribers
-    load_pose_sub_ = std::make_shared<message_filters::Subscriber<geometry_msgs::msg::Pose>>(this, "/load_pose", rmw_qos);
-    drone_pose_sub_ = std::make_shared<message_filters::Subscriber<geometry_msgs::msg::Pose>>(this, "/drone_pose", rmw_qos);
+    load_pose_sub_ = std::make_shared<message_filters::Subscriber<load_pose_stamped::msg::LoadPoseStamped>>(this, "/ros_load_pose", rmw_qos);
+    drone_pose_sub_ = std::make_shared<message_filters::Subscriber<drone_pose_stamped::msg::DronePoseStamped>>(this, "/ros_drone_pose", rmw_qos);
     load_imu_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Imu>>(this, "/load_imu", rmw_qos);
-    load_angle_sub_ = std::make_shared<message_filters::Subscriber<geometry_msgs::msg::Vector3>>(this, "/load_angle", rmw_qos);
+    load_angle_sub_ = std::make_shared<message_filters::Subscriber<angle_stamped_msg::msg::AngleStamped>>(this, "/load_angle", rmw_qos);
     drone_velocity_sub_ = std::make_shared<message_filters::Subscriber<geometry_msgs::msg::TwistStamped>>(this, "/mavros/local_position/velocity_local", rmw_qos);
     drone_imu_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Imu>>(this, "/drone_imu",rmw_qos);
 
@@ -36,10 +37,10 @@ public:
   }
 
 private:
-  void callback(const geometry_msgs::msg::Pose::SharedPtr& load_pose,
-                const geometry_msgs::msg::Pose::SharedPtr& drone_pose,
+  void callback(const load_pose_stamped::msg::LoadPoseStamped::SharedPtr& load_pose,
+                const drone_pose_stamped::msg::DronePoseStamped::SharedPtr& drone_pose,
                 const sensor_msgs::msg::Imu::SharedPtr& load_imu,
-                const geometry_msgs::msg::Vector3::SharedPtr& load_angle,
+                const angle_stamped_msg::msg::AngleStamped::SharedPtr& load_angle,
                 const geometry_msgs::msg::TwistStamped::SharedPtr& drone_velocity,
                 const sensor_msgs::msg::Imu::SharedPtr& drone_imu)
   {
@@ -68,7 +69,7 @@ private:
     std::shared_ptr<message_filters::Subscriber<geometry_msgs::msg::Pose>> load_pose_sub_;
     std::shared_ptr<message_filters::Subscriber<geometry_msgs::msg::Pose>> drone_pose_sub_;
     std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Imu>> load_imu_sub_;
-    std::shared_ptr<message_filters::Subscriber<geometry_msgs::msg::Vector3>> load_angle_sub_;
+    std::shared_ptr<message_filters::Subscriber<angle_stamped_msg::msg::AngleStamped>> load_angle_sub_;
     std::shared_ptr<message_filters::Subscriber<geometry_msgs::msg::TwistStamped>> drone_velocity_sub_;
     std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Imu>> drone_imu_sub_;
     std::shared_ptr<message_filters::Synchronizer<MySyncPolicy>> sync_;

@@ -12,6 +12,7 @@ include_directories(
   "/usr/include/gz/sim7/gz/sim"
   "/usr/include/gz/transport"
   "/home/luky/Desktop/backup/gz_pose_plugin"
+  "/home/luky/Desktop/backup/drone_pose_plugin"
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -19,6 +20,7 @@ include_directories(
 find_package(rclcpp REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(load_pose_stamped REQUIRED)
+find_package(drone_pose_stamped REQUIRED)
 find_package(gz-cmake3 REQUIRED)
 find_package(Protobuf REQUIRED)
 
@@ -30,6 +32,7 @@ set(GZ_SIM_VER ${gz-sim7_VERSION_MAJOR})
 set(SOURCES
   src/bridge_node.cpp
   "/home/luky/Desktop/backup/gz_pose_plugin/load_pose_stamped.pb.cc"
+  "/home/luky/Desktop/backup/drone_pose_plugin/drone_pose_stamped.pb.cc"
 )
 
 # Add executable
@@ -40,12 +43,14 @@ target_include_directories(bridge_node
   PRIVATE
     ${rclcpp_INCLUDE_DIRS}
     ${load_pose_stamped_INCLUDE_DIRS}
+    ${drone_pose_stamped_INCLUDE_DIRS}
 )
 
 # Target link libraries
 target_link_libraries(bridge_node 
   ${rclcpp_LIBRARIES} 
   ${load_pose_stamped_LIBRARIES} 
+  ${drone_pose_stamped_LIBRARIES} 
   ${GAZEBO_LIBRARIES} 
   gz-sim${GZ_SIM_VER}::gz-sim${GZ_SIM_VER} 
   ${PROTOBUF_LIBRARIES}
