@@ -25,7 +25,7 @@ private:
     auto ros_msg = load_pose_stamped::msg::LoadPoseStamped();
 
     ros_msg.header.stamp.sec = gz_msg.header().stamp().sec();
-    ros_msg.header.stamp.nsec = gz_msg.header().stamp().nsec();
+    ros_msg.header.stamp.nanosec = gz_msg.header().stamp().nsec() *1e3;
     
     ros_msg.pose.position.x = gz_msg.pose().position().x();
     ros_msg.pose.position.y = gz_msg.pose().position().y();
@@ -48,8 +48,8 @@ private:
     auto ros_msg = drone_pose_stamped::msg::DronePoseStamped();
 
     ros_msg.header.stamp.sec = gz_msg.header().stamp().sec();
-    ros_msg.header.stamp.nsec = gz_msg.header().stamp().nsec();
-
+    ros_msg.header.stamp.nanosec = gz_msg.header().stamp().nsec() *1e3;
+    
     ros_msg.pose.position.x = gz_msg.pose().position().x();
     ros_msg.pose.position.y = gz_msg.pose().position().y();
     ros_msg.pose.position.z = gz_msg.pose().position().z();

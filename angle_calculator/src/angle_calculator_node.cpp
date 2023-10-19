@@ -37,13 +37,13 @@ private:
     {
         latest_clock_ = msg->clock;
     }
-        angle_stamped_msg::msg::AngleStamp convert_to_angle_stamp(const builtin_interfaces::msg::Time& time)
-    {
-        angle_stamped_msg::msg::AngleStamp angle_stamp;
-        angle_stamp.sec = time.sec;
-        angle_stamp.nsec = time.nanosec;
-        return angle_stamp;
-    }
+   //     angle_stamped_msg::msg::AngleStamp convert_to_angle_stamp(const builtin_interfaces::msg::Time& time)
+  //  {
+ //       angle_stamped_msg::msg::AngleStamp angle_stamp;
+ //       angle_stamp.sec = time.sec;
+ //       angle_stamp.nsec = time.nanosec;
+ //       return angle_stamp;
+ //   }
     void calculate_angles()
     {
         if (!load_pose_ || !drone_pose_) {
@@ -87,7 +87,7 @@ private:
                     theta_x_rad, theta_y_rad, theta_z_rad);
 
         auto angle_msg = angle_stamped_msg::msg::AngleStamped();
-        angle_msg.header.stamp = convert_to_angle_stamp(latest_clock_);
+        angle_msg.header.stamp = latest_clock_;
         angle_msg.angle.angle_x = theta_x_rad;
         angle_msg.angle.angle_y = theta_y_rad;
         angle_msg.angle.angle_z = theta_z_rad;
