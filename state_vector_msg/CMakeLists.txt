@@ -9,12 +9,15 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(load_pose_stamped REQUIRED)
+find_package(drone_pose_stamped REQUIRED)
+find_package(angle_stamped_msg REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/StateVector.msg"
-  DEPENDENCIES geometry_msgs sensor_msgs
+  DEPENDENCIES angle_stamped_msg sensor_msgs drone_pose_stamped load_pose_stamped geometry_msgs
 )
 
 

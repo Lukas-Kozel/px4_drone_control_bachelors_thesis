@@ -19,7 +19,7 @@
   <depend>message_filters</depend>
   <depend>load_pose_stamped</depend>
   <depend>drone_pose_stamped</depend>
-  <depend>angle_stamped</depend>
+  <depend>angle_stamped_msg</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

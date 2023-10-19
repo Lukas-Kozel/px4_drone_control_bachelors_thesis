@@ -15,6 +15,7 @@ public:
     publisher_drone_ = this->create_publisher<drone_pose_stamped::msg::DronePoseStamped>("/ros_drone_pose", 10);
     subscriber_load_ = std::make_unique<gz::transport::v12::Node>();
     subscriber_load_->Subscribe("/load_pose", &GazeboRosBridge::OnLoadMsg, this);
+    subscriber_drone_ = std::make_unique<gz::transport::v12::Node>();
     subscriber_drone_->Subscribe("/drone_pose", &GazeboRosBridge::OnDroneMsg, this);
   }
 
@@ -35,6 +36,10 @@ private:
     ros_msg.pose.orientation.y = gz_msg.pose().orientation().y();
     ros_msg.pose.orientation.z = gz_msg.pose().orientation().z();
 
+    RCLCPP_INFO(this->get_logger(), "Received LoadPoseStamped message: position(%f, %f, %f), orientation(%f, %f, %f, %f)",
+                gz_msg.pose().position().x(), gz_msg.pose().position().y(), gz_msg.pose().position().z(),
+                gz_msg.pose().orientation().w(), gz_msg.pose().orientation().x(), gz_msg.pose().orientation().y(), gz_msg.pose().orientation().z());
+
     publisher_load_->publish(ros_msg);
   }
 
@@ -53,6 +58,10 @@ private:
     ros_msg.pose.orientation.x = gz_msg.pose().orientation().x();
     ros_msg.pose.orientation.y = gz_msg.pose().orientation().y();
     ros_msg.pose.orientation.z = gz_msg.pose().orientation().z();
+
+    RCLCPP_INFO(this->get_logger(), "Received DronePoseStamped message: position(%f, %f, %f), orientation(%f, %f, %f, %f)",
+                gz_msg.pose().position().x(), gz_msg.pose().position().y(), gz_msg.pose().position().z(),
+                gz_msg.pose().orientation().w(), gz_msg.pose().orientation().x(), gz_msg.pose().orientation().y(), gz_msg.pose().orientation().z());
 
     publisher_drone_->publish(ros_msg);
   }
