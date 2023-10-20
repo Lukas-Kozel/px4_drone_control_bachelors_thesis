@@ -15,6 +15,8 @@
   <depend>tf2</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>angle_stamped_msg</depend>
+  <depend>load_pose_stamped</depend>
+<depend>drone_pose_stamped</depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
