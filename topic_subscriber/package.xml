@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>angle_calculator</name>
+  <name>topic_subscriber</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="l.kozel@outlook.cz">luky</maintainer>
@@ -10,13 +10,8 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
-  <depend>sensor_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>tf2</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>angle_stamped_msg</depend>
-  <depend>load_pose_stamped</depend>
-<depend>drone_pose_stamped</depend>
+  <depend>load_pose_stamped</depend>  <!-- Add this line for your custom message package -->
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
