@@ -9,11 +9,12 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(mavros_msgs REQUIRED)
 find_package(px4_msgs REQUIRED)  # Add this line for px4_msgs dependency
 
 # Add executable
 add_executable(move_forward_node src/move_forward_node.cpp)
-ament_target_dependencies(move_forward_node rclcpp px4_msgs geometry_msgs)  # Add px4_msgs here
+ament_target_dependencies(move_forward_node rclcpp px4_msgs geometry_msgs mavros_msgs)  # Add px4_msgs here
 
 install(TARGETS
   move_forward_node

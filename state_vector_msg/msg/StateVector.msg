@@ -1,0 +1,7 @@
+# StateVector.msg
+load_pose_stamped/LoadPoseStamped load_pose
+drone_pose_stamped/DronePoseStamped drone_pose
+angle_stamped_msg/AngleStamped load_angle
+sensor_msgs/Imu load_imu
+sensor_msgs/Imu drone_imu
+geometry_msgs/TwistStamped drone_velocity
