@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QMessageBox>
 #include <QDebug>
 #include <rclcpp/rclcpp.hpp>
 #include "drone_pose_stamped/msg/drone_pose_stamped.hpp"

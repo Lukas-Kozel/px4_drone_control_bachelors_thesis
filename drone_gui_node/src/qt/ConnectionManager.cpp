@@ -67,6 +67,15 @@ void ConnectionManager::checkForMessages()
 }
 
 bool ConnectionManager::switchToOffboardMode() {
+    if (!set_mode_client_->wait_for_service(std::chrono::seconds(1))) {
+        // The service is not available
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Offboard mode issue");
+        msgBox.setText("Service \"/mavros/set_mode\" is not available");
+        msgBox.exec();
+        return false;
+    }
+
     auto set_mode_request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
     set_mode_request->custom_mode = "OFFBOARD";
     auto set_mode_future = set_mode_client_->async_send_request(set_mode_request);
@@ -82,3 +91,4 @@ bool ConnectionManager::switchToOffboardMode() {
     }
     return true;
 }
+
