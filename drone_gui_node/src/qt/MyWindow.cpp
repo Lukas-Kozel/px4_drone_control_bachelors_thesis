@@ -3,13 +3,8 @@
 #include "ConnectionManager.h"
 #include "MyWindow.h"
 
-MyWindow::MyWindow(QWidget *parent) : QMainWindow(parent)
+MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionManager, QWidget *parent) : QMainWindow(parent), node(node), connectionManager(connectionManager)
 {
-    int argc = 0;
-    char **argv = nullptr;
-    rclcpp::init(argc, argv);
-    node = rclcpp::Node::make_shared("gui_node");
-
     QWidget* centralWidget = new QWidget(this);
     gridLayout = new QGridLayout(centralWidget);
     graphSetup();
@@ -22,9 +17,6 @@ MyWindow::MyWindow(QWidget *parent) : QMainWindow(parent)
     connectionIndicator->setStyleSheet("background-color: " + color + "; color: " + textColor + ";");
     connectionIndicator->setText("unknown");
 
-
-    // Create and setup ConnectionManager
-    connectionManager = new ConnectionManager(node, this);
     connect(connectionManager, &ConnectionManager::dronePoseReceived, this, &MyWindow::updateDronePose);
     connect(connectionManager, &ConnectionManager::loadImuReceived, this, &MyWindow::updateLoadImu);
     connect(connectionManager, &ConnectionManager::loadAngleReceived, this, &MyWindow::updateLoadAngle);
@@ -34,7 +26,7 @@ MyWindow::MyWindow(QWidget *parent) : QMainWindow(parent)
     //initialization of ros2 event loop
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() {
-        rclcpp::spin_some(node);
+        rclcpp::spin_some(this->node);
     });
     connect(timer, &QTimer::timeout, this, &MyWindow::updateGraphSlot);
     timer->start(1000);  // Update every 1 second
@@ -53,9 +45,13 @@ MyWindow::MyWindow(QWidget *parent) : QMainWindow(parent)
 
 
     QMenuBar* menuBar = new QMenuBar;
+
     QMenu* overviewMenu = new QMenu("Drone overview", this);
     QAction* overviewAction = new QAction("open drone overview in new window", this);
+    connect(overviewAction, &QAction::triggered, this, &MyWindow::onDroneOverview);
     overviewMenu->addAction(overviewAction);
+    menuBar->addMenu(overviewMenu);
+
     QMenu* controlMenu = new QMenu("Offboard", this);
     QAction* offboardAction = new QAction("Switch to Offboard Mode", this);
     connect(offboardAction, &QAction::triggered, this, &MyWindow::onSwitchToOffboardMode);
@@ -195,4 +191,11 @@ void MyWindow::onSwitchToOffboardMode()
     {
         qDebug() << "Failed to switch to offboard mode";
     }
+}
+
+void MyWindow::onDroneOverview(){
+    DroneVisualWindow *droneVisualWindow = new DroneVisualWindow(node,connectionManager,nullptr);
+    droneVisualWindow->show();
+    qDebug() << "opening widget for drone overview";
+
 }

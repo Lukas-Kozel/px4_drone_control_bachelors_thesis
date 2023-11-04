@@ -27,7 +27,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 add_executable(gui_node src/gui_node.cpp)
-add_executable(gui src/qt/main.cpp src/qt/MyWindow.cpp src/qt/ConnectionManager.cpp)
+add_executable(gui src/qt/main.cpp src/qt/MyWindow.cpp src/qt/ConnectionManager.cpp src/qt/DroneVisualWindow.cpp)
 
 ament_target_dependencies(gui_node
   rclcpp 

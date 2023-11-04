@@ -12,6 +12,8 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 
     set_mode_client_ = node_->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
+    load_pose_subscriber_ = node_->create_subscription<load_pose_stamped::msg::LoadPoseStamped>(
+        "/ros_load_pose", 10, std::bind(&ConnectionManager::onLoadPoseReceived, this, std::placeholders::_1));
     drone_pose_subscriber_ = node_->create_subscription<drone_pose_stamped::msg::DronePoseStamped>(
         "/ros_drone_pose", 10, std::bind(&ConnectionManager::onDronePoseReceived, this, std::placeholders::_1));
     load_imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
@@ -25,8 +27,14 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     check_timer_ = new QTimer(this);
     connect(check_timer_, &QTimer::timeout, this, &ConnectionManager::checkForMessages);
     check_timer_->start(1000);       
+ 
 }
 
+void ConnectionManager::onLoadPoseReceived(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr msg)
+{
+    qDebug() << "message has been emitted";
+    emit loadPoseReceived(msg);
+}
 void ConnectionManager::onDronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr msg)
 {
     drone_pose_received_ = true;
@@ -68,7 +76,6 @@ void ConnectionManager::checkForMessages()
 
 bool ConnectionManager::switchToOffboardMode() {
     if (!set_mode_client_->wait_for_service(std::chrono::seconds(1))) {
-        // The service is not available
         QMessageBox msgBox;
         msgBox.setWindowTitle("Offboard mode issue");
         msgBox.setText("Service \"/mavros/set_mode\" is not available");
@@ -80,15 +87,17 @@ bool ConnectionManager::switchToOffboardMode() {
     set_mode_request->custom_mode = "OFFBOARD";
     auto set_mode_future = set_mode_client_->async_send_request(set_mode_request);
 
-    // Wait for the response
     if (rclcpp::spin_until_future_complete(node_, set_mode_future) == 
         rclcpp::FutureReturnCode::SUCCESS)
     {
         RCLCPP_INFO(node_->get_logger(), "Offboard enabled");
     } else {
         RCLCPP_ERROR(node_->get_logger(), "Failed to call service /mavros/set_mode");
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Offboard mode issue");
+        msgBox.setText("Service \"/mavros/set_mode\" is not available");
+        msgBox.exec();
         return false;
     }
     return true;
 }
-

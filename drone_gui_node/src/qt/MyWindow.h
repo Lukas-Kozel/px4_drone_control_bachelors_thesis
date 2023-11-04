@@ -4,6 +4,7 @@
 
 #include <QMainWindow>
 #include "ConnectionManager.h"
+#include "DroneVisualWindow.h"
 #include <qlayout.h>
 #include <QPainter>
 #include <qpushbutton.h>
@@ -27,7 +28,7 @@ class MyWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MyWindow(QWidget *parent = nullptr);
+    explicit MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionManager, QWidget *parent);
     void updateGraph(double drone_velocity_x, double drone_velocity_y, double load_angular_velocity_x, double load_angular_velocity_y);
     ~MyWindow();
     void graphSetup();
@@ -36,12 +37,12 @@ private:
     QTimer *timer;
     QGridLayout* gridLayout;
     rclcpp::Node::SharedPtr node;
-    ConnectionManager* connectionManager;
     QLabel* dronePoseLabel;
     QLabel* loadImuLabel;
     QLabel* loadAngleLabel;
     QLabel* connectionIndicator;
     QLabel* droneVelocityLabel;
+    ConnectionManager* connectionManager;
     QtCharts::QBarSet* droneVelocitySetX;
     QtCharts::QBarSet* droneVelocitySetY;
     QtCharts::QBarSet* loadAngularVelocitySetX;
@@ -59,6 +60,7 @@ private slots:
     void updateGraphSlot();
     void updateConnectionIndicator(bool connected);
     void onSwitchToOffboardMode();
+    void onDroneOverview();
    // void updateConnectionIndicator(bool connected);
 };
 
