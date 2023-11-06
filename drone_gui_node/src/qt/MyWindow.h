@@ -12,6 +12,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QGraphicsTextItem>
 #include <QLabel>
 #include <QTimer>
 #include <QtCharts/QChartView>
@@ -51,6 +52,9 @@ private:
     QtCharts::QBarSet* loadAngularVelocitySetZ;
     QtCharts::QChartView* droneVelocityGraph;
     QtCharts::QChartView* loadAngularVelocityGraph;
+    double drone_pose_x = 0.0;
+    double drone_pose_y = 0.0;
+    double drone_pose_z = 0.0;
     double drone_velocity_x = 0.0;
     double drone_velocity_y = 0.0;
     double drone_velocity_z = 0.0;
@@ -60,9 +64,16 @@ private:
     double loadPoseX = 0.0;
     double loadPoseY = 0.0;
     double loadPoseZ = 0.0;
-    QGraphicsEllipseItem* loadItem;
-    QGraphicsLineItem* lineItem;
-    QGraphicsRectItem*  droneItem;
+    double load_angle_x = 0.0;
+    double load_angle_y = 0.0;
+    double load_angle_z = 0.0;
+    bool isArmed = false;
+    QGraphicsEllipseItem* loadItem1;
+    QGraphicsLineItem* lineItem1;
+    QGraphicsRectItem*  droneItem1;
+    QGraphicsEllipseItem* loadItem2;
+    QGraphicsLineItem* lineItem2;
+    QGraphicsRectItem*  droneItem2;
 
 private slots:
     void updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);
@@ -70,16 +81,17 @@ private slots:
     void updateLoadAngle(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg);
     void updateDroneVelocity(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
     void updateLoadPose(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr& msg);
-    void updateGraphSlot();
     void updateConnectionIndicator(bool connected);
     void onSwitchToOffboardMode();
-    void updateLoadPoseGraphX();
+    void updateLoadPoseGraphs();
+    void onSwitchToArmedMode();
+    void updateDataTable();
 
 
 private:
-    void updateGraph(double drone_velocity_x, double drone_velocity_y, double drone_velocity_z, double load_angular_velocity_x, double load_angular_velocity_y, double load_angular_velocity_z);
+    void updateGraph();
     void graphSetup();
-    void updateGraphX(double x, double z);
+    void updateGraphs(double x, double z, double y);
     void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString& yAxisTitle);
     QMenuBar* setupMenuBar();
 };

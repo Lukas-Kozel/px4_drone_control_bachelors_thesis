@@ -11,6 +11,7 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     auto qos = rclcpp::QoS(rclcpp::QoSInitialization(RMW_QOS_POLICY_HISTORY_KEEP_LAST,10));
     qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 
+    set_armed_mode_client_ = node_->create_client<mavros_msgs::srv::CommandBool>("/mavros/cmd/arming");
     set_mode_client_ = node_->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
     load_pose_subscriber_ = node_->create_subscription<load_pose_stamped::msg::LoadPoseStamped>(
         "/ros_load_pose", 10, std::bind(&ConnectionManager::onLoadPoseReceived, this, std::placeholders::_1));
@@ -72,6 +73,34 @@ void ConnectionManager::checkForMessages()
     load_imu_received_ = false;
     load_angle_received_ = false;
     drone_velocity_received_ = false;
+}
+
+bool ConnectionManager::switchToArmedMode() {
+    if (!set_armed_mode_client_->wait_for_service(std::chrono::seconds(1))) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Armed mode issue");
+        msgBox.setText("Service \"/mavros/cmd/arming\" is not available");
+        msgBox.exec();
+        return false;
+    }
+
+    auto request = std::make_shared<mavros_msgs::srv::CommandBool::Request>();
+    request->value = true;
+    auto result_future = set_armed_mode_client_->async_send_request(request);
+
+    if (rclcpp::spin_until_future_complete(node_, result_future) == 
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+        RCLCPP_INFO(node_->get_logger(), "Armed");
+    } else {
+        RCLCPP_ERROR(node_->get_logger(), "Failed to call service /mavros/cmd/arming");
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Armed mode issue");
+        msgBox.setText("Service \"/mavros/cmd/arming\" is not available");
+        msgBox.exec();
+        return false;
+    }
+    return true;
 }
 
 bool ConnectionManager::switchToOffboardMode() {

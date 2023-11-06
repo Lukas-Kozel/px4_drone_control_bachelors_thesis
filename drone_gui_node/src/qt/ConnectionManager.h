@@ -14,7 +14,6 @@
 #include "mavros_msgs/srv/set_mode.hpp"
 #include "mavros_msgs/srv/command_bool.hpp"
 
-
 class ConnectionManager : public QObject
 {
     Q_OBJECT
@@ -23,6 +22,7 @@ public:
     explicit ConnectionManager(rclcpp::Node::SharedPtr node, QObject* parent = nullptr);
     void checkForMessages();
     bool switchToOffboardMode();
+    bool switchToArmedMode();
 
 signals:
     void dronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);
@@ -47,6 +47,7 @@ private:
     rclcpp::Subscription<angle_stamped_msg::msg::AngleStamped>::ConstSharedPtr load_angle_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::ConstSharedPtr drone_velocity_subscriber_;
     rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_mode_client_;
+    rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedPtr set_armed_mode_client_;
 
 
     void onDronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr msg);
