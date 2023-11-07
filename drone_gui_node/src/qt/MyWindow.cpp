@@ -260,15 +260,13 @@ void MyWindow::onControllerStart(){
     QProcess *process = new QProcess(this);
     QStringList arguments;
     process->start("ros2", arguments << "run" << "lqr_controller" << "lqr_controller_node");
-    connect(process, &QProcess::readyReadStandardError, this, &MyWindow::handleProcessError);
+    connect(process, &QProcess::errorOccurred, this, &MyWindow::handleProcessError);
 }
 
 void MyWindow::handleProcessError(){
-    QProcess *process = qobject_cast<QProcess *>(sender());
-    QString errorOutput = process->readAllStandardError();
     QMessageBox msgBox;
     msgBox.setWindowTitle("Controller node issue");
-    msgBox.setText(errorOutput);
+    msgBox.setText("controller node can not be loaded");
     msgBox.exec();
 }
 
@@ -276,13 +274,13 @@ void MyWindow::onEnvironmentSetup(){
     QProcess *process = new QProcess(this);
     process->setWorkingDirectory("/home/luky/mavros_ros2_ws/src/scripts");
     process->start("/bin/bash",QStringList() << "./setup_ws.sh");
-    connect(process, &QProcess::readyReadStandardError, this, &MyWindow::handleScriptExecutionError);
+    connect(process, &QProcess::errorOccurred, this, &MyWindow::handleScriptExecutionError);
 }
+
+//TODO fix this, because when I press controller button it do not show the messageBox
 void MyWindow::handleScriptExecutionError(){
-    QProcess *process = qobject_cast<QProcess *>(sender());
-    QString errorOutput = process->readAllStandardError();
     QMessageBox msgBox;
     msgBox.setWindowTitle("Environment setup issue");
-    msgBox.setText(errorOutput);
+    msgBox.setText("script could not be executed");
     msgBox.exec();
 }
