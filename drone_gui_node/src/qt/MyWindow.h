@@ -61,19 +61,10 @@ private:
     double load_angular_velocity_x = 0.0;
     double load_angular_velocity_y = 0.0;
     double load_angular_velocity_z = 0.0;
-    double loadPoseX = 0.0;
-    double loadPoseY = 0.0;
-    double loadPoseZ = 0.0;
     double load_angle_x = 0.0;
     double load_angle_y = 0.0;
     double load_angle_z = 0.0;
     bool isArmed = false;
-    QGraphicsEllipseItem* loadItem1;
-    QGraphicsLineItem* lineItem1;
-    QGraphicsRectItem*  droneItem1;
-    QGraphicsEllipseItem* loadItem2;
-    QGraphicsLineItem* lineItem2;
-    QGraphicsRectItem*  droneItem2;
 
 private slots:
     void updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);

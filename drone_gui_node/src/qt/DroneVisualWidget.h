@@ -41,6 +41,8 @@ private slots:
 
 private:
     void updateGraphs();
+    void addAxes(std::string axis1,std::string axis2, QGraphicsRectItem* parent, QGraphicsScene* parentScene, QPointF droneCenter, QPen axisPen);
+
 
 };
 
