@@ -38,7 +38,7 @@ qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's
         load_angle_subscriber_ = this->create_subscription<angle_stamped_msg::msg::AngleStamped>(
             "/load_angle", 10, std::bind(&LQRController::on_load_angle_received, this, std::placeholders::_1));
         drone_velocity_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-            "/mavros/local_position/velocity_local", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
+            "/mavros/local_position/velocity_body", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
         attitude_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/setpoint_attitude/attitude", 20);
         drone_state_subscriber_ = this->create_subscription<mavros_msgs::msg::State>(
             "/mavros/state", qos2, std::bind(&LQRController::on_drone_state_received, this, std::placeholders::_1));

@@ -65,6 +65,7 @@ private:
     double load_angle_y = 0.0;
     double load_angle_z = 0.0;
     bool isArmed = false;
+    bool isConnected = false;
 
 private slots:
     void updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);
@@ -72,6 +73,7 @@ private slots:
     void updateLoadAngle(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg);
     void updateDroneVelocity(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
     void updateConnectionIndicator(bool connected);
+    void checkConnectivity(bool connected);
     void onSwitchToOffboardMode();
     void onSwitchToArmedMode();
     void updateDataTable();

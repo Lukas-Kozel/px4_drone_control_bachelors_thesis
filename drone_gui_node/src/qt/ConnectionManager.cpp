@@ -22,7 +22,7 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     load_angle_subscriber_ = node_->create_subscription<angle_stamped_msg::msg::AngleStamped>(
         "/load_angle", 10, std::bind(&ConnectionManager::onLoadAngleReceived, this, std::placeholders::_1));
     drone_velocity_subscriber_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
-        "/mavros/local_position/velocity_local", qos, std::bind(&ConnectionManager::onDroneVelocityReceived, this, std::placeholders::_1));
+        "/mavros/local_position/velocity_body", qos, std::bind(&ConnectionManager::onDroneVelocityReceived, this, std::placeholders::_1));
 
     //check for messages every 1s 
     check_timer_ = new QTimer(this);

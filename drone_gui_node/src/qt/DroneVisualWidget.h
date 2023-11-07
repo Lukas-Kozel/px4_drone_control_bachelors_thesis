@@ -34,14 +34,17 @@ private:
     double loadPoseX=0;
     double loadPoseY=0;
     double loadPoseZ=0;
+    bool isConnected = false;
 
 
 private slots:
     void updateLoadPose(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr& msg);
+    void checkConnectivity(bool connected);
 
 private:
     void updateGraphs();
     void addAxes(std::string axis1,std::string axis2, QGraphicsRectItem* parent, QGraphicsScene* parentScene, QPointF droneCenter, QPen axisPen);
+
 
 
 };

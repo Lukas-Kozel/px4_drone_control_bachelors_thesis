@@ -54,6 +54,7 @@ DroneVisualWidget::DroneVisualWidget(rclcpp::Node::SharedPtr node, ConnectionMan
 
     
    connect(connectionManager, &ConnectionManager::loadPoseReceived, this, &DroneVisualWidget::updateLoadPose);
+   connect(connectionManager, &ConnectionManager::connectionStatusChanged, this, &DroneVisualWidget::checkConnectivity);
    //spinning node to update data every 0.1 sec
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]() {
@@ -72,6 +73,7 @@ void DroneVisualWidget::updateLoadPose(const load_pose_stamped::msg::LoadPoseSta
 
 void DroneVisualWidget::updateGraphs()
 {
+    if(isConnected){
     // Assuming msg contains the x and z coordinates of the load
     loadPoseX = loadPoseX * 400;  // Convert meters to centimeters and scale up by 3
     loadPoseZ = loadPoseZ * 400;  // Convert meters to centimeters and scale up by 3
@@ -81,6 +83,21 @@ void DroneVisualWidget::updateGraphs()
     lineItem1->setLine(0, 5, loadPoseX, -loadPoseZ);  // Adjusted for center of bottom line of rect and center of the load (circle)
     loadItem2->setPos(loadPoseY - 15, -loadPoseZ - 15);  // Adjusted for center of the load (circle)
     lineItem2->setLine(0, 5, loadPoseY, -loadPoseZ);  // Adjusted for center of bottom line of rect and center of the load (circle)
+    }
+    else{
+        loadPoseX = 0;
+        loadPoseZ = -0.35 * 400;
+        loadPoseY = 0;
+        loadItem1->setPos(loadPoseX - 15, -loadPoseZ - 15);  // Adjusted for center of the load (circle)
+        lineItem1->setLine(0, 5, loadPoseX, -loadPoseZ);  // Adjusted for center of bottom line of rect and center of the load (circle)
+        loadItem2->setPos(loadPoseY - 15, -loadPoseZ - 15);  // Adjusted for center of the load (circle)
+        lineItem2->setLine(0, 5, loadPoseY, -loadPoseZ);  // Adjusted for center of bottom line of rect and center of the load (circle)
+        // Reset the transformations and center the views on the drone item
+        topView->resetTransform();
+        topView->centerOn(droneItem1);
+        bottomView->resetTransform();
+        bottomView->centerOn(droneItem2);
+    }
 }
 
 void DroneVisualWidget::addAxes(std::string axis1,std::string axis2, QGraphicsRectItem* parent, QGraphicsScene* parentScene, QPointF droneCenter, QPen axisPen){
@@ -135,4 +152,13 @@ void DroneVisualWidget::addAxes(std::string axis1,std::string axis2, QGraphicsRe
     parentScene->addItem(xLabel);
     // Set the text item's parent to the droneItem1 so it moves with the drone
     xLabel->setParentItem(parent);
+}
+
+void DroneVisualWidget::checkConnectivity(bool connected){
+    if(connected){
+        isConnected = true;
+    }
+    else{
+        isConnected = false;
+    }
 }

@@ -54,13 +54,14 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     QMenuBar* menuBar = setupMenuBar();  // Assuming setupMenuBar is a function to setup the menu bar
     setMenuBar(menuBar);
     setCentralWidget(centralWidget);
-    resize(1000, 500);  // Adjusted to give more space
+    resize(1500, 750);  // Adjusted to give more space
 
     connect(connectionManager, &ConnectionManager::dronePoseReceived, this, &MyWindow::updateDronePose);
     connect(connectionManager, &ConnectionManager::loadImuReceived, this, &MyWindow::updateLoadImu);
     connect(connectionManager, &ConnectionManager::loadAngleReceived, this, &MyWindow::updateLoadAngle);
     connect(connectionManager, &ConnectionManager::droneVelocityReceived, this, &MyWindow::updateDroneVelocity);
     connect(connectionManager, &ConnectionManager::connectionStatusChanged, this, &MyWindow::updateConnectionIndicator);
+    connect(connectionManager, &ConnectionManager::connectionStatusChanged, this, &MyWindow::checkConnectivity);
 
    //spinning node to update data every 1 sec
     timer1 = new QTimer(this);
@@ -70,7 +71,6 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     connect(timer1, &QTimer::timeout, this, &MyWindow::updateGraph);
     connect(timer1,&QTimer::timeout, this, &MyWindow::updateDataTable);
     timer1->start(1000);  // Update every 1 second
-
 
 }
 
@@ -119,6 +119,7 @@ void MyWindow::updateGraph() {
 }
 
 void MyWindow::updateDataTable(){
+    if(isConnected){
     std::string position = "Drone position: (" + std::to_string(drone_pose_x) + ", " + std::to_string(drone_pose_y) + ", " + std::to_string(drone_pose_z) + ")";
     dronePoseLabel->setText(QString::fromStdString(position));
     std::string imu = "Load angular velocity: (" + std::to_string(load_angular_velocity_x) + ", " + std::to_string(load_angular_velocity_y) + ", " + std::to_string(load_angular_velocity_z) + ")";
@@ -127,6 +128,13 @@ void MyWindow::updateDataTable(){
     loadAngleLabel->setText(QString::fromStdString(load_angle));
     std::string drone_velocity = "Drone velocity: (" + std::to_string(drone_velocity_x) + ", " + std::to_string(drone_velocity_y) + ", " + std::to_string(drone_velocity_z) + ")";
     droneVelocityLabel->setText(QString::fromStdString(drone_velocity));
+    }
+    else{
+    dronePoseLabel->setText("Drone position: Data unavailable");
+    loadImuLabel->setText("Load angular velocity: Data unavailable");
+    loadAngleLabel->setText("Load angle: Data unavailable");
+    droneVelocityLabel->setText("Drone velocity: Data unavailable");
+    }
 }
 
 void MyWindow::graphSetup(){
@@ -189,7 +197,6 @@ void MyWindow::setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, 
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 }
-
 
 void MyWindow::updateConnectionIndicator(bool connected) {
     if (!connectionIndicator) {
@@ -256,4 +263,7 @@ QMenuBar* MyWindow::setupMenuBar()
     menuBar->setCornerWidget(rightSpacer, Qt::TopRightCorner);
 
     return menuBar;
+}
+void MyWindow::checkConnectivity(bool connected){
+    isConnected = connected;
 }
