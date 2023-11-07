@@ -23,7 +23,7 @@
 #include <QMenu>
 #include <rclcpp/rclcpp.hpp>
 #include "ConnectionManager.h"
-#include "DroneVisualWindow.h"
+#include "DroneVisualWidget.h"
 
 class MyWindow : public QMainWindow
 {
@@ -80,10 +80,8 @@ private slots:
     void updateLoadImu(const sensor_msgs::msg::Imu::ConstSharedPtr& msg);
     void updateLoadAngle(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg);
     void updateDroneVelocity(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
-    void updateLoadPose(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr& msg);
     void updateConnectionIndicator(bool connected);
     void onSwitchToOffboardMode();
-    void updateLoadPoseGraphs();
     void onSwitchToArmedMode();
     void updateDataTable();
 
@@ -91,7 +89,6 @@ private slots:
 private:
     void updateGraph();
     void graphSetup();
-    void updateGraphs(double x, double z, double y);
     void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString& yAxisTitle);
     QMenuBar* setupMenuBar();
 };
