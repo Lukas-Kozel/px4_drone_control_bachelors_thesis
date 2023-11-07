@@ -3,6 +3,7 @@
 #define MYWINDOW_H
 
 #include <QMainWindow>
+#include <QProcess>
 #include <QSplitter>
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -79,6 +80,10 @@ private slots:
     void checkConnectivity(bool connected);
     void onSwitchToOffboardMode();
     void onSwitchToArmedMode();
+    void onControllerStart();
+    void handleProcessError();
+    void onEnvironmentSetup();
+    void handleScriptExecutionError();
 
 
 private:

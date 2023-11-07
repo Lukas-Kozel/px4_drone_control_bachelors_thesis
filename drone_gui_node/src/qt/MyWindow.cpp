@@ -25,8 +25,16 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     QPushButton* armButton = new QPushButton("Arm");
     connect(armButton, &QPushButton::clicked, this, &MyWindow::onSwitchToArmedMode);
 
-    rightLayout->addWidget(switchOffboardModeButton);
+    QPushButton* controllerButton = new QPushButton("Controller");
+    connect(controllerButton,&QPushButton::clicked, this,&MyWindow::onControllerStart);
+
+    QPushButton* environmentSetupButton = new QPushButton("setup the environment");
+    connect(environmentSetupButton,&QPushButton::clicked, this,&MyWindow::onEnvironmentSetup);
+
+    rightLayout->addWidget(environmentSetupButton);
     rightLayout->addWidget(armButton);
+    rightLayout->addWidget(switchOffboardModeButton);
+    rightLayout->addWidget(controllerButton);
 
     //data visualization
     dronePoseLabel = new QLabel(centralWidget);
@@ -246,4 +254,35 @@ QMenuBar* MyWindow::setupMenuBar()
 }
 void MyWindow::checkConnectivity(bool connected){
     isConnected = connected;
+}
+
+void MyWindow::onControllerStart(){
+    QProcess *process = new QProcess(this);
+    QStringList arguments;
+    process->start("ros2", arguments << "run" << "lqr_controller" << "lqr_controller_node");
+    connect(process, &QProcess::readyReadStandardError, this, &MyWindow::handleProcessError);
+}
+
+void MyWindow::handleProcessError(){
+    QProcess *process = qobject_cast<QProcess *>(sender());
+    QString errorOutput = process->readAllStandardError();
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Controller node issue");
+    msgBox.setText(errorOutput);
+    msgBox.exec();
+}
+
+void MyWindow::onEnvironmentSetup(){
+    QProcess *process = new QProcess(this);
+    process->setWorkingDirectory("/home/luky/mavros_ros2_ws/src/scripts");
+    process->start("/bin/bash",QStringList() << "./setup_ws.sh");
+    connect(process, &QProcess::readyReadStandardError, this, &MyWindow::handleScriptExecutionError);
+}
+void MyWindow::handleScriptExecutionError(){
+    QProcess *process = qobject_cast<QProcess *>(sender());
+    QString errorOutput = process->readAllStandardError();
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Environment setup issue");
+    msgBox.setText(errorOutput);
+    msgBox.exec();
 }
