@@ -30,10 +30,13 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     check_timer_->start(1000);       
  
 }
+ConnectionManager::~ConnectionManager(){
+    delete check_timer_;
+    }
 
 void ConnectionManager::onLoadPoseReceived(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr msg)
 {
-    qDebug() << "message has been emitted";
+    load_pose_received_ = true;
     emit loadPoseReceived(msg);
 }
 void ConnectionManager::onDronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr msg)
@@ -62,13 +65,11 @@ void ConnectionManager::onDroneVelocityReceived(const geometry_msgs::msg::TwistS
 
 void ConnectionManager::checkForMessages()
 {
-    bool all_received = drone_pose_received_ && load_imu_received_ && load_angle_received_ && drone_velocity_received_;
+    bool all_received = drone_pose_received_ && load_imu_received_ && load_angle_received_ && drone_velocity_received_ && load_pose_received_;
     if (!all_received) {
-        // One or more topics did not receive a message since the last check
         qDebug() << "Not all topics have received messages since the last check.";
     }
-    emit connectionStatusChanged(all_received);  // Emit signal with the current connection status
-    // Reset the flags for the next check
+    emit connectionStatusChanged(all_received);
     drone_pose_received_ = false;
     load_imu_received_ = false;
     load_angle_received_ = false;

@@ -12,6 +12,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QDebug>
 #include <QGraphicsTextItem>
 #include <QLabel>
 #include <QTimer>
@@ -20,6 +21,9 @@
 #include <QtCharts/QBarSeries>
 #include <QtCharts/QValueAxis>
 #include <QMenuBar>
+#include <QWidget>
+#include <QSplitter>
+#include <QMessageLogger>
 #include <QMenu>
 #include <rclcpp/rclcpp.hpp>
 #include "ConnectionManager.h"
@@ -37,7 +41,6 @@ private:
     rclcpp::Node::SharedPtr node;
     ConnectionManager* connectionManager;
     QTimer* timer1;
-    QTimer* timer2;
     QVBoxLayout* rightLayout;
     QLabel* dronePoseLabel;
     QLabel* loadImuLabel;
@@ -76,14 +79,14 @@ private slots:
     void checkConnectivity(bool connected);
     void onSwitchToOffboardMode();
     void onSwitchToArmedMode();
-    void updateDataTable();
 
 
 private:
     void updateGraph();
     void graphSetup();
-    void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString& yAxisTitle);
+    void updateDataTable();
+    void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd);
     QMenuBar* setupMenuBar();
 };
 
-#endif // MYWINDOW_H
+#endif

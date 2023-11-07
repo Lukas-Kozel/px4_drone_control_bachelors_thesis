@@ -3,12 +3,12 @@
 #include <QObject>
 #include <QTimer>
 #include <QMessageBox>
+#include <QWidget>
 #include <QDebug>
 #include <rclcpp/rclcpp.hpp>
 #include "drone_pose_stamped/msg/drone_pose_stamped.hpp"
 #include "load_pose_stamped/msg/load_pose_stamped.hpp"
 #include <sensor_msgs/msg/imu.hpp>
-#include <qwidget.h>
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "mavros_msgs/srv/set_mode.hpp"
@@ -20,6 +20,7 @@ class ConnectionManager : public QObject
 
 public:
     explicit ConnectionManager(rclcpp::Node::SharedPtr node, QObject* parent = nullptr);
+    ~ConnectionManager();
     void checkForMessages();
     bool switchToOffboardMode();
     bool switchToArmedMode();
@@ -39,8 +40,8 @@ private:
     bool load_imu_received_;
     bool load_angle_received_;
     bool drone_velocity_received_;
+    bool load_pose_received_;
     rclcpp::Node::SharedPtr node_;
-    load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr last_load_pose_msg_;
     rclcpp::Subscription<drone_pose_stamped::msg::DronePoseStamped>::ConstSharedPtr drone_pose_subscriber_;
     rclcpp::Subscription<load_pose_stamped::msg::LoadPoseStamped>::ConstSharedPtr load_pose_subscriber_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::ConstSharedPtr load_imu_subscriber_;

@@ -1,43 +1,34 @@
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QSplitter>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QMessageLogger>
-#include "ConnectionManager.h"
-#include "DroneVisualWidget.h"
 #include "MyWindow.h"
 
 MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionManager, QWidget *parent) : QMainWindow(parent), node(node), connectionManager(connectionManager)
 {
+
     QWidget* centralWidget = new QWidget(this);
-    QHBoxLayout* mainLayout = new QHBoxLayout(centralWidget);  // Main layout to hold left and right layouts
+    QHBoxLayout* mainLayout = new QHBoxLayout(centralWidget);
     connectionIndicator = new QLabel(centralWidget);
 
-    if (!node || !connectionManager) {
-        qFatal("Null pointer passed to MyWindow constructor");
-        return;
-    }
-
-    // Setup the graphics view and scene
     DroneVisualWidget *droneVisual = new DroneVisualWidget(node,connectionManager,this);
 
-    QVBoxLayout* leftLayout = new QVBoxLayout();
+    //left side of the app
+    QVBoxLayout* leftLayout = new QVBoxLayout(centralWidget);
     QSplitter* leftSplitter = new QSplitter(Qt::Vertical);
     leftSplitter->addWidget(droneVisual);
     leftLayout->addWidget(leftSplitter);
-    mainLayout->addLayout(leftLayout, 1);  // Assign more space to the left side
+    mainLayout->addLayout(leftLayout, 1);
 
-    // Right side layout for buttons and labels
-    rightLayout = new QVBoxLayout();
+    //right side of the app
+    rightLayout = new QVBoxLayout(centralWidget);
+
     QPushButton* switchOffboardModeButton = new QPushButton("Switch to Offboard Mode");
     connect(switchOffboardModeButton, &QPushButton::clicked, this, &MyWindow::onSwitchToOffboardMode);
+
     QPushButton* armButton = new QPushButton("Arm");
     connect(armButton, &QPushButton::clicked, this, &MyWindow::onSwitchToArmedMode);
+
     rightLayout->addWidget(switchOffboardModeButton);
     rightLayout->addWidget(armButton);
 
-    // Create labels for displaying data
+    //data visualization
     dronePoseLabel = new QLabel(centralWidget);
     loadImuLabel = new QLabel(centralWidget);
     loadAngleLabel = new QLabel(centralWidget);
@@ -47,14 +38,13 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     rightLayout->addWidget(loadAngleLabel);
     rightLayout->addWidget(droneVelocityLabel);
 
-    // Setup the graphs
     graphSetup();
-    mainLayout->addLayout(rightLayout, 1);  // Assign equal space to the right side
+    mainLayout->addLayout(rightLayout, 1);
 
-    QMenuBar* menuBar = setupMenuBar();  // Assuming setupMenuBar is a function to setup the menu bar
+    QMenuBar* menuBar = setupMenuBar();
     setMenuBar(menuBar);
     setCentralWidget(centralWidget);
-    resize(1500, 750);  // Adjusted to give more space
+    resize(1500, 750);
 
     connect(connectionManager, &ConnectionManager::dronePoseReceived, this, &MyWindow::updateDronePose);
     connect(connectionManager, &ConnectionManager::loadImuReceived, this, &MyWindow::updateLoadImu);
@@ -70,15 +60,13 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     });
     connect(timer1, &QTimer::timeout, this, &MyWindow::updateGraph);
     connect(timer1,&QTimer::timeout, this, &MyWindow::updateDataTable);
-    timer1->start(1000);  // Update every 1 second
+    timer1->start(1000);
 
 }
 
 MyWindow::~MyWindow()
 {
     rclcpp::shutdown();
-    delete timer1; // Clean up the timer
-    delete timer2;
 }
 
 void MyWindow::updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg)
@@ -138,11 +126,11 @@ void MyWindow::updateDataTable(){
 }
 
 void MyWindow::graphSetup(){
-    // Drone velocity graph setup
     droneVelocitySetX = new QtCharts::QBarSet("drone's velocity x");
     droneVelocitySetY = new QtCharts::QBarSet("drone's velocity y");
-    droneVelocitySetZ = new QtCharts::QBarSet("drone's velocity z");  // Added for z-axis
-    *droneVelocitySetX << 1;  // Initialize with a value
+    droneVelocitySetZ = new QtCharts::QBarSet("drone's velocity z");
+    //init with some default value
+    *droneVelocitySetX << 1;
     *droneVelocitySetY << 1;
     *droneVelocitySetZ << 1;
     
@@ -153,16 +141,16 @@ void MyWindow::graphSetup(){
     
     QtCharts::QChart* droneChart = new QtCharts::QChart();
     droneChart->addSeries(droneSeries);
-    setupAxis(droneChart, droneSeries, "Velocity (m/s)");  // Assuming setupAxis is a helper function to setup axes
+    setupAxis(droneChart, droneSeries, "Velocity (m/s)",-10,10);
     
     droneVelocityGraph = new QtCharts::QChartView(droneChart);
     droneVelocityGraph->setRenderHint(QPainter::Antialiasing);
     
-    // Load angular velocity graph setup
-    loadAngularVelocitySetX = new QtCharts::QBarSet("load angular velocity x");
-    loadAngularVelocitySetY = new QtCharts::QBarSet("load angular velocity y");
-    loadAngularVelocitySetZ = new QtCharts::QBarSet("load angular velocity z");  // Added for z-axis
-    *loadAngularVelocitySetX << 1;  // Initialize with a value
+    loadAngularVelocitySetX = new QtCharts::QBarSet("load's angular velocity x");
+    loadAngularVelocitySetY = new QtCharts::QBarSet("load's angular velocity y");
+    loadAngularVelocitySetZ = new QtCharts::QBarSet("load's angular velocity z");
+    //init with some default value
+    *loadAngularVelocitySetX << 1;
     *loadAngularVelocitySetY << 1;
     *loadAngularVelocitySetZ << 1;
     
@@ -173,7 +161,7 @@ void MyWindow::graphSetup(){
     
     QtCharts::QChart* loadChart = new QtCharts::QChart();
     loadChart->addSeries(loadSeries);
-    setupAxis(loadChart, loadSeries, "Angular Velocity (rad/s)");  // Assuming setupAxis is a helper function to setup axes
+    setupAxis(loadChart, loadSeries, "Angular Velocity (rad/s)",-4,4);
     
     loadAngularVelocityGraph = new QtCharts::QChartView(loadChart);
     loadAngularVelocityGraph->setRenderHint(QPainter::Antialiasing);
@@ -182,27 +170,21 @@ void MyWindow::graphSetup(){
     rightLayout->addWidget(loadAngularVelocityGraph);
 }
 
-void MyWindow::setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString& yAxisTitle){
-    // Common axis setup logic for both graphs
+void MyWindow::setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd){
     QtCharts::QValueAxis* axisX = new QtCharts::QValueAxis;
-    axisX->setTitleText("Axis (Units)");
     axisX->setGridLineVisible(true); 
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
     QtCharts::QValueAxis* axisY = new QtCharts::QValueAxis;
-    axisY->setTitleText(yAxisTitle);
+    axisY->setTitleText(AxisText);
     axisY->setGridLineVisible(true);
-    axisY->setRange(-8, 8);
+    axisY->setRange(rangeStart, rangeEnd);
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 }
 
 void MyWindow::updateConnectionIndicator(bool connected) {
-    if (!connectionIndicator) {
-        qWarning() << "connectionIndicator is null";
-        return;
-    }
     QString color = connected ? "green" : "red";
     connectionIndicator->setStyleSheet("background-color: " + color + "; color: white");
     connectionIndicator->setText(connected ? "Connected" : "Disconnected");
@@ -247,18 +229,16 @@ void MyWindow::onSwitchToArmedMode()
 
 QMenuBar* MyWindow::setupMenuBar()
 {
-    QMenuBar* menuBar = new QMenuBar;
-    QWidget* rightSpacer = new QWidget(this);
+    QMenuBar* menuBar = new QMenuBar(this);
+    QWidget* rightSpacer = new QWidget(menuBar);
     rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QHBoxLayout* cornerLayout = new QHBoxLayout(rightSpacer);
     connectionIndicator->setAutoFillBackground(true);
     connectionIndicator->setMinimumSize(120, 30);
-    QString color =  "gray";
-    QString textColor = "white";
-    connectionIndicator->setStyleSheet("background-color: " + color + "; color: " + textColor + ";");
+    connectionIndicator->setStyleSheet("background-color: gray; color: white;");
     connectionIndicator->setText("unknown");
     connectionIndicator->setAlignment(Qt::AlignCenter);
-    cornerLayout->addWidget(connectionIndicator);  // Add connectionIndicator to the layout
+    cornerLayout->addWidget(connectionIndicator);
     rightSpacer->setLayout(cornerLayout);
     menuBar->setCornerWidget(rightSpacer, Qt::TopRightCorner);
 

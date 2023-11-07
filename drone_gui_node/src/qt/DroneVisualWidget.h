@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsRectItem>
 #include <QGraphicsLineItem>
+#include <QVBoxLayout>
 #include <QGraphicsTextItem>
 #include "ConnectionManager.h"
 #include <rclcpp/rclcpp.hpp>
@@ -25,12 +26,12 @@ private:
     QGraphicsView *bottomView;
     QGraphicsScene *topScene;
     QGraphicsScene *bottomScene;
-    QGraphicsRectItem *droneItem1;
-    QGraphicsRectItem *droneItem2;
-    QGraphicsEllipseItem *loadItem1;
-    QGraphicsEllipseItem *loadItem2;
-    QGraphicsLineItem *lineItem1;
-    QGraphicsLineItem *lineItem2;
+    QGraphicsRectItem *drone1;
+    QGraphicsRectItem *drone2;
+    QGraphicsEllipseItem *load1;
+    QGraphicsEllipseItem *load2;
+    QGraphicsLineItem *line1;
+    QGraphicsLineItem *line2;
     double loadPoseX=0;
     double loadPoseY=0;
     double loadPoseZ=0;
@@ -49,4 +50,4 @@ private:
 
 };
 
-#endif // DRONEVISUALWIDGET_H
+#endif
