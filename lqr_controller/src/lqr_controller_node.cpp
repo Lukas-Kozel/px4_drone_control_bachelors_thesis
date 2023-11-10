@@ -12,6 +12,8 @@
 #include "drone_pose_stamped/msg/drone_pose_stamped.hpp"
 #include "load_pose_stamped/msg/load_pose_stamped.hpp"
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
+#include "mavros_msgs/msg/attitude_target.hpp"
+
 
 class LQRController : public rclcpp::Node
 {
@@ -38,8 +40,8 @@ qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's
         load_angle_subscriber_ = this->create_subscription<angle_stamped_msg::msg::AngleStamped>(
             "/load_angle", 10, std::bind(&LQRController::on_load_angle_received, this, std::placeholders::_1));
         drone_velocity_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
-            "/mavros/local_position/velocity_body", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
-        attitude_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/setpoint_attitude/attitude", 20);
+            "/mavros/local_position/velocity_local", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
+        attitude_publisher_ = this->create_publisher<mavros_msgs::msg::AttitudeTarget>("/mavros/setpoint_raw/attitude", 20);
         drone_state_subscriber_ = this->create_subscription<mavros_msgs::msg::State>(
             "/mavros/state", qos2, std::bind(&LQRController::on_drone_state_received, this, std::placeholders::_1));
 
@@ -106,25 +108,31 @@ private:
 
     void create_state_vector(){
 
-        tf2::Matrix3x3 rotation_matrix(tf2::Quaternion(
+        if (!drone_pose_ || !load_imu_ || !load_angle_ || !drone_velocity_) {
+        RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
+        return;
+    }
+
+       /* tf2::Matrix3x3 rotation_matrix(tf2::Quaternion(
         drone_pose_->pose.orientation.x,
         drone_pose_->pose.orientation.y,
         drone_pose_->pose.orientation.z,
         drone_pose_->pose.orientation.w
         ));
-        tf2::Vector3 position_world(drone_pose_->pose.position.x, drone_pose_->pose.position.y, 0);
-        tf2::Vector3 velocity_world(drone_velocity_->twist.linear.x, drone_velocity_->twist.linear.y, 0);
+        */
+        //tf2::Vector3 position_world(drone_pose_->pose.position.x, drone_pose_->pose.position.y, 0);
+        //tf2::Vector3 velocity_world(drone_velocity_->twist.linear.x, drone_velocity_->twist.linear.y, 0);
 
-        tf2::Vector3 position_drone = rotation_matrix.inverse() * position_world;
-        tf2::Vector3 velocity_drone = rotation_matrix.inverse() * velocity_world;
+        //::Vector3 position_drone = rotation_matrix.inverse() * position_world;
+        //tf2::Vector3 velocity_drone = rotation_matrix.inverse() * velocity_world;
 
-        state_x(0) = position_drone.x();
-        state_x(1) = velocity_drone.x();
+        state_x(0) = drone_pose_->pose.position.x;
+        state_x(1) = drone_velocity_->twist.linear.x;
         state_x(2)= load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
-        state_y(0) = position_drone.y();
-        state_y(1) = velocity_drone.y();
+        state_y(0) = drone_pose_->pose.position.y;
+        state_y(1) = drone_velocity_->twist.linear.x;
         state_y(2)= load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
 
@@ -138,18 +146,20 @@ private:
         double acceleration_x = control_input_x/system_mass;
         double acceleration_y = control_input_y/system_mass;
 
-        roll = acos((g)/(2*acceleration_y)); // roll is around axis x
-        pitch = acos((g)/(2*acceleration_x)); // pitch is around axis y
+        //roll = acos((g)/(2*acceleration_y)); // roll is around axis x
+        //pitch = acos((g)/(2*acceleration_x)); // pitch is around axis y
+        roll = -acceleration_x/g;
+        pitch = -acceleration_y/g;
 
         RCLCPP_WARN(this->get_logger(),"DEBUG: roll: %.2f, pitch: %.2f",roll,pitch);
     }
 
     void control(){
         RCLCPP_INFO(this->get_logger(), "control method called");
-        if (!offboard_mode_) {
+  /*     if (!offboard_mode_) {
             RCLCPP_INFO(this->get_logger(), "Waiting for offboard mode...");
             return;  // Exit early if not in offboard mode
-        }
+        }*/
         create_state_vector();
         control_input_x = (-K_x_ * state_x).coeff(0,0);
         control_input_y = (-K_y_ * state_y).coeff(0,0);
@@ -160,18 +170,18 @@ private:
     }
 
     void publish_control(double roll, double pitch){
-    geometry_msgs::msg::PoseStamped pose_msg;
-    pose_msg.header.stamp = this->get_clock()->now();
-    pose_msg.header.frame_id = "x500_0"; 
-    tf2::Quaternion q;
-    q.setRPY(roll, pitch, 0);  // Assuming yaw (theta_z) is 0
-    q.setRPY(0.5,0.5,0);
-    pose_msg.pose.orientation.x = q.x();
-    pose_msg.pose.orientation.y = q.y();
-    pose_msg.pose.orientation.z = q.z();
-    pose_msg.pose.orientation.w = q.w();
+    mavros_msgs::msg::AttitudeTarget attitude_msg;
+    attitude_msg.header.stamp = this->get_clock()->now();
+    attitude_msg.header.frame_id = "base_link"; // or the appropriate frame
+        tf2::Quaternion q;
+        q.setRPY(roll, pitch, 0); // Set your roll, pitch, and yaw here
+        attitude_msg.thrust = 1;
+        attitude_msg.orientation.x = q.x();
+        attitude_msg.orientation.y = q.y();
+        attitude_msg.orientation.z = q.z();
+        attitude_msg.orientation.w = q.w();
 
-    attitude_publisher_->publish(pose_msg);
+    attitude_publisher_->publish(attitude_msg);
     }
 
    void on_drone_state_received(const mavros_msgs::msg::State::SharedPtr msg)
@@ -206,7 +216,7 @@ private:
     double system_mass;
     double pitch;
     double roll;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr attitude_publisher_;
+    rclcpp::Publisher<mavros_msgs::msg::AttitudeTarget>::SharedPtr attitude_publisher_;
     Eigen::Vector3d previous_load_angular_velocity_ = Eigen::Vector3d::Zero();
     Eigen::Vector3d load_angular_acceleration_ = Eigen::Vector3d::Zero();
     rclcpp::Time last_time_ = this->get_clock()->now();  // Initialize with current time

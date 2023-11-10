@@ -48,6 +48,10 @@ private:
     QLabel* loadAngleLabel;
     QLabel* droneVelocityLabel;
     QLabel* connectionIndicator;
+    QPushButton* controllerButton;
+    QPushButton* landingButton;
+    QPushButton* turnOffboardModeOffButton;
+    QPushButton* switchOffboardModeButton;
     QtCharts::QBarSet* droneVelocitySetX;
     QtCharts::QBarSet* droneVelocitySetY;
     QtCharts::QBarSet* droneVelocitySetZ;
@@ -70,6 +74,7 @@ private:
     double load_angle_z = 0.0;
     bool isArmed = false;
     bool isConnected = false;
+    bool offboardMode = false;
 
 private slots:
     void updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);
@@ -79,17 +84,20 @@ private slots:
     void updateConnectionIndicator(bool connected);
     void checkConnectivity(bool connected);
     void onSwitchToOffboardMode();
+    void turnOffboardModeOff();
     void onSwitchToArmedMode();
+    void onTakeOffMode();
+    void onLandingMode();
     void onControllerStart();
     void handleProcessError();
     void onEnvironmentSetup();
     void handleScriptExecutionError();
+    void updateGraph();
+    void updateDataTable();
 
 
 private:
-    void updateGraph();
     void graphSetup();
-    void updateDataTable();
     void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd);
     QMenuBar* setupMenuBar();
 };

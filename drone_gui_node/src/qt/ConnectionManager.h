@@ -13,6 +13,9 @@
 #include "geometry_msgs/msg/twist_stamped.hpp"
 #include "mavros_msgs/srv/set_mode.hpp"
 #include "mavros_msgs/srv/command_bool.hpp"
+#include "mavros_msgs/srv/command_tol.hpp"
+#include "mavros_msgs/msg/state.hpp"
+
 
 class ConnectionManager : public QObject
 {
@@ -24,6 +27,9 @@ public:
     void checkForMessages();
     bool switchToOffboardMode();
     bool switchToArmedMode();
+    bool takeOffMode();
+    bool droneLanding();
+    bool switchTheOffboardModeOff();
 
 signals:
     void dronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);
@@ -47,14 +53,19 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::Imu>::ConstSharedPtr load_imu_subscriber_;
     rclcpp::Subscription<angle_stamped_msg::msg::AngleStamped>::ConstSharedPtr load_angle_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::ConstSharedPtr drone_velocity_subscriber_;
+    mavros_msgs::msg::State current_state_;
+    rclcpp::Subscription<mavros_msgs::msg::State>::ConstSharedPtr state_subscriber_;
     rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_mode_client_;
     rclcpp::Client<mavros_msgs::srv::CommandBool>::SharedPtr set_armed_mode_client_;
+    rclcpp::Client<mavros_msgs::srv::CommandTOL>::SharedPtr set_takeoff_mode_client_;
+    rclcpp::Client<mavros_msgs::srv::CommandTOL>::SharedPtr set_landing_mode_client_;
 
 
     void onDronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr msg);
     void onLoadImuReceived(const sensor_msgs::msg::Imu::ConstSharedPtr msg);
     void onLoadAngleReceived(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr msg);
     void onDroneVelocityReceived(const geometry_msgs::msg::TwistStamped::ConstSharedPtr msg);
-    void onLoadPoseReceived(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr msg);    
+    void onLoadPoseReceived(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr msg);  
+    void onStateReceived(const mavros_msgs::msg::State::ConstSharedPtr& msg);  
     
 };

@@ -19,13 +19,24 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     //right side of the app
     rightLayout = new QVBoxLayout(centralWidget);
 
-    QPushButton* switchOffboardModeButton = new QPushButton("Switch to Offboard Mode");
+    switchOffboardModeButton = new QPushButton("Switch to Offboard Mode");
     connect(switchOffboardModeButton, &QPushButton::clicked, this, &MyWindow::onSwitchToOffboardMode);
+
+    turnOffboardModeOffButton = new QPushButton("Turn the Offboard Mode off");
+    turnOffboardModeOffButton->setDisabled(true);
+    connect(turnOffboardModeOffButton, &QPushButton::clicked, this, &MyWindow::turnOffboardModeOff);
 
     QPushButton* armButton = new QPushButton("Arm");
     connect(armButton, &QPushButton::clicked, this, &MyWindow::onSwitchToArmedMode);
 
-    QPushButton* controllerButton = new QPushButton("Controller");
+    QPushButton* takeoffButton = new QPushButton("Takeoff");
+    connect(takeoffButton, &QPushButton::clicked, this, &MyWindow::onTakeOffMode);
+
+    landingButton = new QPushButton("Land");
+    connect(landingButton, &QPushButton::clicked, this, &MyWindow::onLandingMode);
+
+    controllerButton = new QPushButton("Controller");
+    controllerButton->setDisabled(true);
     connect(controllerButton,&QPushButton::clicked, this,&MyWindow::onControllerStart);
 
     QPushButton* environmentSetupButton = new QPushButton("setup the environment");
@@ -33,8 +44,12 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
 
     rightLayout->addWidget(environmentSetupButton);
     rightLayout->addWidget(armButton);
+    rightLayout->addWidget(takeoffButton);
     rightLayout->addWidget(switchOffboardModeButton);
+    rightLayout->addWidget(turnOffboardModeOffButton);
     rightLayout->addWidget(controllerButton);
+    rightLayout->addWidget(landingButton);
+
 
     //data visualization
     dronePoseLabel = new QLabel(centralWidget);
@@ -169,7 +184,7 @@ void MyWindow::graphSetup(){
     
     QtCharts::QChart* loadChart = new QtCharts::QChart();
     loadChart->addSeries(loadSeries);
-    setupAxis(loadChart, loadSeries, "Angular Velocity (rad/s)",-4,4);
+    setupAxis(loadChart, loadSeries, "Angular Velocity (rad/s)",-3,3);
     
     loadAngularVelocityGraph = new QtCharts::QChartView(loadChart);
     loadAngularVelocityGraph->setRenderHint(QPainter::Antialiasing);
@@ -203,6 +218,9 @@ void MyWindow::onSwitchToOffboardMode()
     if(isArmed){
     if (connectionManager->switchToOffboardMode())
     {
+        controllerButton->setDisabled(false);
+        switchOffboardModeButton->setDisabled(true);
+        turnOffboardModeOffButton->setDisabled(false);
         qDebug() << "Successfully switched to offboard mode";
     }
     else
@@ -218,20 +236,31 @@ void MyWindow::onSwitchToOffboardMode()
     }
 }
 
+void MyWindow::turnOffboardModeOff(){
+    if (connectionManager->switchTheOffboardModeOff())
+    {
+        controllerButton->setDisabled(true);
+        switchOffboardModeButton->setDisabled(false);
+        turnOffboardModeOffButton->setDisabled(true);
+        qDebug() << "Successfully switched off the offboard mode";
+    }
+    else
+    {
+        qDebug() << "Failed to switch off the offboard mode";
+    }
+}
+
 void MyWindow::onSwitchToArmedMode()
 {
     if (connectionManager->switchToArmedMode())
     {
         isArmed = true;
+        landingButton->setDisabled(false);
         qDebug() << "Successfully switched to armed mode";
     }
     else
     {
         qDebug() << "Failed to switch to armed mode";
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Armed mode issue");
-        msgBox.setText("something went wrong while arming");
-        msgBox.exec();
     }
 }
 
@@ -277,10 +306,35 @@ void MyWindow::onEnvironmentSetup(){
     connect(process, &QProcess::errorOccurred, this, &MyWindow::handleScriptExecutionError);
 }
 
-//TODO fix this, because when I press controller button it do not show the messageBox
+
 void MyWindow::handleScriptExecutionError(){
     QMessageBox msgBox;
     msgBox.setWindowTitle("Environment setup issue");
     msgBox.setText("script could not be executed");
     msgBox.exec();
+}
+
+void MyWindow::onTakeOffMode(){
+    if (connectionManager->takeOffMode())
+    {
+        isArmed = true;
+        qDebug() << "Successfully switched to takeoff mode";
+    }
+    else
+    {
+        qDebug() << "Failed to switch to takeoff mode";
+    }   
+}
+
+void MyWindow::onLandingMode(){
+    if (connectionManager->droneLanding())
+    {
+        controllerButton->setDisabled(true);
+        landingButton->setDisabled(true);
+        qDebug() << "Successfully switched to landing mode";
+    }
+    else
+    {
+        qDebug() << "Failed to switch to landing mode";
+    } 
 }
