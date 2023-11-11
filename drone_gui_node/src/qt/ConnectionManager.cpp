@@ -37,8 +37,10 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
 ConnectionManager::~ConnectionManager(){
     delete check_timer_;
     }
+
 void ConnectionManager::onStateReceived(const mavros_msgs::msg::State::ConstSharedPtr& msg) {
-    current_state_ = *msg;
+    std::string mode = msg->mode;
+    emit stateReceived(mode);
 }
 
 void ConnectionManager::onLoadPoseReceived(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr msg)
@@ -227,67 +229,5 @@ bool ConnectionManager::switchTheOffboardModeOff() {
         RCLCPP_ERROR(node_->get_logger(), "Set mode request was sent but not executed by the drone");
         return false;
     }
-
-    // Wait for 5 seconds to confirm the offboard mode is disabled
-    rclcpp::Time start_time = node_->get_clock()->now();
-    rclcpp::Duration timeout = rclcpp::Duration::from_seconds(5);
-    while (rclcpp::ok() && (node_->get_clock()->now() - start_time) < timeout) {
-        rclcpp::spin_some(node_);
-        if (current_state_.mode == "AUTO.LOITER") {
-            RCLCPP_INFO(node_->get_logger(), "Confirmed offboard mode is disabled");
-            return true;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // sleep to avoid busy-wait
-    }
-
-    RCLCPP_ERROR(node_->get_logger(), "Failed to switch off offboard mode after 5 seconds");
-    return false;
-}
-
-/*
-bool ConnectionManager::switchTheOffboardModeOff() {
-    
-    if (!set_mode_client_->wait_for_service(std::chrono::seconds(1))) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Offboard mode issue");
-        msgBox.setText("Service \"/mavros/set_mode\" is not available");
-        msgBox.exec();
-        return false;
-    }
-    
-    auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
-    request->custom_mode = "HOLD";
-    auto set_mode_future = set_mode_client_->async_send_request(request);
-
-    if (rclcpp::spin_until_future_complete(node_, set_mode_future) == 
-        rclcpp::FutureReturnCode::SUCCESS)
-        {
-        if (!set_mode_future.get()->mode_sent) {
-            RCLCPP_ERROR(node_->get_logger(), "Set mode request was sent but not executed by the drone");
-            return false;
-        }
-
-        rclcpp::Time start_time = node_->get_clock()->now();
-        while ((node_->get_clock()->now() - start_time).seconds() < 5.0) {
-            rclcpp::spin_some(node_);
-            if (current_state_.mode == "HOLD") {
-                RCLCPP_INFO(node_->get_logger(), "Confirmed offboard mode is disabled");
-                return true;
-            }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        }
-
-        RCLCPP_ERROR(node_->get_logger(), "Failed to switch off offboard mode after 5 seconds");
-        return false;
-    }
-     else {
-        RCLCPP_ERROR(node_->get_logger(), "Failed to call service /mavros/set_mode");
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Offboard mode issue");
-        msgBox.setText("Service \"/mavros/set_mode\" is not available");
-        msgBox.exec();
-        return false;
-    }
     return true;
 }
-*/

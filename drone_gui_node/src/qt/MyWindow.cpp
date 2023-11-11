@@ -6,6 +6,7 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     QWidget* centralWidget = new QWidget(this);
     QHBoxLayout* mainLayout = new QHBoxLayout(centralWidget);
     connectionIndicator = new QLabel(centralWidget);
+    stateIndicator = new QLabel(centralWidget);
 
     DroneVisualWidget *droneVisual = new DroneVisualWidget(node,connectionManager,this);
 
@@ -39,7 +40,7 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     controllerButton->setDisabled(true);
     connect(controllerButton,&QPushButton::clicked, this,&MyWindow::onControllerStart);
 
-    QPushButton* environmentSetupButton = new QPushButton("setup the environment");
+    environmentSetupButton = new QPushButton("setup the environment");
     connect(environmentSetupButton,&QPushButton::clicked, this,&MyWindow::onEnvironmentSetup);
 
     rightLayout->addWidget(environmentSetupButton);
@@ -74,7 +75,7 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     connect(connectionManager, &ConnectionManager::loadAngleReceived, this, &MyWindow::updateLoadAngle);
     connect(connectionManager, &ConnectionManager::droneVelocityReceived, this, &MyWindow::updateDroneVelocity);
     connect(connectionManager, &ConnectionManager::connectionStatusChanged, this, &MyWindow::updateConnectionIndicator);
-    connect(connectionManager, &ConnectionManager::connectionStatusChanged, this, &MyWindow::checkConnectivity);
+    connect(connectionManager, &ConnectionManager::stateReceived, this, &MyWindow::updateStateIndicator);
 
    //spinning node to update data every 1 sec
     timer1 = new QTimer(this);
@@ -211,7 +212,17 @@ void MyWindow::updateConnectionIndicator(bool connected) {
     QString color = connected ? "green" : "red";
     connectionIndicator->setStyleSheet("background-color: " + color + "; color: white");
     connectionIndicator->setText(connected ? "Connected" : "Disconnected");
+    isConnected = connected;
+    buttonManager();
 }
+
+void MyWindow::updateStateIndicator(std::string mode) {
+    QString qmode = QString::fromStdString(mode);
+    QString color = isConnected ? "green" : "red";
+    stateIndicator->setStyleSheet("background-color: " + color + "; color: white");
+    stateIndicator->setText(qmode);
+}
+
 
 void MyWindow::onSwitchToOffboardMode()
 {
@@ -268,25 +279,40 @@ void MyWindow::onSwitchToArmedMode()
 QMenuBar* MyWindow::setupMenuBar()
 {
     QMenuBar* menuBar = new QMenuBar(this);
-    QWidget* rightSpacer = new QWidget(menuBar);
-    rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    QHBoxLayout* cornerLayout = new QHBoxLayout(rightSpacer);
+    //QWidget* rightSpacer = new QWidget(menuBar);
+    //rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    //QHBoxLayout* cornerLayout = new QHBoxLayout(rightSpacer);
+    stateIndicator->setAutoFillBackground(true);
+    stateIndicator->setMinimumSize(150, 30);
+    stateIndicator->setStyleSheet("background-color: gray; color: white;");
+    stateIndicator->setText("unknown");
+    stateIndicator->setAlignment(Qt::AlignCenter);
+
     connectionIndicator->setAutoFillBackground(true);
     connectionIndicator->setMinimumSize(120, 30);
     connectionIndicator->setStyleSheet("background-color: gray; color: white;");
     connectionIndicator->setText("unknown");
     connectionIndicator->setAlignment(Qt::AlignCenter);
-    cornerLayout->addWidget(connectionIndicator);
-    rightSpacer->setLayout(cornerLayout);
+
+    QWidget* rightSpacer = new QWidget(menuBar);
+    rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QHBoxLayout* rightLayout = new QHBoxLayout(rightSpacer);
+    rightLayout->addWidget(connectionIndicator);
+    rightSpacer->setLayout(rightLayout);
     menuBar->setCornerWidget(rightSpacer, Qt::TopRightCorner);
+
+    // Layout for the left side
+    QWidget* leftSpacer = new QWidget(menuBar);
+    leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    QHBoxLayout* leftLayout = new QHBoxLayout(leftSpacer);
+    leftLayout->addWidget(stateIndicator);
+    leftSpacer->setLayout(leftLayout);
+    menuBar->setCornerWidget(leftSpacer, Qt::TopLeftCorner);
+
+    return menuBar;
 
     return menuBar;
 }
-void MyWindow::checkConnectivity(bool connected){
-    isConnected = connected;
-    buttonManager();
-}
-
 void MyWindow::onControllerStart(){
     QProcess *process = new QProcess(this);
     QStringList arguments;
@@ -329,6 +355,7 @@ void MyWindow::onTakeOffMode(){
     {
         isArmed = true;
         switchOffboardModeButton->setDisabled(false);
+        landingButton->setDisabled(false);
         qDebug() << "Successfully switched to takeoff mode";
     }
     else
@@ -342,6 +369,7 @@ void MyWindow::onLandingMode(){
     {
         controllerButton->setDisabled(true);
         landingButton->setDisabled(true);
+        armButton->setDisabled(false);
         qDebug() << "Successfully switched to landing mode";
     }
     else
@@ -351,11 +379,16 @@ void MyWindow::onLandingMode(){
 }
 void MyWindow::buttonManager(){
     if(!isConnected){
+        environmentSetupButton->setDisabled(false);
         controllerButton->setDisabled(true);
         switchOffboardModeButton->setDisabled(true);
         turnOffboardModeOffButton->setDisabled(true);
         landingButton->setDisabled(true);
         takeoffButton->setDisabled(true);
         armButton->setDisabled(true);
+    }
+    else{
+        armButton->setDisabled(false);
+        environmentSetupButton->setDisabled(true);
     }
 }

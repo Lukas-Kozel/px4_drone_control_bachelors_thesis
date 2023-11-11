@@ -36,6 +36,7 @@ signals:
     void loadPoseReceived(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr& msg);
     void loadImuReceived(const sensor_msgs::msg::Imu::ConstSharedPtr& msg);
     void loadAngleReceived(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg);
+    void stateReceived(std::string mode);
     void droneVelocityReceived(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
     void connectionStatusChanged(bool connected);
 

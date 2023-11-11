@@ -48,12 +48,14 @@ private:
     QLabel* loadAngleLabel;
     QLabel* droneVelocityLabel;
     QLabel* connectionIndicator;
+    QLabel* stateIndicator;
     QPushButton* controllerButton;
     QPushButton* landingButton;
     QPushButton* armButton;
     QPushButton* takeoffButton;
     QPushButton* turnOffboardModeOffButton;
     QPushButton* switchOffboardModeButton;
+    QPushButton* environmentSetupButton;
     QtCharts::QBarSet* droneVelocitySetX;
     QtCharts::QBarSet* droneVelocitySetY;
     QtCharts::QBarSet* droneVelocitySetZ;
@@ -84,7 +86,7 @@ private slots:
     void updateLoadAngle(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg);
     void updateDroneVelocity(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
     void updateConnectionIndicator(bool connected);
-    void checkConnectivity(bool connected);
+    void updateStateIndicator(std::string mode);
     void onSwitchToOffboardMode();
     void turnOffboardModeOff();
     void onSwitchToArmedMode();
