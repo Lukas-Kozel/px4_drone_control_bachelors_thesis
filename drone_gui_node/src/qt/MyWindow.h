@@ -50,6 +50,8 @@ private:
     QLabel* connectionIndicator;
     QPushButton* controllerButton;
     QPushButton* landingButton;
+    QPushButton* armButton;
+    QPushButton* takeoffButton;
     QPushButton* turnOffboardModeOffButton;
     QPushButton* switchOffboardModeButton;
     QtCharts::QBarSet* droneVelocitySetX;
@@ -94,6 +96,8 @@ private slots:
     void handleScriptExecutionError();
     void updateGraph();
     void updateDataTable();
+    void buttonManager();
+    void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 
 private:

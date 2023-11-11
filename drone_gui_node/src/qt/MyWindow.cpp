@@ -26,10 +26,10 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     turnOffboardModeOffButton->setDisabled(true);
     connect(turnOffboardModeOffButton, &QPushButton::clicked, this, &MyWindow::turnOffboardModeOff);
 
-    QPushButton* armButton = new QPushButton("Arm");
+    armButton = new QPushButton("Arm");
     connect(armButton, &QPushButton::clicked, this, &MyWindow::onSwitchToArmedMode);
 
-    QPushButton* takeoffButton = new QPushButton("Takeoff");
+    takeoffButton = new QPushButton("Takeoff");
     connect(takeoffButton, &QPushButton::clicked, this, &MyWindow::onTakeOffMode);
 
     landingButton = new QPushButton("Land");
@@ -256,6 +256,7 @@ void MyWindow::onSwitchToArmedMode()
     {
         isArmed = true;
         landingButton->setDisabled(false);
+        takeoffButton->setDisabled(false);
         qDebug() << "Successfully switched to armed mode";
     }
     else
@@ -283,6 +284,7 @@ QMenuBar* MyWindow::setupMenuBar()
 }
 void MyWindow::checkConnectivity(bool connected){
     isConnected = connected;
+    buttonManager();
 }
 
 void MyWindow::onControllerStart(){
@@ -304,6 +306,14 @@ void MyWindow::onEnvironmentSetup(){
     process->setWorkingDirectory("/home/luky/mavros_ros2_ws/src/scripts");
     process->start("/bin/bash",QStringList() << "./setup_ws.sh");
     connect(process, &QProcess::errorOccurred, this, &MyWindow::handleScriptExecutionError);
+    connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &MyWindow::onProcessFinished); //QProcess::finished has 2 overloads. The correct one needs to be specified
+
+}
+void MyWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus){
+    qDebug() << exitCode << " + " << exitStatus;
+    if(exitCode ==0 && exitStatus == QProcess::NormalExit){
+        armButton->setDisabled(false);
+    }
 }
 
 
@@ -318,6 +328,7 @@ void MyWindow::onTakeOffMode(){
     if (connectionManager->takeOffMode())
     {
         isArmed = true;
+        switchOffboardModeButton->setDisabled(false);
         qDebug() << "Successfully switched to takeoff mode";
     }
     else
@@ -337,4 +348,14 @@ void MyWindow::onLandingMode(){
     {
         qDebug() << "Failed to switch to landing mode";
     } 
+}
+void MyWindow::buttonManager(){
+    if(!isConnected){
+        controllerButton->setDisabled(true);
+        switchOffboardModeButton->setDisabled(true);
+        turnOffboardModeOffButton->setDisabled(true);
+        landingButton->setDisabled(true);
+        takeoffButton->setDisabled(true);
+        armButton->setDisabled(true);
+    }
 }
