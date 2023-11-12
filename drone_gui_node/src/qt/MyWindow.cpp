@@ -40,10 +40,14 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     controllerButton->setDisabled(true);
     connect(controllerButton,&QPushButton::clicked, this,&MyWindow::onControllerStart);
 
+    QPushButton* restartSimulationButton = new QPushButton("restart simulation");
+    connect(restartSimulationButton,&QPushButton::clicked, this,&MyWindow::onRestartSimulation);
+
     environmentSetupButton = new QPushButton("setup the environment");
     connect(environmentSetupButton,&QPushButton::clicked, this,&MyWindow::onEnvironmentSetup);
 
     rightLayout->addWidget(environmentSetupButton);
+    rightLayout->addWidget(restartSimulationButton);
     rightLayout->addWidget(armButton);
     rightLayout->addWidget(takeoffButton);
     rightLayout->addWidget(switchOffboardModeButton);
@@ -329,8 +333,10 @@ void MyWindow::handleProcessError(){
 
 void MyWindow::onEnvironmentSetup(){
     QProcess *process = new QProcess(this);
-    process->setWorkingDirectory("/home/luky/mavros_ros2_ws/src/scripts");
-    process->start("/bin/bash",QStringList() << "./setup_ws.sh");
+    QString scriptPath = ("/home/luky/mavros_ros2_ws/src/scripts/test.sh");
+    QStringList arguments;
+    arguments << "--" << "bash" << "-c" << scriptPath;
+    process->start("gnome-terminal", arguments);
     connect(process, &QProcess::errorOccurred, this, &MyWindow::handleScriptExecutionError);
     connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &MyWindow::onProcessFinished); //QProcess::finished has 2 overloads. The correct one needs to be specified
 
@@ -391,4 +397,18 @@ void MyWindow::buttonManager(){
         armButton->setDisabled(false);
         environmentSetupButton->setDisabled(true);
     }
+}
+
+void MyWindow::onRestartSimulation(){
+    QProcess *process = new QProcess(this);
+    QString scriptPath = "/home/luky/mavros_ros2_ws/src/scripts/restartSimulation.sh";
+    process->start("/bin/bash", QStringList() << scriptPath);
+}
+
+void MyWindow::closeEvent(QCloseEvent *event) {
+    QProcess *process = new QProcess(this);
+    QString scriptPath = "/home/luky/mavros_ros2_ws/src/scripts/clean_up_script.sh";
+    process->start("/bin/bash", QStringList() << scriptPath);
+    process->waitForFinished(-1);
+    QMainWindow::closeEvent(event);
 }

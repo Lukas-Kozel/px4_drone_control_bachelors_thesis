@@ -27,6 +27,8 @@
 #include <QMessageLogger>
 #include <QMenu>
 #include <rclcpp/rclcpp.hpp>
+#include <QFile>
+#include <QTextStream>
 #include "ConnectionManager.h"
 #include "DroneVisualWidget.h"
 
@@ -100,12 +102,16 @@ private slots:
     void updateDataTable();
     void buttonManager();
     void onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void onRestartSimulation();
 
 
 private:
     void graphSetup();
     void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd);
     QMenuBar* setupMenuBar();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif
