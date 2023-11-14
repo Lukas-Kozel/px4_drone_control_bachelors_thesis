@@ -74,8 +74,6 @@ ros2 run gazebo_ros2_bridge bridge_node &
 pids+=($!)
 ros2 run angle_calculator angle_calculator_node &
 pids+=($!)
-ros2 run move_forward move_forward_node &
-pids+=($!)
 
 find_px4_pids
 for pid in "${pids[@]}"; do

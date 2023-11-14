@@ -10,14 +10,12 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
 
     DroneVisualWidget *droneVisual = new DroneVisualWidget(node,connectionManager,this);
 
-    //left side of the app
     QVBoxLayout* leftLayout = new QVBoxLayout(centralWidget);
     QSplitter* leftSplitter = new QSplitter(Qt::Vertical);
     leftSplitter->addWidget(droneVisual);
     leftLayout->addWidget(leftSplitter);
     mainLayout->addLayout(leftLayout, 1);
 
-    //right side of the app
     rightLayout = new QVBoxLayout(centralWidget);
 
     switchOffboardModeButton = new QPushButton("Switch to Offboard Mode");
@@ -56,7 +54,6 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     rightLayout->addWidget(landingButton);
 
 
-    //data visualization
     dronePoseLabel = new QLabel(centralWidget);
     loadImuLabel = new QLabel(centralWidget);
     loadAngleLabel = new QLabel(centralWidget);
@@ -177,6 +174,7 @@ void MyWindow::graphSetup(){
     loadAngularVelocitySetX = new QtCharts::QBarSet("load's angular velocity x");
     loadAngularVelocitySetY = new QtCharts::QBarSet("load's angular velocity y");
     loadAngularVelocitySetZ = new QtCharts::QBarSet("load's angular velocity z");
+
     //init with some default value
     *loadAngularVelocitySetX << 1;
     *loadAngularVelocitySetY << 1;
@@ -217,6 +215,7 @@ void MyWindow::updateConnectionIndicator(bool connected) {
     connectionIndicator->setStyleSheet("background-color: " + color + "; color: white");
     connectionIndicator->setText(connected ? "Connected" : "Disconnected");
     isConnected = connected;
+    if(!connected) updateStateIndicator("unknown");
     buttonManager();
 }
 
@@ -233,7 +232,7 @@ void MyWindow::onSwitchToOffboardMode()
     if(isArmed){
     if (connectionManager->switchToOffboardMode())
     {
-        controllerButton->setDisabled(false);
+        controllerButton->setDisabled(true);
         switchOffboardModeButton->setDisabled(true);
         turnOffboardModeOffButton->setDisabled(false);
         qDebug() << "Successfully switched to offboard mode";
@@ -254,7 +253,7 @@ void MyWindow::onSwitchToOffboardMode()
 void MyWindow::turnOffboardModeOff(){
     if (connectionManager->switchTheOffboardModeOff())
     {
-        controllerButton->setDisabled(true);
+        turnOffTheController();
         switchOffboardModeButton->setDisabled(false);
         turnOffboardModeOffButton->setDisabled(true);
         qDebug() << "Successfully switched off the offboard mode";
@@ -270,6 +269,7 @@ void MyWindow::onSwitchToArmedMode()
     if (connectionManager->switchToArmedMode())
     {
         isArmed = true;
+        controllerButton->setDisabled(false);
         landingButton->setDisabled(false);
         takeoffButton->setDisabled(false);
         qDebug() << "Successfully switched to armed mode";
@@ -283,9 +283,6 @@ void MyWindow::onSwitchToArmedMode()
 QMenuBar* MyWindow::setupMenuBar()
 {
     QMenuBar* menuBar = new QMenuBar(this);
-    //QWidget* rightSpacer = new QWidget(menuBar);
-    //rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    //QHBoxLayout* cornerLayout = new QHBoxLayout(rightSpacer);
     stateIndicator->setAutoFillBackground(true);
     stateIndicator->setMinimumSize(150, 30);
     stateIndicator->setStyleSheet("background-color: gray; color: white;");
@@ -314,15 +311,41 @@ QMenuBar* MyWindow::setupMenuBar()
     menuBar->setCornerWidget(leftSpacer, Qt::TopLeftCorner);
 
     return menuBar;
-
-    return menuBar;
 }
+
 void MyWindow::onControllerStart(){
     QProcess *process = new QProcess(this);
     QStringList arguments;
     process->start("ros2", arguments << "run" << "lqr_controller" << "lqr_controller_node");
     connect(process, &QProcess::errorOccurred, this, &MyWindow::handleProcessError);
 }
+
+void MyWindow::turnOffTheController() {
+    QProcess process;
+    process.start("bash", QStringList() << "-c" << "ps aux | grep lqr_controller | grep -v grep | awk '{print $2}'");
+
+    if (!process.waitForFinished()) {
+        qDebug() << "Failed to execute command";
+        return;
+    }
+
+    QString output = process.readAllStandardOutput().trimmed();
+    qDebug() << "Process IDs to kill:" << output;
+
+    QStringList pids = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+
+    for (const QString& pid : pids) {
+        bool ok;
+        int pidNum = pid.toInt(&ok);
+        if (ok) {
+            qDebug() << "Killing PID:" << pidNum;
+            QProcess::execute("kill", QStringList() << QString::number(pidNum));
+        } else {
+            qDebug() << "Invalid PID:" << pid;
+        }
+    }
+}
+
 
 void MyWindow::handleProcessError(){
     QMessageBox msgBox;
@@ -362,6 +385,7 @@ void MyWindow::onTakeOffMode(){
         isArmed = true;
         switchOffboardModeButton->setDisabled(false);
         landingButton->setDisabled(false);
+        controllerButton->setDisabled(false);
         qDebug() << "Successfully switched to takeoff mode";
     }
     else

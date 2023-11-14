@@ -107,6 +107,7 @@ private slots:
 
 private:
     void graphSetup();
+    void turnOffTheController();
     void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd);
     QMenuBar* setupMenuBar();
 

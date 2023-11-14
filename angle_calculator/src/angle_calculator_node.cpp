@@ -55,21 +55,6 @@ private:
         double x = load_pose_->pose.position.x;
         double y = load_pose_->pose.position.y;
         double z = load_pose_->pose.position.z;
-
-    //    tf2::Quaternion q(
-    //        drone_pose_->orientation.x,
-    //        drone_pose_->orientation.y,
-    //        drone_pose_->orientation.z,
-    //        drone_pose_->orientation.w
-    //   );
-
-     //   tf2::Matrix3x3 m(q);
-    //    double roll, pitch, yaw;
-     //   m.getRPY(roll, pitch, yaw);
-
-     //   double adjusted_x = x * cos(pitch) + z * sin(pitch);
-     //   double adjusted_y = y * cos(roll) - z * sin(roll);
-    //    double adjusted_z = -x * sin(pitch) + z * cos(pitch);
         double projection_xy_magnitude = std::sqrt(x * x + y * y);
 
         if(projection_xy_magnitude == 0) {
