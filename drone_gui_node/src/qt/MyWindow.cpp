@@ -14,7 +14,7 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     QSplitter* leftSplitter = new QSplitter(Qt::Vertical);
     leftSplitter->addWidget(droneVisual);
     leftLayout->addWidget(leftSplitter);
-    mainLayout->addLayout(leftLayout, 1);
+    mainLayout->addLayout(leftLayout, 6);
 
     rightLayout = new QVBoxLayout(centralWidget);
 
@@ -44,27 +44,47 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     environmentSetupButton = new QPushButton("setup the environment");
     connect(environmentSetupButton,&QPushButton::clicked, this,&MyWindow::onEnvironmentSetup);
 
-    rightLayout->addWidget(environmentSetupButton);
-    rightLayout->addWidget(restartSimulationButton);
-    rightLayout->addWidget(armButton);
-    rightLayout->addWidget(takeoffButton);
-    rightLayout->addWidget(switchOffboardModeButton);
-    rightLayout->addWidget(turnOffboardModeOffButton);
-    rightLayout->addWidget(controllerButton);
-    rightLayout->addWidget(landingButton);
+    QGridLayout* gridLayout = new QGridLayout(centralWidget);
 
+    int buttonWidth = 250;
+    int buttonHeight = 30;
+
+    switchOffboardModeButton->setFixedSize(buttonWidth, buttonHeight);
+    turnOffboardModeOffButton->setFixedSize(buttonWidth, buttonHeight);
+    armButton->setFixedSize(buttonWidth, buttonHeight);
+    takeoffButton->setFixedSize(buttonWidth, buttonHeight);
+    landingButton->setFixedSize(buttonWidth, buttonHeight);
+    controllerButton->setFixedSize(buttonWidth, buttonHeight);
+    restartSimulationButton->setFixedSize(buttonWidth, buttonHeight);
+    environmentSetupButton->setFixedSize(buttonWidth, buttonHeight);
+
+    gridLayout->addWidget(restartSimulationButton, 1, 0);
+    gridLayout->addWidget(environmentSetupButton, 0, 0);
+    gridLayout->addWidget(armButton, 2, 0);
+    gridLayout->addWidget(takeoffButton, 3, 0);
+
+    gridLayout->addWidget(switchOffboardModeButton, 0, 1);
+    gridLayout->addWidget(turnOffboardModeOffButton, 1,1);
+    gridLayout->addWidget(controllerButton, 2, 1);
+    gridLayout->addWidget(landingButton, 3, 1);
+
+    rightLayout->addLayout(gridLayout);
 
     dronePoseLabel = new QLabel(centralWidget);
     loadImuLabel = new QLabel(centralWidget);
     loadAngleLabel = new QLabel(centralWidget);
     droneVelocityLabel = new QLabel(centralWidget);
-    rightLayout->addWidget(dronePoseLabel);
-    rightLayout->addWidget(loadImuLabel);
-    rightLayout->addWidget(loadAngleLabel);
-    rightLayout->addWidget(droneVelocityLabel);
+    QGridLayout* labels = new QGridLayout(centralWidget);
+    labels->addWidget(dronePoseLabel, 0, 0);
+    labels->addWidget(loadImuLabel, 0, 1); 
+    labels->addWidget(droneVelocityLabel, 1, 0);
+    labels->addWidget(loadAngleLabel, 1, 1);
+    rightLayout->addLayout(labels);
+
+
 
     graphSetup();
-    mainLayout->addLayout(rightLayout, 1);
+    mainLayout->addLayout(rightLayout, 4);
 
     QMenuBar* menuBar = setupMenuBar();
     setMenuBar(menuBar);
@@ -110,9 +130,10 @@ void MyWindow::updateLoadImu(const sensor_msgs::msg::Imu::ConstSharedPtr& msg)
 
 void MyWindow::updateLoadAngle(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg)
 {
-    load_angle_x = msg->angle.angle_x;
     load_angle_y = msg->angle.angle_y;
     load_angle_z = msg->angle.angle_z;
+    load_angle_x = msg->angle.angle_x;
+
 }
 
 void MyWindow::updateDroneVelocity(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg)
@@ -133,14 +154,22 @@ void MyWindow::updateGraph() {
 
 void MyWindow::updateDataTable(){
     if(isConnected){
-    std::string position = "Drone position: (" + std::to_string(drone_pose_x) + ", " + std::to_string(drone_pose_y) + ", " + std::to_string(drone_pose_z) + ")";
-    dronePoseLabel->setText(QString::fromStdString(position));
-    std::string imu = "Load angular velocity: (" + std::to_string(load_angular_velocity_x) + ", " + std::to_string(load_angular_velocity_y) + ", " + std::to_string(load_angular_velocity_z) + ")";
-    loadImuLabel->setText(QString::fromStdString(imu));
-    std::string load_angle = "Load angle: (" + std::to_string(load_angle_x) + ", " + std::to_string(load_angle_y) + ", " + std::to_string(load_angle_z) + ")";
-    loadAngleLabel->setText(QString::fromStdString(load_angle));
-    std::string drone_velocity = "Drone velocity: (" + std::to_string(drone_velocity_x) + ", " + std::to_string(drone_velocity_y) + ", " + std::to_string(drone_velocity_z) + ")";
-    droneVelocityLabel->setText(QString::fromStdString(drone_velocity));
+QString position;
+position.sprintf("Drone position: (%.3f, %.3f, %.3f)", drone_pose_x, drone_pose_y, drone_pose_z);
+dronePoseLabel->setText(position);
+
+QString drone_velocity;
+drone_velocity.sprintf("Drone velocity: (%.3f, %.3f, %.3f)", drone_velocity_x, drone_velocity_y, drone_velocity_z);
+droneVelocityLabel->setText(drone_velocity);
+
+QString load_angle;
+load_angle.sprintf("Load angle: (%.3f, %.3f, %.3f)", load_angle_x, load_angle_y, load_angle_z);
+loadAngleLabel->setText(load_angle);
+
+QString imu;
+imu.sprintf("Load angular velocity: (%.3f, %.3f, %.3f)", load_angular_velocity_x, load_angular_velocity_y, load_angular_velocity_z);
+loadImuLabel->setText(imu);
+
     }
     else{
     dronePoseLabel->setText("Drone position: Data unavailable");
@@ -163,7 +192,8 @@ void MyWindow::graphSetup(){
     droneSeries->append(droneVelocitySetX);
     droneSeries->append(droneVelocitySetY);
     droneSeries->append(droneVelocitySetZ);
-    
+    droneSeries->setBarWidth(0.2);
+
     QtCharts::QChart* droneChart = new QtCharts::QChart();
     droneChart->addSeries(droneSeries);
     setupAxis(droneChart, droneSeries, "Velocity (m/s)",-10,10);
@@ -184,7 +214,8 @@ void MyWindow::graphSetup(){
     loadSeries->append(loadAngularVelocitySetX);
     loadSeries->append(loadAngularVelocitySetY);
     loadSeries->append(loadAngularVelocitySetZ);
-    
+    loadSeries->setBarWidth(0.2);
+
     QtCharts::QChart* loadChart = new QtCharts::QChart();
     loadChart->addSeries(loadSeries);
     setupAxis(loadChart, loadSeries, "Angular Velocity (rad/s)",-3,3);
@@ -198,7 +229,9 @@ void MyWindow::graphSetup(){
 
 void MyWindow::setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd){
     QtCharts::QValueAxis* axisX = new QtCharts::QValueAxis;
-    axisX->setGridLineVisible(true); 
+    axisX->setGridLineVisible(true);
+    axisX->setTitleText("");
+    axisX->setLabelsVisible(false);
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
@@ -302,7 +335,6 @@ QMenuBar* MyWindow::setupMenuBar()
     rightSpacer->setLayout(rightLayout);
     menuBar->setCornerWidget(rightSpacer, Qt::TopRightCorner);
 
-    // Layout for the left side
     QWidget* leftSpacer = new QWidget(menuBar);
     leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     QHBoxLayout* leftLayout = new QHBoxLayout(leftSpacer);
@@ -330,7 +362,6 @@ void MyWindow::turnOffTheController() {
     }
 
     QString output = process.readAllStandardOutput().trimmed();
-    qDebug() << "Process IDs to kill:" << output;
 
     QStringList pids = output.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
 

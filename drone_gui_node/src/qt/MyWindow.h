@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDebug>
+#include <cmath>
 #include <QGraphicsTextItem>
 #include <QLabel>
 #include <QTimer>
@@ -42,7 +43,7 @@ public:
 
 private:
     rclcpp::Node::SharedPtr node;
-    ConnectionManager* connectionManager;
+    ConnectionManager *connectionManager;
     QTimer* timer1;
     QVBoxLayout* rightLayout;
     QLabel* dronePoseLabel;

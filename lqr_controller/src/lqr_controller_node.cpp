@@ -178,14 +178,22 @@ void update_load_angular_velocity()
         double acceleration_y = control_input_y/system_mass;
         roll = -acceleration_y/g;
         pitch = -acceleration_x/g;
-
         RCLCPP_WARN(this->get_logger(),"DEBUG: roll: %.2f, pitch: %.2f",roll,pitch);
     }
 
     void control(){
+        if (!drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
+        return;
+        }
         create_state_vector();
         control_input_x = (-K_x_ * state_x).coeff(0,0);
         control_input_y = (-K_y_ * state_y).coeff(0,0);
+        double yaw = getYawFromQuaternion(drone_pose_->pose.orientation);
+        auto rotated_inputs = rotateControlInputs(control_input_x, control_input_y, yaw);
+
+        control_input_x = rotated_inputs.first;
+        control_input_y = rotated_inputs.second;
         RCLCPP_INFO(this->get_logger(), "Control input x: %.2f",control_input_x);
         RCLCPP_INFO(this->get_logger(), "Control input y: %.2f",control_input_y);
         compute_attitude();
@@ -210,24 +218,10 @@ void publish_control(double roll, double pitch){
 
     // Make sure new_thrust is within valid range
     new_thrust = std::max(0.0, std::min(1.0, new_thrust));
- /*   tf2::Quaternion current_orientation(
-        drone_pose_->pose.orientation.x,
-        drone_pose_->pose.orientation.y,
-        drone_pose_->pose.orientation.z,
-        drone_pose_->pose.orientation.w
-    );
-    tf2::Quaternion desired_rotation;
-    roll=0;
-    desired_rotation.setRPY(roll,pitch, 0);
-    tf2::Quaternion combined_orientation = current_orientation * desired_rotation;
-    combined_orientation.normalize();
-*/
-    double yaw = getYawFromQuaternion(drone_pose_->pose.orientation);
-    auto [rotated_pitch, rotated_roll] = rotateControlInputs(yaw);
     tf2::Quaternion combined_orientation;
     roll=0;
     //rotated_pitch = 0;
-    combined_orientation.setRPY(roll,rotated_pitch, 0);
+    combined_orientation.setRPY(roll,-pitch, 0);
     combined_orientation.normalize();
     mavros_msgs::msg::AttitudeTarget attitude_msg;
     attitude_msg.header.stamp = this->get_clock()->now();
@@ -239,6 +233,16 @@ void publish_control(double roll, double pitch){
     attitude_msg.orientation.w = combined_orientation.w();
 
     attitude_publisher_->publish(attitude_msg);
+}
+std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
+    Eigen::Matrix2d rotation_matrix;
+    rotation_matrix << cos(yaw), -sin(yaw),
+                       sin(yaw),  cos(yaw);
+
+    Eigen::Vector2d inputs(input_x, input_y);
+    Eigen::Vector2d rotated_inputs = rotation_matrix * inputs;
+
+    return {rotated_inputs(0), rotated_inputs(1)};
 }
 
 double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
