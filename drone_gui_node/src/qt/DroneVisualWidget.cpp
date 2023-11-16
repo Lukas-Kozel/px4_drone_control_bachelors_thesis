@@ -71,6 +71,7 @@ void DroneVisualWidget::updateGraphs()
 {
     if (isConnected)
     {
+        if(std::abs(loadPoseX) <= 0.35 && std::abs(loadPoseY) <= 0.35 && std::abs(loadPoseZ) <= 0.35){
         loadPoseX = loadPoseX * 400;
         loadPoseZ = loadPoseZ * 400;
         loadPoseY = loadPoseY * 400;
@@ -79,6 +80,7 @@ void DroneVisualWidget::updateGraphs()
         line1->setLine(0, 5, loadPoseX, -loadPoseZ);
         load2->setPos(loadPoseY - 15, -loadPoseZ - 15);
         line2->setLine(0, 5, loadPoseY, -loadPoseZ);
+        }
     }
     else
     {
