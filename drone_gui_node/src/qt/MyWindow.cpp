@@ -10,13 +10,13 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
 
     DroneVisualWidget *droneVisual = new DroneVisualWidget(node,connectionManager,this);
 
-    QVBoxLayout* leftLayout = new QVBoxLayout(centralWidget);
+    QVBoxLayout* leftLayout = new QVBoxLayout();
     QSplitter* leftSplitter = new QSplitter(Qt::Vertical);
     leftSplitter->addWidget(droneVisual);
     leftLayout->addWidget(leftSplitter);
     mainLayout->addLayout(leftLayout, 6);
 
-    rightLayout = new QVBoxLayout(centralWidget);
+    rightLayout = new QVBoxLayout();
 
     switchOffboardModeButton = new QPushButton("Switch to Offboard Mode");
     connect(switchOffboardModeButton, &QPushButton::clicked, this, &MyWindow::onSwitchToOffboardMode);
@@ -44,7 +44,7 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     environmentSetupButton = new QPushButton("setup the environment");
     connect(environmentSetupButton,&QPushButton::clicked, this,&MyWindow::onEnvironmentSetup);
 
-    QGridLayout* gridLayout = new QGridLayout(centralWidget);
+    QGridLayout* gridLayout = new QGridLayout();
 
     int buttonWidth = 250;
     int buttonHeight = 30;
@@ -74,11 +74,11 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     loadImuLabel = new QLabel(centralWidget);
     loadAngleLabel = new QLabel(centralWidget);
     droneVelocityLabel = new QLabel(centralWidget);
-    QGridLayout* labels = new QGridLayout(centralWidget);
-    labels->addWidget(dronePoseLabel, 0, 0);
-    labels->addWidget(loadImuLabel, 0, 1); 
-    labels->addWidget(droneVelocityLabel, 1, 0);
-    labels->addWidget(loadAngleLabel, 1, 1);
+    QGridLayout* labels = new QGridLayout();
+    labels->addWidget(dronePoseLabel, 0, 0, Qt::AlignCenter);
+    labels->addWidget(loadImuLabel, 0, 1, Qt::AlignCenter); 
+    labels->addWidget(droneVelocityLabel, 1, 0, Qt::AlignCenter);
+    labels->addWidget(loadAngleLabel, 1, 1, Qt::AlignCenter);
     rightLayout->addLayout(labels);
 
 
@@ -265,7 +265,6 @@ void MyWindow::onSwitchToOffboardMode()
     if(isArmed){
     if (connectionManager->switchToOffboardMode())
     {
-        controllerButton->setDisabled(true);
         switchOffboardModeButton->setDisabled(true);
         turnOffboardModeOffButton->setDisabled(false);
         qDebug() << "Successfully switched to offboard mode";
@@ -466,4 +465,7 @@ void MyWindow::closeEvent(QCloseEvent *event) {
     process->start("/bin/bash", QStringList() << scriptPath);
     process->waitForFinished(-1);
     QMainWindow::closeEvent(event);
+    std::ofstream ofs;
+    ofs.open("/home/luky/mavros_ros2_ws/src/scripts/px4_log.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.close();   
 }

@@ -23,7 +23,6 @@ class ConnectionManager : public QObject
 
 public:
     explicit ConnectionManager(rclcpp::Node::SharedPtr node, QObject* parent = nullptr);
-    ~ConnectionManager();
     void checkForMessages();
     bool switchToOffboardMode();
     bool switchToArmedMode();

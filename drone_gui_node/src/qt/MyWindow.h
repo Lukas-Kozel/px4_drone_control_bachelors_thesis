@@ -14,6 +14,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDebug>
+#include <fstream>
 #include <cmath>
 #include <QGraphicsTextItem>
 #include <QLabel>
