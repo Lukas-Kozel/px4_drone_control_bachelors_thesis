@@ -15,7 +15,7 @@ declare -a pids
 trap kill_processes SIGINT SIGTERM
 
 # Start processes and store their PIDs
-gnome-terminal -- bash -c "cd /home/luky/px4-SITL/PX4-Autopilot; make px4_sitl gz_x500; exec bash" &
+gnome-terminal -- bash -c "cd /home/luky/PX4-Autopilot ; make px4_sitl gz_x500; exec bash" &
 pids+=($!)
 gnome-terminal -- bash -c "cd /home/luky/mavros_ros2_ws; ros2 launch mavros px4.launch fcu_url:=udp://:14540@localhost:14580; exec bash" &
 pids+=($!)

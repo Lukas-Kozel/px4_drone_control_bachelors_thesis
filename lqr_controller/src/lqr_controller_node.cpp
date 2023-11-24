@@ -50,11 +50,11 @@ qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's
 
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
-        K_x_ = (Eigen::MatrixXd(1, 4) <<  2, 3.7569, 2.7331, 1.1943 ).finished(); //2, 3.7569, 2.7331, 1.1943
-        K_y_ = (Eigen::MatrixXd(1, 4) <<  2, 3.7569, 2.7331, 1.1943 ).finished(); //2.2361, 3.9722, 2.9874, 1.6828 // 1.0, 2.7142, 1.8019, 1.2180 //5, 8.5781, 25.5878, 5.1423
+        K_x_ = (Eigen::MatrixXd(1, 4) <<  0.1,2.1449,7.3917,3.0167).finished(); //0.1,2.1449,7.3917,3.0167 4.0,5.2133,6.35,2.0023 0.2
+        K_y_ = (Eigen::MatrixXd(1, 4) <<  0.1,2.1449,7.3917,3.0167).finished(); // 0.1000 ,   1.2929 ,  10.8637 ,   3.9498
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(50),  
+            std::chrono::milliseconds(20),  
             std::bind(&LQRController::control, this)
         );
 
@@ -107,6 +107,7 @@ private:
     }
     drone_velocity_ = msg;
 }
+/*
 void update_load_angular_velocity()
 {
     if (!load_imu_ || !load_pose_) {
@@ -145,6 +146,47 @@ void update_load_angular_velocity()
     state_y(3) = local_angular_velocity.y();
     // Note: Adjust the indices as per your state vector's structure
 }
+*/
+void update_load_angular_velocity() {
+    if (!load_imu_ || !load_pose_ || !drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Load IMU, load pose, or drone pose data not available");
+        return;
+    }
+
+    // Orientation of the load with respect to the drone
+    tf2::Quaternion drone_orientation(
+        drone_pose_->pose.orientation.x,
+        drone_pose_->pose.orientation.y,
+        drone_pose_->pose.orientation.z,
+        drone_pose_->pose.orientation.w
+    );
+    
+    // Invert the drone's orientation to use for transformation
+    tf2::Quaternion drone_orientation_inv = drone_orientation.inverse();
+
+    // Convert quaternion to rotation matrix
+    tf2::Matrix3x3 rotation_matrix(drone_orientation_inv);
+
+    Eigen::Matrix3d eigen_rotation_matrix;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            eigen_rotation_matrix(i, j) = rotation_matrix[i][j];
+
+    // Obtain angular velocity from IMU data
+    Eigen::Vector3d global_angular_velocity(
+        load_imu_->angular_velocity.x,
+        load_imu_->angular_velocity.y,
+        load_imu_->angular_velocity.z
+    );
+
+    // Transform angular velocity to the drone's local frame
+    Eigen::Vector3d local_angular_velocity = eigen_rotation_matrix * global_angular_velocity;
+
+    // Update state vector or other variables as needed
+    state_x(3) = local_angular_velocity.x();
+    state_y(3) = local_angular_velocity.y();
+}
+
 
 
     void create_state_vector(){
@@ -154,16 +196,16 @@ void update_load_angular_velocity()
         return;
     }
 
-        state_x(0) = drone_pose_->pose.position.x;
+        state_x(0) = drone_pose_->pose.position.x -5 ;
         //state_x(0) = load_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
-        state_x(2)= load_angle_-> angle.angle_x;
+        state_x(2)= -load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
-        state_y(0) = drone_pose_->pose.position.y;
+        state_y(0) = drone_pose_->pose.position.y - 5;
         //state_y(0) = load_pose_->pose.position.y;
-        state_y(1) = drone_velocity_->twist.linear.x;
-        state_y(2)= load_angle_-> angle.angle_y;
+        state_y(1) = drone_velocity_->twist.linear.y;
+        state_y(2)= -load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
         update_load_angular_velocity();
 
@@ -178,7 +220,14 @@ void update_load_angular_velocity()
         double acceleration_y = control_input_y/system_mass;
         roll = -acceleration_y/g;
         pitch = -acceleration_x/g;
-        RCLCPP_WARN(this->get_logger(),"DEBUG: roll: %.2f, pitch: %.2f",roll,pitch);
+        // Saturation limits
+        double max_tilt_angle = 0.698;  // 40 degrees in radians
+
+        // Apply saturation
+        roll = std::max(std::min(roll, max_tilt_angle), -max_tilt_angle);
+        pitch = std::max(std::min(pitch, max_tilt_angle), -max_tilt_angle);
+
+        RCLCPP_WARN(this->get_logger(), "DEBUG: roll: %.2f, pitch: %.2f", roll, pitch);
     }
 
     void control(){
@@ -213,14 +262,12 @@ void publish_control(double roll, double pitch){
     double thrust_adjustment = pid.compute(altitude_error, dt);
 
     // Use thrust_adjustment to set the thrust in your control message
-    double base_thrust = 0.7; // Base thrust needed to hover (adjust as needed)
+    double base_thrust = 0.5; // Base thrust needed to hover (adjust as needed)
     double new_thrust = base_thrust + thrust_adjustment;
 
     // Make sure new_thrust is within valid range
     new_thrust = std::max(0.0, std::min(1.0, new_thrust));
     tf2::Quaternion combined_orientation;
-    roll=0;
-    //rotated_pitch = 0;
     combined_orientation.setRPY(roll,-pitch, 0);
     combined_orientation.normalize();
     mavros_msgs::msg::AttitudeTarget attitude_msg;

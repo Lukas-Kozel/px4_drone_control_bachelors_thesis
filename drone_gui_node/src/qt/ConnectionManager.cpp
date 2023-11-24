@@ -34,9 +34,6 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     check_timer_->start(1000);       
  
 }
-ConnectionManager::~ConnectionManager(){
-    delete check_timer_;
-    }
 
 void ConnectionManager::onStateReceived(const mavros_msgs::msg::State::ConstSharedPtr& msg) {
     std::string mode = msg->mode;
@@ -123,7 +120,7 @@ bool ConnectionManager::takeOffMode() {
     }
 
     auto request = std::make_shared<mavros_msgs::srv::CommandTOL::Request>();
-    request->altitude = 540.5;
+    request->altitude = 500.5;
     request->latitude = 47.397743;
     request->longitude = 8.545594;
     auto result_future = set_takeoff_mode_client_->async_send_request(request);
