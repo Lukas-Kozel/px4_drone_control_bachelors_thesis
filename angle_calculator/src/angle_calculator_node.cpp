@@ -1,8 +1,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose.hpp"
-#include "tf2/LinearMath/Quaternion.h"
-#include "tf2/LinearMath/Matrix3x3.h"
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include "geometry_msgs/msg/vector3.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 #include "drone_pose_stamped/msg/drone_pose_stamped.hpp"
@@ -13,10 +15,15 @@ class AngleCalculator : public rclcpp::Node
 public:
     AngleCalculator() : Node("angle_calculator")
     {
+                auto qos = rclcpp::QoS(rclcpp::QoSInitialization(
+    RMW_QOS_POLICY_HISTORY_KEEP_LAST,
+    10
+));
+qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         load_pose_subscriber_ = this->create_subscription<load_pose_stamped::msg::LoadPoseStamped>(
             "/ros_load_pose", 10, std::bind(&AngleCalculator::on_load_pose_received, this, std::placeholders::_1));
-        drone_pose_subscriber_ = this->create_subscription<drone_pose_stamped::msg::DronePoseStamped>(
-            "/ros_drone_pose", 10, std::bind(&AngleCalculator::on_drone_pose_received, this, std::placeholders::_1));
+        drone_pose_subscriber_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+            "/mavros/local_position/pose", qos, std::bind(&AngleCalculator::on_drone_pose_received, this, std::placeholders::_1));
         load_angle_publisher_ = this->create_publisher<angle_stamped_msg::msg::AngleStamped>("load_angle", 10);
         clock_subscriber_ = this->create_subscription<rosgraph_msgs::msg::Clock>(
             "/clock", 10, std::bind(&AngleCalculator::on_clock_received, this, std::placeholders::_1));
@@ -29,7 +36,7 @@ private:
         calculate_angles();
     }
 
-    void on_drone_pose_received(const drone_pose_stamped::msg::DronePoseStamped::SharedPtr msg)
+    void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
     {
         drone_pose_ = msg;
         calculate_angles();
@@ -39,37 +46,32 @@ private:
     {
         latest_clock_ = msg->clock;
     }
-   //     angle_stamped_msg::msg::AngleStamp convert_to_angle_stamp(const builtin_interfaces::msg::Time& time)
-  //  {
- //       angle_stamped_msg::msg::AngleStamp angle_stamp;
- //       angle_stamp.sec = time.sec;
- //       angle_stamp.nsec = time.nanosec;
- //       return angle_stamp;
  //   }
     void calculate_angles()
     {
         if (!load_pose_ || !drone_pose_) {
             return;
         }
-
-        double x = load_pose_->pose.position.x;
-        double y = load_pose_->pose.position.y;
-        double z = load_pose_->pose.position.z;
-
-    //    tf2::Quaternion q(
-    //        drone_pose_->orientation.x,
-    //        drone_pose_->orientation.y,
-    //        drone_pose_->orientation.z,
-    //        drone_pose_->orientation.w
-    //   );
-
-     //   tf2::Matrix3x3 m(q);
-    //    double roll, pitch, yaw;
-     //   m.getRPY(roll, pitch, yaw);
-
-     //   double adjusted_x = x * cos(pitch) + z * sin(pitch);
-     //   double adjusted_y = y * cos(roll) - z * sin(roll);
-    //    double adjusted_z = -x * sin(pitch) + z * cos(pitch);
+        tf2::Quaternion drone_orientation(
+        drone_pose_->pose.orientation.x,
+        drone_pose_->pose.orientation.y,
+        drone_pose_->pose.orientation.z,
+        drone_pose_->pose.orientation.w
+        );
+        tf2::Matrix3x3 drone_rotation_matrix(drone_orientation);
+        tf2::Matrix3x3 inverse_drone_rotation = drone_rotation_matrix.inverse();
+        tf2::Vector3 load_position(
+        load_pose_->pose.position.x,
+        load_pose_->pose.position.y,
+        load_pose_->pose.position.z
+        );
+        tf2::Vector3 transformed_load_position = inverse_drone_rotation * load_position;
+        double x = transformed_load_position.x();
+        double y = transformed_load_position.y();
+        double z = transformed_load_position.z();
+        //double x = load_pose_->pose.position.x;
+        //double y = load_pose_->pose.position.y;
+        //double z = load_pose_->pose.position.z;
         double projection_xy_magnitude = std::sqrt(x * x + y * y);
 
         if(projection_xy_magnitude == 0) {
@@ -97,11 +99,11 @@ private:
     }
 
     rclcpp::Subscription<load_pose_stamped::msg::LoadPoseStamped>::SharedPtr load_pose_subscriber_;
-    rclcpp::Subscription< drone_pose_stamped::msg::DronePoseStamped>::SharedPtr drone_pose_subscriber_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr drone_pose_subscriber_;
     rclcpp::Subscription<rosgraph_msgs::msg::Clock>::SharedPtr clock_subscriber_;
     rclcpp::Publisher<angle_stamped_msg::msg::AngleStamped>::SharedPtr load_angle_publisher_;
     load_pose_stamped::msg::LoadPoseStamped::SharedPtr load_pose_;
-    drone_pose_stamped::msg::DronePoseStamped::SharedPtr drone_pose_;
+    geometry_msgs::msg::PoseStamped::SharedPtr drone_pose_;
     builtin_interfaces::msg::Time latest_clock_;
 };
 
