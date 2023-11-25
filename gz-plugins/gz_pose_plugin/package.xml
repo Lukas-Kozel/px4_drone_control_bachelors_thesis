@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>gz_pose_plugin</name>
+  <version>0.0.0</version>
+  <description>None</description>
+  <maintainer email="rhys.mainwaring@me.com">Rhys Mainwaring</maintainer>
+  <license>None</license>
+  <author>Rhys Mainwaring</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <build_depend>libgz-cmake3-dev</build_depend>
+  <build_depend>libgz-sim7-dev</build_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

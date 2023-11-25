@@ -1,0 +1,2 @@
+source;share/gz_pose_plugin/environment/ament_prefix_path.sh
+source;share/gz_pose_plugin/environment/path.sh

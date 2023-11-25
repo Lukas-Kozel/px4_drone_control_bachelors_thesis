@@ -1,0 +1,2 @@
+Invoking command in '/home/luky/mavros_ros2_ws/src/gz_pose_plugin/build/gz_pose_plugin': /home/luky/.local/bin/cmake /home/luky/mavros_ros2_ws/src/gz_pose_plugin -DCMAKE_INSTALL_PREFIX=/home/luky/mavros_ros2_ws/src/gz_pose_plugin/install/gz_pose_plugin
+Invoked command in '/home/luky/mavros_ros2_ws/src/gz_pose_plugin/build/gz_pose_plugin' returned '1': /home/luky/.local/bin/cmake /home/luky/mavros_ros2_ws/src/gz_pose_plugin -DCMAKE_INSTALL_PREFIX=/home/luky/mavros_ros2_ws/src/gz_pose_plugin/install/gz_pose_plugin
