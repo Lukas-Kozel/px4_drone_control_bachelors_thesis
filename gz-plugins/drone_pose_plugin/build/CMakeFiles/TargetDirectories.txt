@@ -1,0 +1,10 @@
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/uninstall.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/drone_pose_plugin_uninstall.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/drone_pose_plugin.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/test.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/edit_cache.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/rebuild_cache.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/list_install_components.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/install.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/install/local.dir
+/home/luky/Desktop/backup/drone_pose_plugin/build/CMakeFiles/install/strip.dir

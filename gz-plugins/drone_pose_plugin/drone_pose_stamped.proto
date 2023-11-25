@@ -1,0 +1,34 @@
+syntax = "proto3";
+package drone_pose_plugin;
+
+message DroneHeader {
+  message DroneStamp {
+    int64 sec = 1;
+    int32 nsec = 2;
+  }
+  DroneStamp stamp = 1;  // Nested Timestamp
+  map<string, string> data = 2;  // Key-value pairs
+}
+
+message DronePose {
+  message Position {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+  }
+
+  message Orientation {
+    double w = 1;
+    double x = 2;
+    double y = 3;
+    double z = 4;
+  }
+
+  Position position = 1;
+  Orientation orientation = 2;
+}
+
+message DronePoseStamped {
+  DroneHeader header = 1;
+  DronePose pose = 2;
+}

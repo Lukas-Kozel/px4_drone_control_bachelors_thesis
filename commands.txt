@@ -1,0 +1,28 @@
+zmena pohledu na dron:
+gz service --req 'x: 2 y: 0 z: 2' --reqtype=gz.msgs.Vector3d --reptype=gz.msgs.Boolean --timeout=2000 --service=/gui/follow/offset
+
+
+videt gazebo topic skrz ros2:
+ros2 run ros_gz_bridge parameter_bridge /imu@sensor_msgs/msg/Imu@gz.msgs.IMU
+ros2 topic echo /imu
+
+
+move forward ros pkg: 
+ros2 run move_forward move_forward_node
+
+switch offboard mode:
+ros2 service call /mavros/set_mode mavros_msgs/srv/SetMode "{base_mode: 0, custom_mode: 'OFFBOARD'}"
+
+bridge for load_gps:
+ros2 run ros_gz_bridge parameter_bridge /load_gps@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat
+
+
+ros2 run ros_gz_bridge parameter_bridge /load_pose@geometry_msgs/msg/Pose@gz.msgs.Pose
+
+clock time:
+ros2 run ros_gz_bridge parameter_bridge /clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock
+
+
+bash scripting + linux commands: 
+ps -p $pid 
+check if the pid is running
