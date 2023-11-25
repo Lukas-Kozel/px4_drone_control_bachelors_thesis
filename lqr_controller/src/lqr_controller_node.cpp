@@ -1,4 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
+#include "PIDController.h"
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "tf2/LinearMath/Quaternion.h"
@@ -12,6 +13,8 @@
 #include "drone_pose_stamped/msg/drone_pose_stamped.hpp"
 #include "load_pose_stamped/msg/load_pose_stamped.hpp"
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
+#include "mavros_msgs/msg/attitude_target.hpp"
+
 
 class LQRController : public rclcpp::Node
 {
@@ -20,36 +23,38 @@ public:
     {
         auto qos = rclcpp::QoS(rclcpp::QoSInitialization(
     RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-    10  // The depth of the QoS history, similar to your original code
+    10
 ));
 qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 
 auto qos2 = rclcpp::QoS(rclcpp::QoSInitialization(
     RMW_QOS_POLICY_HISTORY_KEEP_LAST,
-    10  // The depth of the QoS history, similar to your original code
+    10
 ));
 qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's QoS settings
-      // load_pose_subscriber_ = this->create_subscription<load_pose_stamped::msg::LoadPoseStamped>(
-        //    "/load_pose", 10, std::bind(&LQRController::on_load_pose_received, this, std::placeholders::_1));
-        drone_pose_subscriber_ = this->create_subscription<drone_pose_stamped::msg::DronePoseStamped>(
-            "/ros_drone_pose", 10, std::bind(&LQRController::on_drone_pose_received, this, std::placeholders::_1));
+       load_pose_subscriber_ = this->create_subscription<load_pose_stamped::msg::LoadPoseStamped>(
+            "/ros_load_pose", 10, std::bind(&LQRController::on_load_pose_received, this, std::placeholders::_1));
+       /* drone_pose_subscriber_ = this->create_subscription<drone_pose_stamped::msg::DronePoseStamped>(
+            "/ros_drone_pose", 10, std::bind(&LQRController::on_drone_pose_received, this, std::placeholders::_1));*/
+        drone_pose_subscriber_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
+            "/mavros/local_position/pose", qos, std::bind(&LQRController::on_drone_pose_received, this, std::placeholders::_1));
         load_imu_subscriber_ = this->create_subscription<sensor_msgs::msg::Imu>(
             "/load_imu", 10, std::bind(&LQRController::on_load_imu_received, this, std::placeholders::_1));
         load_angle_subscriber_ = this->create_subscription<angle_stamped_msg::msg::AngleStamped>(
             "/load_angle", 10, std::bind(&LQRController::on_load_angle_received, this, std::placeholders::_1));
         drone_velocity_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
             "/mavros/local_position/velocity_local", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
-        attitude_publisher_ = this->create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/setpoint_attitude/attitude", 20);
+        attitude_publisher_ = this->create_publisher<mavros_msgs::msg::AttitudeTarget>("/mavros/setpoint_raw/attitude", 20);
         drone_state_subscriber_ = this->create_subscription<mavros_msgs::msg::State>(
             "/mavros/state", qos2, std::bind(&LQRController::on_drone_state_received, this, std::placeholders::_1));
 
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
-        K_x_ = (Eigen::MatrixXd(1, 4) << 14.9071, 14.6655, 23.0584, 4.0895).finished();
-        K_y_ = (Eigen::MatrixXd(1, 4) << 14.9071, 14.6655, 23.0584, 4.0895).finished();
-        system_mass = 3;
+        K_x_ = (Eigen::MatrixXd(1, 4) <<  0.1,2.1449,7.3917,3.0167).finished(); //0.1,2.1449,7.3917,3.0167 4.0,5.2133,6.35,2.0023 0.2
+        K_y_ = (Eigen::MatrixXd(1, 4) <<  0.1,2.1449,7.3917,3.0167).finished(); // 0.1000 ,   1.2929 ,  10.8637 ,   3.9498
+        system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(50),  
+            std::chrono::milliseconds(20),  
             std::bind(&LQRController::control, this)
         );
 
@@ -57,76 +62,152 @@ qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's
     }
 
 private:
-  //  void on_load_pose_received(const load_pose_stamped::msg::LoadPoseStamped::SharedPtr msg)
-//{
-//    if (msg == nullptr) {
-///        RCLCPP_ERROR(this->get_logger(), "Received null message in on_load_pose_received");
-//        return;
-//    }
-//    load_pose_ = msg;
-//    RCLCPP_INFO(this->get_logger(), "Received load pose message");
-//}
+ void on_load_pose_received(const load_pose_stamped::msg::LoadPoseStamped::SharedPtr msg)
+{
+    if (msg == nullptr) {
+        return;
+    }
+    load_pose_ = msg;
+}
+/*
     void on_drone_pose_received(const drone_pose_stamped::msg::DronePoseStamped::SharedPtr msg)
 {
     if (msg == nullptr) {
-        //RCLCPP_ERROR(this->get_logger(), "Received null message in on_drone_pose_received");
         return;
     }
     drone_pose_ = msg;
-   // RCLCPP_INFO(this->get_logger(), "Received drone pose message");
+}
+*/
+
+    void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
+{
+    if (msg == nullptr) {
+        return;
+    }
+    drone_pose_ = msg;
 }
     void on_load_imu_received(const sensor_msgs::msg::Imu::SharedPtr msg)
     {        
     if (msg == nullptr) {
-      //  RCLCPP_ERROR(this->get_logger(), "Received null message in on_load_imu_received");
         return;
     }
-    load_imu_ = msg;
-    //RCLCPP_INFO(this->get_logger(), "Received load imu message");
-    
+    load_imu_ = msg;   
     }
     void on_load_angle_received(const angle_stamped_msg::msg::AngleStamped::SharedPtr msg)
 {
     if (msg == nullptr) {
-      //  RCLCPP_ERROR(this->get_logger(), "Received null message in on_load_angle_received");
         return;
     }
     load_angle_ = msg;
-    //RCLCPP_INFO(this->get_logger(), "Received load angle message");
 }
     void on_drone_velocity_received(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
 {
     if (msg == nullptr) {
-      //  RCLCPP_ERROR(this->get_logger(), "Received null message in on_drone_velocity_received");
         return;
     }
     drone_velocity_ = msg;
-    //RCLCPP_INFO(this->get_logger(), "Received drone velocity message");
 }
+/*
+void update_load_angular_velocity()
+{
+    if (!load_imu_ || !load_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Load IMU or pose data not available");
+        return;
+    }
 
-    void create_state_vector(){
+    // Extract the orientation quaternion from the load pose
+    tf2::Quaternion q(
+        load_pose_->pose.orientation.x,
+        load_pose_->pose.orientation.y,
+        load_pose_->pose.orientation.z,
+        load_pose_->pose.orientation.w
+    );
 
-        tf2::Matrix3x3 rotation_matrix(tf2::Quaternion(
+    // Convert quaternion to rotation matrix
+    tf2::Matrix3x3 m(q);
+    Eigen::Matrix3d rotation_matrix;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            rotation_matrix(i, j) = m[i][j];
+
+    // Obtain angular velocity from IMU data
+    Eigen::Vector3d global_angular_velocity(
+        load_imu_->angular_velocity.x,
+        load_imu_->angular_velocity.y,
+        load_imu_->angular_velocity.z
+    );
+
+    // Transform angular velocity to the local frame
+    Eigen::Vector3d local_angular_velocity = rotation_matrix * global_angular_velocity;
+
+    // Update state vector or other variables as needed
+    // For example, if your state vector is a member variable, you can update it here
+    state_x(3) = local_angular_velocity.x();
+    state_y(3) = local_angular_velocity.y();
+    // Note: Adjust the indices as per your state vector's structure
+}
+*/
+void update_load_angular_velocity() {
+    if (!load_imu_ || !load_pose_ || !drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Load IMU, load pose, or drone pose data not available");
+        return;
+    }
+
+    // Orientation of the load with respect to the drone
+    tf2::Quaternion drone_orientation(
         drone_pose_->pose.orientation.x,
         drone_pose_->pose.orientation.y,
         drone_pose_->pose.orientation.z,
         drone_pose_->pose.orientation.w
-        ));
-        tf2::Vector3 position_world(drone_pose_->pose.position.x, drone_pose_->pose.position.y, 0);
-        tf2::Vector3 velocity_world(drone_velocity_->twist.linear.x, drone_velocity_->twist.linear.y, 0);
+    );
+    
+    // Invert the drone's orientation to use for transformation
+    tf2::Quaternion drone_orientation_inv = drone_orientation.inverse();
 
-        tf2::Vector3 position_drone = rotation_matrix.inverse() * position_world;
-        tf2::Vector3 velocity_drone = rotation_matrix.inverse() * velocity_world;
+    // Convert quaternion to rotation matrix
+    tf2::Matrix3x3 rotation_matrix(drone_orientation_inv);
 
-        state_x(0) = position_drone.x();
-        state_x(1) = velocity_drone.x();
-        state_x(2)= load_angle_-> angle.angle_x;
+    Eigen::Matrix3d eigen_rotation_matrix;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            eigen_rotation_matrix(i, j) = rotation_matrix[i][j];
+
+    // Obtain angular velocity from IMU data
+    Eigen::Vector3d global_angular_velocity(
+        load_imu_->angular_velocity.x,
+        load_imu_->angular_velocity.y,
+        load_imu_->angular_velocity.z
+    );
+
+    // Transform angular velocity to the drone's local frame
+    Eigen::Vector3d local_angular_velocity = eigen_rotation_matrix * global_angular_velocity;
+
+    // Update state vector or other variables as needed
+    state_x(3) = local_angular_velocity.x();
+    state_y(3) = local_angular_velocity.y();
+}
+
+
+
+    void create_state_vector(){
+
+        if (!drone_pose_ || !load_imu_ || !load_angle_ || !drone_velocity_) {
+        RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
+        return;
+    }
+
+        state_x(0) = drone_pose_->pose.position.x -5 ;
+        //state_x(0) = load_pose_->pose.position.x;
+        state_x(1) = drone_velocity_->twist.linear.x;
+        state_x(2)= -load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
-        state_y(0) = position_drone.y();
-        state_y(1) = velocity_drone.y();
-        state_y(2)= load_angle_-> angle.angle_y;
+        state_y(0) = drone_pose_->pose.position.y - 5;
+        //state_y(0) = load_pose_->pose.position.y;
+        state_y(1) = drone_velocity_->twist.linear.y;
+        state_y(2)= -load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
+        update_load_angular_velocity();
 
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
@@ -137,42 +218,100 @@ private:
         double g = 9.81;
         double acceleration_x = control_input_x/system_mass;
         double acceleration_y = control_input_y/system_mass;
+        roll = -acceleration_y/g;
+        pitch = -acceleration_x/g;
+        // Saturation limits
+        double max_tilt_angle = 0.698;  // 40 degrees in radians
 
-        roll = acos((g)/(2*acceleration_y)); // roll is around axis x
-        pitch = acos((g)/(2*acceleration_x)); // pitch is around axis y
+        // Apply saturation
+        roll = std::max(std::min(roll, max_tilt_angle), -max_tilt_angle);
+        pitch = std::max(std::min(pitch, max_tilt_angle), -max_tilt_angle);
 
-        RCLCPP_WARN(this->get_logger(),"DEBUG: roll: %.2f, pitch: %.2f",roll,pitch);
+        RCLCPP_WARN(this->get_logger(), "DEBUG: roll: %.2f, pitch: %.2f", roll, pitch);
     }
 
     void control(){
-        RCLCPP_INFO(this->get_logger(), "control method called");
-        if (!offboard_mode_) {
-            RCLCPP_INFO(this->get_logger(), "Waiting for offboard mode...");
-            return;  // Exit early if not in offboard mode
+        if (!drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
+        return;
         }
         create_state_vector();
         control_input_x = (-K_x_ * state_x).coeff(0,0);
         control_input_y = (-K_y_ * state_y).coeff(0,0);
+        double yaw = getYawFromQuaternion(drone_pose_->pose.orientation);
+        auto rotated_inputs = rotateControlInputs(control_input_x, control_input_y, yaw);
+
+        control_input_x = rotated_inputs.first;
+        control_input_y = rotated_inputs.second;
         RCLCPP_INFO(this->get_logger(), "Control input x: %.2f",control_input_x);
         RCLCPP_INFO(this->get_logger(), "Control input y: %.2f",control_input_y);
         compute_attitude();
         publish_control(roll, pitch);
     }
 
-    void publish_control(double roll, double pitch){
-    geometry_msgs::msg::PoseStamped pose_msg;
-    pose_msg.header.stamp = this->get_clock()->now();
-    pose_msg.header.frame_id = "x500_0"; 
-    tf2::Quaternion q;
-    q.setRPY(roll, pitch, 0);  // Assuming yaw (theta_z) is 0
-    q.setRPY(0.5,0.5,0);
-    pose_msg.pose.orientation.x = q.x();
-    pose_msg.pose.orientation.y = q.y();
-    pose_msg.pose.orientation.z = q.z();
-    pose_msg.pose.orientation.w = q.w();
-
-    attitude_publisher_->publish(pose_msg);
+void publish_control(double roll, double pitch){
+        if (!drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
+        return;
     }
+    double desired_altitude = 10; // Set your desired altitude
+    double current_altitude = drone_pose_->pose.position.z;
+    double altitude_error = desired_altitude - current_altitude;
+
+    double dt = 0.05; // Calculate time difference since last control call
+    double thrust_adjustment = pid.compute(altitude_error, dt);
+
+    // Use thrust_adjustment to set the thrust in your control message
+    double base_thrust = 0.5; // Base thrust needed to hover (adjust as needed)
+    double new_thrust = base_thrust + thrust_adjustment;
+
+    // Make sure new_thrust is within valid range
+    new_thrust = std::max(0.0, std::min(1.0, new_thrust));
+    tf2::Quaternion combined_orientation;
+    combined_orientation.setRPY(roll,-pitch, 0);
+    combined_orientation.normalize();
+    mavros_msgs::msg::AttitudeTarget attitude_msg;
+    attitude_msg.header.stamp = this->get_clock()->now();
+    attitude_msg.header.frame_id = "base_link";
+    attitude_msg.thrust = new_thrust;
+    attitude_msg.orientation.x = combined_orientation.x();
+    attitude_msg.orientation.y = combined_orientation.y();
+    attitude_msg.orientation.z = combined_orientation.z();
+    attitude_msg.orientation.w = combined_orientation.w();
+
+    attitude_publisher_->publish(attitude_msg);
+}
+std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
+    Eigen::Matrix2d rotation_matrix;
+    rotation_matrix << cos(yaw), -sin(yaw),
+                       sin(yaw),  cos(yaw);
+
+    Eigen::Vector2d inputs(input_x, input_y);
+    Eigen::Vector2d rotated_inputs = rotation_matrix * inputs;
+
+    return {rotated_inputs(0), rotated_inputs(1)};
+}
+
+double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
+    tf2::Quaternion tf_q(q.x, q.y, q.z, q.w);
+    tf2::Matrix3x3 m(tf_q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+    return yaw;
+}
+
+// Function to apply rotation
+std::pair<double, double> rotateControlInputs(double yaw) {
+    Eigen::Matrix2d rotation_matrix;
+    rotation_matrix << cos(yaw), -sin(yaw),
+                       sin(yaw),  cos(yaw);
+
+    Eigen::Vector2d inputs(pitch, roll);
+    Eigen::Vector2d rotated_inputs = rotation_matrix * inputs;
+
+    return {rotated_inputs(0), rotated_inputs(1)};
+}
+
 
    void on_drone_state_received(const mavros_msgs::msg::State::SharedPtr msg)
     {
@@ -185,14 +324,16 @@ private:
 
 
     rclcpp::TimerBase::SharedPtr control_timer_;
-    //rclcpp::Subscription<load_pose_stamped::msg::LoadPoseStamped>::SharedPtr load_pose_subscriber_;
+    rclcpp::Subscription<load_pose_stamped::msg::LoadPoseStamped>::SharedPtr load_pose_subscriber_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr load_imu_subscriber_;
-    rclcpp::Subscription<drone_pose_stamped::msg::DronePoseStamped>::SharedPtr drone_pose_subscriber_;
+    //rclcpp::Subscription<drone_pose_stamped::msg::DronePoseStamped>::SharedPtr drone_pose_subscriber_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr drone_pose_subscriber_;
     rclcpp::Subscription<angle_stamped_msg::msg::AngleStamped>::SharedPtr load_angle_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr drone_velocity_subscriber_;
     rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr drone_state_subscriber_;
     load_pose_stamped::msg::LoadPoseStamped::SharedPtr load_pose_;
-    drone_pose_stamped::msg::DronePoseStamped::SharedPtr drone_pose_;
+    //drone_pose_stamped::msg::DronePoseStamped::SharedPtr drone_pose_;
+    geometry_msgs::msg::PoseStamped::SharedPtr drone_pose_;
     angle_stamped_msg::msg::AngleStamped::SharedPtr load_angle_;
     sensor_msgs::msg::Imu::SharedPtr load_imu_;
     sensor_msgs::msg::Imu::SharedPtr drone_imu_;
@@ -204,13 +345,15 @@ private:
     double control_input_x;
     double control_input_y;
     double system_mass;
-    double pitch;
-    double roll;
-    rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr attitude_publisher_;
+    double pitch = 0;
+    double roll = 0;
+    rclcpp::Publisher<mavros_msgs::msg::AttitudeTarget>::SharedPtr attitude_publisher_;
     Eigen::Vector3d previous_load_angular_velocity_ = Eigen::Vector3d::Zero();
     Eigen::Vector3d load_angular_acceleration_ = Eigen::Vector3d::Zero();
     rclcpp::Time last_time_ = this->get_clock()->now();  // Initialize with current time
     bool offboard_mode_ = false;
+    PIDController pid = PIDController(0.45, 0.01, 0.09, -5,5);
+
 };
 
 
