@@ -87,9 +87,12 @@ void calculate_angles()
         RCLCPP_WARN(this->get_logger(), "Projection onto xy-plane has zero magnitude, cannot calculate θ_z");
         return;
     }
-
+    /*
     double theta_x_rad = std::atan2(z, x) + M_PI/2 - pitch;
     double theta_y_rad = std::atan2(z, y) + M_PI/2 + roll;
+    */
+    double theta_x_rad = std::atan2(x, abs(z)) - pitch; 
+    double theta_y_rad = std::atan2(y, abs(z)) + roll;
     double theta_z_rad = std::atan2(projection_xy_magnitude, -z);
 
     RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f rad, θ_y = %.2f rad, θ_z = %.2f rad",
