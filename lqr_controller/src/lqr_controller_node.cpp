@@ -59,8 +59,6 @@ qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's
             std::chrono::milliseconds(50),  
             std::bind(&LQRController::control, this)
         );
-
-            
     }
 
 private:
@@ -109,46 +107,7 @@ private:
     }
     drone_velocity_ = msg;
 }
-/*
-void update_load_angular_velocity()
-{
-    if (!load_imu_ || !load_pose_) {
-        RCLCPP_ERROR(this->get_logger(), "Load IMU or pose data not available");
-        return;
-    }
 
-    // Extract the orientation quaternion from the load pose
-    tf2::Quaternion q(
-        load_pose_->pose.orientation.x,
-        load_pose_->pose.orientation.y,
-        load_pose_->pose.orientation.z,
-        load_pose_->pose.orientation.w
-    );
-
-    // Convert quaternion to rotation matrix
-    tf2::Matrix3x3 m(q);
-    Eigen::Matrix3d rotation_matrix;
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            rotation_matrix(i, j) = m[i][j];
-
-    // Obtain angular velocity from IMU data
-    Eigen::Vector3d global_angular_velocity(
-        load_imu_->angular_velocity.x,
-        load_imu_->angular_velocity.y,
-        load_imu_->angular_velocity.z
-    );
-
-    // Transform angular velocity to the local frame
-    Eigen::Vector3d local_angular_velocity = rotation_matrix * global_angular_velocity;
-
-    // Update state vector or other variables as needed
-    // For example, if your state vector is a member variable, you can update it here
-    state_x(3) = local_angular_velocity.x();
-    state_y(3) = local_angular_velocity.y();
-    // Note: Adjust the indices as per your state vector's structure
-}
-*/
 void update_load_angular_velocity() {
     if (!load_imu_ || !drone_pose_) {
         RCLCPP_ERROR(this->get_logger(), "Load IMU or drone pose data not available");
@@ -187,11 +146,10 @@ void update_load_angular_velocity() {
 
     // Update state vector
     state_x(3) = global_angular_velocity.x();
+    state_x(3)=0;
     state_y(3) = global_angular_velocity.y();
+    state_y(3)=0;
 }
-
-
-
 
     void create_state_vector(){
 
@@ -201,16 +159,15 @@ void update_load_angular_velocity() {
     }
 
         state_x(0) = drone_pose_->pose.position.x;
-        //state_x(0) = load_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
-        state_x(2)= -load_angle_-> angle.angle_x;
+        state_x(2)= load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
 
         state_y(0) = drone_pose_->pose.position.y;
         //state_y(0) = load_pose_->pose.position.y;
         state_y(1) = drone_velocity_->twist.linear.y;
-        state_y(2)= -load_angle_-> angle.angle_y;
+        state_y(2)= load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
         update_load_angular_velocity();
 
@@ -264,13 +221,13 @@ void publish_control(double roll, double pitch, double yaw){
     }
     double desired_altitude = 10; // Set your desired altitude
     double current_altitude = drone_pose_->pose.position.z;
-    double altitude_error = current_altitude - desired_altitude;
+    double altitude_error = desired_altitude - current_altitude;
 
     double dt = 0.05; // Calculate time difference since last control call
     double thrust_adjustment = pid.compute(altitude_error, dt);
 
     // Use thrust_adjustment to set the thrust in your control message
-    double base_thrust = 0.7; // Base thrust needed to hover (adjust as needed)
+    double base_thrust = 0.6; // Base thrust needed to hover (adjust as needed)
     double new_thrust = base_thrust + thrust_adjustment;
 
     // Make sure new_thrust is within valid range
@@ -359,7 +316,7 @@ double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
     Eigen::Vector3d load_angular_acceleration_ = Eigen::Vector3d::Zero();
     rclcpp::Time last_time_ = this->get_clock()->now();  // Initialize with current time
     bool offboard_mode_ = false;
-    PIDController pid = PIDController(0.55, 1.6, 0, -3,3);
+    PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1); //0.15, 0.005, 0.08, -1,1 regulating on 8.9    0.8, 0.07, 0.3, -1,1 almost perfect
     Eigen::Vector3d current_target_position_{0, 0, 10}; // Current target for gradual movement
     Eigen::Vector3d desired_target_position_{-10, 10, 10}; // Final desired position
     double step_size_ = 0.05; // Step size for gradual movement, adjust as needed
