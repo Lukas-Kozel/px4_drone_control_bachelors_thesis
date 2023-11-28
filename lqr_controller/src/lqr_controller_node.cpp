@@ -52,11 +52,11 @@ qos2.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);  // Match the publisher's
 
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
-        K_x_ = (Eigen::MatrixXd(1, 4) <<   0.1,2.1449,7.3917,3.0167).finished(); //0.1,2.1449,7.3917,3.0167 4.0,5.2133,6.35,2.0023 0.2
-        K_y_ = (Eigen::MatrixXd(1, 4) <<   0.1,2.1449,7.3917,3.0167).finished(); // 0.1000 ,   1.2929 ,  10.8637 ,   3.9498 // 0.1000   , 2.3641  ,  9.8428  ,  3.5739
+        K_x_ = (Eigen::MatrixXd(1, 4) <<   0.1000 ,   1.2929 ,  10.8637 ,   3.9498).finished(); //0.1,2.1449,7.3917,3.0167 4.0,5.2133,6.35,2.0023 0.2
+        K_y_ = (Eigen::MatrixXd(1, 4) <<   0.1000 ,   1.2929 ,  10.8637 ,   3.9498).finished(); // 0.1000 ,   1.2929 ,  10.8637 ,   3.9498 // 0.1000   , 2.3641  ,  9.8428  ,  3.5739
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(25),  
+            std::chrono::milliseconds(50),  
             std::bind(&LQRController::control, this)
         );
 
@@ -264,19 +264,21 @@ void publish_control(double roll, double pitch, double yaw){
     }
     double desired_altitude = 10; // Set your desired altitude
     double current_altitude = drone_pose_->pose.position.z;
-    double altitude_error = desired_altitude - current_altitude;
+    double altitude_error = current_altitude - desired_altitude;
 
     double dt = 0.05; // Calculate time difference since last control call
     double thrust_adjustment = pid.compute(altitude_error, dt);
 
     // Use thrust_adjustment to set the thrust in your control message
-    double base_thrust = 0.5; // Base thrust needed to hover (adjust as needed)
+    double base_thrust = 0.7; // Base thrust needed to hover (adjust as needed)
     double new_thrust = base_thrust + thrust_adjustment;
 
     // Make sure new_thrust is within valid range
     new_thrust = std::max(0.0, std::min(1.0, new_thrust));
     tf2::Quaternion combined_orientation;
-    combined_orientation.setRPY(roll,-pitch, yaw);
+
+    combined_orientation.setRPY(roll,-pitch, -yaw); //this should transform from ENU to NED
+    RCLCPP_ERROR(this->get_logger(), "yaw: %.2f",yaw);
     combined_orientation.normalize();
     mavros_msgs::msg::AttitudeTarget attitude_msg;
     attitude_msg.header.stamp = this->get_clock()->now();
@@ -318,19 +320,6 @@ double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
     return yaw;
 }
 
-// Function to apply rotation
-std::pair<double, double> rotateControlInputs(double yaw) {
-    Eigen::Matrix2d rotation_matrix;
-    rotation_matrix << cos(yaw), -sin(yaw),
-                       sin(yaw),  cos(yaw);
-
-    Eigen::Vector2d inputs(pitch, roll);
-    Eigen::Vector2d rotated_inputs = rotation_matrix * inputs;
-
-    return {rotated_inputs(0), rotated_inputs(1)};
-}
-
-
    void on_drone_state_received(const mavros_msgs::msg::State::SharedPtr msg)
     {
         if (msg == nullptr) {
@@ -370,7 +359,7 @@ std::pair<double, double> rotateControlInputs(double yaw) {
     Eigen::Vector3d load_angular_acceleration_ = Eigen::Vector3d::Zero();
     rclcpp::Time last_time_ = this->get_clock()->now();  // Initialize with current time
     bool offboard_mode_ = false;
-    PIDController pid = PIDController(0.45, 0.01, 0.1, -3,3);
+    PIDController pid = PIDController(0.55, 1.6, 0, -3,3);
     Eigen::Vector3d current_target_position_{0, 0, 10}; // Current target for gradual movement
     Eigen::Vector3d desired_target_position_{-10, 10, 10}; // Final desired position
     double step_size_ = 0.05; // Step size for gradual movement, adjust as needed
