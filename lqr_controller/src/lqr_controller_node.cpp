@@ -87,6 +87,29 @@ void update_load_angular_velocity() {
         return;
     }
 
+    tf2::Quaternion drone_orientation(
+        drone_pose_->pose.orientation.x,
+        drone_pose_->pose.orientation.y,
+        drone_pose_->pose.orientation.z,
+        drone_pose_->pose.orientation.w
+    );
+    drone_orientation.normalize();
+    double drone_roll, drone_pitch, drone_yaw;
+    tf2::Matrix3x3(drone_orientation).getRPY(drone_roll, drone_pitch, drone_yaw);
+    tf2::Matrix3x3 rotation_matrix;
+    rotation_matrix.setRPY(0, 0, drone_yaw);
+        
+    // Obtain angular velocity from IMU data
+    tf2::Vector3 local_angular_velocity(
+        load_imu_->angular_velocity.x,
+        load_imu_->angular_velocity.y,
+        load_imu_->angular_velocity.z
+    );
+
+    tf2::Vector3 rotated_load_imu = rotation_matrix * local_angular_velocity;
+    state_x(3) = rotated_load_imu.x();
+    state_y(3) = rotated_load_imu.y();
+    /*
     // Convert geometry_msgs::Quaternion to tf2::Quaternion
     tf2::Quaternion drone_orientation_tf2, imu_orientation_tf2;
     tf2::fromMsg(drone_pose_->pose.orientation, drone_orientation_tf2);
@@ -120,27 +143,28 @@ void update_load_angular_velocity() {
     // Update state vector
     state_x(3) = global_angular_velocity.x();
     state_y(3) = global_angular_velocity.y();
+    */
 }
 
     void create_state_vector(){
-
         if (!drone_pose_ || !load_imu_ || !load_angle_ || !drone_velocity_) {
         RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
         return;
     }
-
         state_x(0) = drone_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
-        state_x(2)= load_angle_-> angle.angle_x;
+        state_x(2)= -load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
 
         state_y(0) = drone_pose_->pose.position.y;
         state_y(1) = drone_velocity_->twist.linear.y;
-        state_y(2)= load_angle_-> angle.angle_y;
+        state_y(2)= -load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
-        update_load_angular_velocity();
 
+        update_load_angular_velocity();
+        state_x(3)= load_imu_->angular_velocity.x;
+        state_y(3)= load_imu_->angular_velocity.y;
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
 
@@ -158,14 +182,8 @@ void update_load_angular_velocity() {
         // Apply saturation
         roll = std::max(std::min(roll, max_tilt_angle), -max_tilt_angle);
         pitch = std::max(std::min(pitch, max_tilt_angle), -max_tilt_angle);
-                // Convert from ENU to NED for roll and pitch
-        //roll = -roll;
-        //pitch = -pitch;
-        double temp = roll; 
-        roll = pitch;
-        pitch = temp;
 
-        RCLCPP_WARN(this->get_logger(), "DEBUG: roll: %.2f, pitch: %.2f", roll, pitch);
+        RCLCPP_INFO(this->get_logger(), "ENU - DEBUG: roll: %.2f, pitch: %.2f, yaw: %.2f", roll, pitch, yaw);
     }
 
     void control(){
@@ -205,19 +223,17 @@ void publish_control(double roll, double pitch, double yaw){
     double new_thrust = base_thrust + thrust_adjustment;
 
     new_thrust = std::max(0.0, std::min(1.0, new_thrust));
-    tf2::Quaternion new_drone_orientation_NED;
-
-    new_drone_orientation_NED.setRPY(roll,pitch, yaw); //this should transform from ENU to NED
-    RCLCPP_ERROR(this->get_logger(), "yaw: %.2f",yaw);
-    new_drone_orientation_NED.normalize();
+    tf2::Quaternion quaternion;
+    quaternion.setRPY(roll, -pitch, yaw);
+    quaternion.normalize();
     mavros_msgs::msg::AttitudeTarget attitude_msg;
     attitude_msg.header.stamp = this->get_clock()->now();
     attitude_msg.header.frame_id = "base_link";
     attitude_msg.thrust = new_thrust;
-    attitude_msg.orientation.x = new_drone_orientation_NED.x();
-    attitude_msg.orientation.y = new_drone_orientation_NED.y();
-    attitude_msg.orientation.z = new_drone_orientation_NED.z();
-    attitude_msg.orientation.w = new_drone_orientation_NED.w();
+    attitude_msg.orientation.x = quaternion.x();
+    attitude_msg.orientation.y = quaternion.y();
+    attitude_msg.orientation.z = quaternion.z();
+    attitude_msg.orientation.w = quaternion.w();
 
     attitude_publisher_->publish(attitude_msg);
 }

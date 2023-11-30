@@ -60,6 +60,7 @@ void calculate_angles()
         drone_pose_->pose.orientation.z,
         drone_pose_->pose.orientation.w
     );
+    drone_orientation.normalize();
     double roll, pitch, yaw;
     tf2::Matrix3x3(drone_orientation).getRPY(roll, pitch, yaw);
 
