@@ -63,7 +63,6 @@ void calculate_angles()
     double roll, pitch, yaw;
     tf2::Matrix3x3(drone_orientation).getRPY(roll, pitch, yaw);
 
-    // Rotation matrix for rotation around Z-axis
     tf2::Matrix3x3 rotation_matrix;
     rotation_matrix.setRPY(0, 0, yaw);
 
@@ -73,7 +72,8 @@ void calculate_angles()
         load_pose_->pose.position.y,
         load_pose_->pose.position.z
     );
-    // Apply rotation to load's position
+
+
     tf2::Vector3 rotated_load_position = rotation_matrix * load_position;
 
     double x = rotated_load_position.x();
@@ -87,13 +87,11 @@ void calculate_angles()
         RCLCPP_WARN(this->get_logger(), "Projection onto xy-plane has zero magnitude, cannot calculate θ_z");
         return;
     }
-    /*
-    double theta_x_rad = std::atan2(z, x) + M_PI/2 - pitch;
-    double theta_y_rad = std::atan2(z, y) + M_PI/2 + roll;
-    */
-    double theta_x_rad = std::atan2(x, abs(z)) - pitch; 
-    double theta_y_rad = std::atan2(y, abs(z)) + roll;
-    double theta_z_rad = std::atan2(projection_xy_magnitude, -z);
+    RCLCPP_INFO(this->get_logger(), "pitch: %.2f ; roll: %.2f",
+            pitch, roll);
+    double theta_x_rad = std::atan(x/abs(z)) - pitch; 
+    double theta_y_rad = std::atan(y/abs(z)) + roll;
+    double theta_z_rad = std::atan(projection_xy_magnitude/-z);
 
     RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f rad, θ_y = %.2f rad, θ_z = %.2f rad",
                 theta_x_rad, theta_y_rad, theta_z_rad);
