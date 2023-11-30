@@ -1,0 +1,22 @@
+session_name: drone_simulation
+windows:
+  - window_name: PX4
+    layout: even-horizontal
+    panes:
+      - directory: /home/luky/PX4-Autopilot
+        command: make px4_sitl gz_x500
+      - directory: /home/luky/mavros_ros2_ws
+        command: ros2 launch mavros px4.launch fcu_url:=udp://:14540@localhost:14580
+      - directory: /home/luky
+        command: ./QGroundControl.AppImage
+  - window_name: ROS_Bridge
+    panes:
+      - command: ros2 run gazebo_ros2_bridge bridge_node
+      - command: ros2 run ros_gz_bridge parameter_bridge /load_imu@sensor_msgs/msg/Imu@gz.msgs.IMU
+      - command: ros2 run ros_gz_bridge parameter_bridge /drone_imu@sensor_msgs/msg/Imu@gz.msgs.IMU
+      - command: ros2 run ros_gz_bridge parameter_bridge /clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock
+  - window_name: Additional_Tools
+    layout: even-horizontal
+    panes:
+      - command: ros2 run gazebo_ros2_bridge bridge_node
+      - command: ros2 run angle_calculator angle_calculator_node
