@@ -46,7 +46,7 @@ private:
     {
         latest_clock_ = msg->clock;
     }
- //   }
+
 void calculate_angles()
 {
     if (!load_pose_ || !drone_pose_) {
