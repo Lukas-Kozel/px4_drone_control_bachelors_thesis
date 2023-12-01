@@ -80,7 +80,7 @@ private:
     }
     drone_velocity_ = msg;
 }
-
+/*
 void update_load_angular_velocity() {
     if (!load_imu_ || !drone_pose_) {
         RCLCPP_ERROR(this->get_logger(), "Load IMU or drone pose data not available");
@@ -109,41 +109,37 @@ void update_load_angular_velocity() {
     tf2::Vector3 rotated_load_imu = rotation_matrix * local_angular_velocity;
     state_x(3) = rotated_load_imu.x();
     state_y(3) = rotated_load_imu.y();
-    /*
-    // Convert geometry_msgs::Quaternion to tf2::Quaternion
-    tf2::Quaternion drone_orientation_tf2, imu_orientation_tf2;
-    tf2::fromMsg(drone_pose_->pose.orientation, drone_orientation_tf2);
-    tf2::fromMsg(load_imu_->orientation, imu_orientation_tf2);
+}
+*/
 
-    // Normalize the quaternions
-    drone_orientation_tf2.normalize();
-    imu_orientation_tf2.normalize();
+void update_load_angular_velocity() {
+    if (!load_imu_ || !drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Load IMU or drone pose data not available");
+        return;
+    }
 
-    // Combine the orientations to find the IMU's orientation in the global frame
-    tf2::Quaternion imu_orientation_global = drone_orientation_tf2 * imu_orientation_tf2;
-    imu_orientation_global.normalize();
-
-    // Convert quaternion to rotation matrix
-    Eigen::Matrix3d eigen_rotation_matrix;
-    tf2::Matrix3x3 rotation_matrix(imu_orientation_global);
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            eigen_rotation_matrix(i, j) = rotation_matrix[i][j];
-
+    tf2::Quaternion load_orientation(
+        load_imu_->orientation.x,
+        load_imu_->orientation.y,
+        load_imu_->orientation.z,
+        load_imu_->orientation.w
+    );
+    load_orientation.normalize();
+    double load_roll, load_pitch, load_yaw;
+    tf2::Matrix3x3(load_orientation).getRPY(load_roll, load_pitch, load_yaw);
+    tf2::Matrix3x3 rotation_matrix;
+    rotation_matrix.setRPY(0, 0, load_yaw);
+        
     // Obtain angular velocity from IMU data
-    Eigen::Vector3d local_angular_velocity(
+    tf2::Vector3 local_angular_velocity(
         load_imu_->angular_velocity.x,
         load_imu_->angular_velocity.y,
         load_imu_->angular_velocity.z
     );
-
-    // Transform angular velocity from the IMU's frame to the global frame
-    Eigen::Vector3d global_angular_velocity = eigen_rotation_matrix.inverse() * local_angular_velocity;
-
-    // Update state vector
-    state_x(3) = global_angular_velocity.x();
-    state_y(3) = global_angular_velocity.y();
-    */
+    RCLCPP_INFO(this->get_logger(), "yaw: %.2f",yaw);
+    tf2::Vector3 rotated_load_imu = rotation_matrix * local_angular_velocity;
+    state_x(3) = rotated_load_imu.x();
+    state_y(3) = rotated_load_imu.y();
 }
 
     void create_state_vector(){
@@ -153,18 +149,16 @@ void update_load_angular_velocity() {
     }
         state_x(0) = drone_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
-        state_x(2)= -load_angle_-> angle.angle_x;
-        state_x(3)= load_imu_->angular_velocity.x;
+        state_x(2)= load_angle_-> angle.angle_x;
+        //state_x(3)= load_imu_->angular_velocity.x;
 
 
         state_y(0) = drone_pose_->pose.position.y;
         state_y(1) = drone_velocity_->twist.linear.y;
-        state_y(2)= -load_angle_-> angle.angle_y;
-        state_y(3)= load_imu_->angular_velocity.y;
+        state_y(2)= load_angle_-> angle.angle_y;
+        //state_y(3)= load_imu_->angular_velocity.y;
 
         update_load_angular_velocity();
-        state_x(3)= load_imu_->angular_velocity.x;
-        state_y(3)= load_imu_->angular_velocity.y;
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
 
@@ -175,9 +169,9 @@ void update_load_angular_velocity() {
         double acceleration_x = control_input_x/system_mass;
         double acceleration_y = control_input_y/system_mass;
         roll = -acceleration_y/g;
-        pitch = -acceleration_x/g;
+        pitch = acceleration_x/g;
         // Saturation limits
-        double max_tilt_angle = 0.698;  // 40 degrees in radians
+        double max_tilt_angle = 0.2617993878;  // 15 degrees in radians
 
         // Apply saturation
         roll = std::max(std::min(roll, max_tilt_angle), -max_tilt_angle);
@@ -213,19 +207,20 @@ void publish_control(double roll, double pitch, double yaw){
         RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
         return;
     }
+
     double desired_altitude = 10;
     double altitude_error = desired_altitude - drone_pose_->pose.position.z;
-
     double dt = 0.05;
     double thrust_adjustment = pid.compute(altitude_error, dt);
-
     double base_thrust = 0.6;
     double new_thrust = base_thrust + thrust_adjustment;
 
     new_thrust = std::max(0.0, std::min(1.0, new_thrust));
+
     tf2::Quaternion quaternion;
-    quaternion.setRPY(roll, -pitch, yaw);
+    quaternion.setRPY(roll, pitch, yaw);
     quaternion.normalize();
+
     mavros_msgs::msg::AttitudeTarget attitude_msg;
     attitude_msg.header.stamp = this->get_clock()->now();
     attitude_msg.header.frame_id = "base_link";
