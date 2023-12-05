@@ -2,7 +2,7 @@
 #include "geometry_msgs/msg/pose.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include "geometry_msgs/msg/vector3.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
@@ -53,14 +53,13 @@ void calculate_angles()
         return;
     }
 
-    // Extract yaw from drone's orientation
-    tf2::Quaternion drone_orientation(
-        drone_pose_->pose.orientation.x,
-        drone_pose_->pose.orientation.y,
-        drone_pose_->pose.orientation.z,
-        drone_pose_->pose.orientation.w
-    );
+    tf2::Quaternion drone_orientation;
+
+    // Convert geometry_msgs::msg::Quaternion (drone_pose_->pose.orientation) to tf2::Quaternion
+    tf2::convert(drone_pose_->pose.orientation, drone_orientation);
+
     drone_orientation.normalize();
+
     double roll, pitch, yaw;
     tf2::Matrix3x3(drone_orientation).getRPY(roll, pitch, yaw);
 
@@ -74,24 +73,19 @@ void calculate_angles()
         load_pose_->pose.position.z
     );
 
-
     tf2::Vector3 rotated_load_position = rotation_matrix * load_position;
 
     double x = rotated_load_position.x();
     double y = rotated_load_position.y();
     double z = rotated_load_position.z();
-    RCLCPP_INFO(this->get_logger(), "x = %.2fy = %.2f z = %.2f",
+    RCLCPP_INFO(this->get_logger(), "x = %.2f y = %.2f z = %.2f",
             x, y, z);
     double projection_xy_magnitude = std::sqrt(x * x + y * y);
 
-    if (projection_xy_magnitude == 0) {
-        RCLCPP_WARN(this->get_logger(), "Projection onto xy-plane has zero magnitude, cannot calculate θ_z");
-        return;
-    }
     RCLCPP_INFO(this->get_logger(), "pitch: %.2f ; roll: %.2f",
             pitch, roll);
-    double theta_x_rad = std::atan(x/abs(z)) - pitch; 
-    double theta_y_rad = std::atan(y/abs(z)) + roll;
+    double theta_x_rad = std::atan(x/(z))  +pitch; 
+    double theta_y_rad = std::atan(y/(z)) -roll;
     double theta_z_rad = std::atan(projection_xy_magnitude/-z);
 
     RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f rad, θ_y = %.2f rad, θ_z = %.2f rad",
