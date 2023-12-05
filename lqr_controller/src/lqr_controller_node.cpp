@@ -17,6 +17,8 @@
 #include "load_pose_stamped/msg/load_pose_stamped.hpp"
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
 #include "mavros_msgs/msg/attitude_target.hpp"
+#include "std_msgs/msg/float64_multi_array.hpp"
+
 
 
 class LQRController : public rclcpp::Node
@@ -39,13 +41,13 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         drone_velocity_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
             "/mavros/local_position/velocity_local", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
         attitude_publisher_ = this->create_publisher<mavros_msgs::msg::AttitudeTarget>("/mavros/setpoint_raw/attitude", 20);
-
+        state_publisher_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("state_vector", 10);
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
         loadLQRParams();
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(30),  
+            std::chrono::milliseconds(20),  
             std::bind(&LQRController::control, this)
         );
     }
@@ -80,37 +82,6 @@ private:
     }
     drone_velocity_ = msg;
 }
-/*
-void update_load_angular_velocity() {
-    if (!load_imu_ || !drone_pose_) {
-        RCLCPP_ERROR(this->get_logger(), "Load IMU or drone pose data not available");
-        return;
-    }
-
-    tf2::Quaternion drone_orientation(
-        drone_pose_->pose.orientation.x,
-        drone_pose_->pose.orientation.y,
-        drone_pose_->pose.orientation.z,
-        drone_pose_->pose.orientation.w
-    );
-    drone_orientation.normalize();
-    double drone_roll, drone_pitch, drone_yaw;
-    tf2::Matrix3x3(drone_orientation).getRPY(drone_roll, drone_pitch, drone_yaw);
-    tf2::Matrix3x3 rotation_matrix;
-    rotation_matrix.setRPY(0, 0, drone_yaw);
-        
-    // Obtain angular velocity from IMU data
-    tf2::Vector3 local_angular_velocity(
-        load_imu_->angular_velocity.x,
-        load_imu_->angular_velocity.y,
-        load_imu_->angular_velocity.z
-    );
-
-    tf2::Vector3 rotated_load_imu = rotation_matrix * local_angular_velocity;
-    state_x(3) = rotated_load_imu.x();
-    state_y(3) = rotated_load_imu.y();
-}
-*/
 
 void update_load_angular_velocity() {
     if (!load_imu_ || !drone_pose_) {
@@ -136,8 +107,8 @@ void update_load_angular_velocity() {
         load_imu_->angular_velocity.y,
         load_imu_->angular_velocity.z
     );
-    RCLCPP_INFO(this->get_logger(), "yaw: %.2f",yaw);
-    tf2::Vector3 rotated_load_imu = rotation_matrix * local_angular_velocity;
+    RCLCPP_INFO(this->get_logger(), "yaw: %.2f",load_yaw);
+    tf2::Vector3 rotated_load_imu = rotation_matrix.transpose() * local_angular_velocity;
     state_x(3) = rotated_load_imu.x();
     state_y(3) = rotated_load_imu.y();
 }
@@ -159,17 +130,19 @@ void update_load_angular_velocity() {
         //state_y(3)= load_imu_->angular_velocity.y;
 
         update_load_angular_velocity();
+        //updateTargetPositionGradually();
+        //state_x(0) = //drone_pose_->pose.position.x - current_target_position_(0);
+        //state_y(0) = //drone_pose_->pose.position.y - current_target_position_(1);
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
-
     }
 
-    void compute_attitude(){
+    void compute_attitude(double control_input_x, double control_input_y){
         double g = 9.81;
         double acceleration_x = control_input_x/system_mass;
         double acceleration_y = control_input_y/system_mass;
         roll = -acceleration_y/g;
-        pitch = acceleration_x/g;
+        pitch = +acceleration_x/g;
         // Saturation limits
         double max_tilt_angle = 0.2617993878;  // 15 degrees in radians
 
@@ -186,19 +159,17 @@ void update_load_angular_velocity() {
         return;
         }
         create_state_vector();
-        updateTargetPositionGradually();
-        state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
-        state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
-        control_input_x = (-K_x_ * state_x).coeff(0,0);
-        control_input_y = (-K_y_ * state_y).coeff(0,0);
+        control_input_x = -K_x_.dot(state_x);
+        control_input_y = -K_y_.dot(state_y);
+        publishStateVector();
         yaw = getYawFromQuaternion(drone_pose_->pose.orientation);
         auto rotated_inputs = rotateControlInputs(control_input_x, control_input_y, yaw);
 
-        control_input_x = rotated_inputs.first;
-        control_input_y = rotated_inputs.second;
-        RCLCPP_INFO(this->get_logger(), "Control input x: %.2f",control_input_x);
-        RCLCPP_INFO(this->get_logger(), "Control input y: %.2f",control_input_y);
-        compute_attitude();
+        double control_input_x_rotated = rotated_inputs.first; 
+        double control_input_y_rotated = rotated_inputs.second;
+        RCLCPP_INFO(this->get_logger(), "Control input x: %.2f",control_input_x_rotated);
+        RCLCPP_INFO(this->get_logger(), "Control input y: %.2f",control_input_y_rotated);
+        compute_attitude(control_input_x_rotated,control_input_y_rotated);
         publish_control(roll, pitch, yaw);
     }
 
@@ -210,7 +181,7 @@ void publish_control(double roll, double pitch, double yaw){
 
     double desired_altitude = 10;
     double altitude_error = desired_altitude - drone_pose_->pose.position.z;
-    double dt = 0.05;
+    double dt = 0.02;
     double thrust_adjustment = pid.compute(altitude_error, dt);
     double base_thrust = 0.6;
     double new_thrust = base_thrust + thrust_adjustment;
@@ -243,14 +214,16 @@ void updateTargetPositionGradually() {
 }
 
 std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
-    Eigen::Matrix2d rotation_matrix;
-    rotation_matrix << cos(yaw), -sin(yaw),
-                       sin(yaw),  cos(yaw);
-
-    Eigen::Vector2d inputs(input_x, input_y);
-    Eigen::Vector2d rotated_inputs = rotation_matrix * inputs;
-
-    return {rotated_inputs(0), rotated_inputs(1)};
+    tf2::Matrix3x3 rotation_matrix;
+    rotation_matrix.setRPY(0, 0, yaw);
+    RCLCPP_INFO(this->get_logger(), "anglex yaw for rotation:  %.2f",yaw);
+    tf2::Vector3 inputs(input_x, input_y, 0);
+    RCLCPP_INFO(this->get_logger(), "[NOT ROTATED] Control input x: %.2f",input_x);
+    RCLCPP_INFO(this->get_logger(), "[NOT ROTATED] Control input y: %.2f",input_y);
+    tf2::Vector3 rotated_inputs = rotation_matrix.transpose() * inputs;
+    RCLCPP_INFO(this->get_logger(), "[ALREADY ROTATED] Control input x: %.2f",rotated_inputs.x());
+    RCLCPP_INFO(this->get_logger(), "[ALREADY ROTATED] Control input y: %.2f",rotated_inputs.y());
+    return {rotated_inputs.x(), rotated_inputs.y()};
 }
 
 double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
@@ -261,31 +234,44 @@ double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
     return yaw;
 }
 
-void loadLQRParams()
-    {
-        
-        std::string file_path = "/home/luky/mavros_ros2_ws/src/lqr_controller/src/params.yaml";
-        YAML::Node config = YAML::LoadFile(file_path);
+void publishStateVector(){
+    std_msgs::msg::Float64MultiArray state_msg;
+    state_msg.data = {state_x(0), state_x(1), state_x(2), state_x(3), state_y(0), state_y(1), state_y(2), state_y(3)};
+    state_publisher_->publish(state_msg);
 
-        if (config["lqr_params"])
+}
+
+void loadLQRParams()
+{
+    std::string file_path = "/home/luky/mavros_ros2_ws/src/lqr_controller/src/params.yaml";
+    YAML::Node config = YAML::LoadFile(file_path);
+
+    if (config["lqr_params"])
+    {
+        std::vector<double> K_x = config["lqr_params"]["K_x"].as<std::vector<double>>();
+        std::vector<double> K_y = config["lqr_params"]["K_y"].as<std::vector<double>>();
+        if (K_x.size() == 4 and K_y.size() == 4)
         {
-            std::vector<double> K_x = config["lqr_params"]["K_x"].as<std::vector<double>>();
-            std::vector<double> K_y = config["lqr_params"]["K_y"].as<std::vector<double>>();
-            if (K_x.size() == 4 and K_y.size() == 4)
+            K_x_ = Eigen::VectorXd(4);
+            K_y_ = Eigen::VectorXd(4);
+
+            for (int i = 0; i < 4; ++i)
             {
-                K_x_ = (Eigen::MatrixXd(1, 4) << K_x[0], K_x[1], K_x[2], K_x[3]).finished();
-                K_y_ = (Eigen::MatrixXd(1, 4) << K_y[0], K_y[1], K_y[2], K_y[3]).finished();
-            }
-            else
-            {
-                RCLCPP_ERROR(this->get_logger(), "Invalid size for K in LQR parameters");
+                K_x_(i) = K_x[i];
+                K_y_(i) = K_y[i];
             }
         }
         else
         {
-            RCLCPP_ERROR(this->get_logger(), "LQR parameters not found in YAML file");
+            RCLCPP_ERROR(this->get_logger(), "Invalid size for K in LQR parameters");
         }
     }
+    else
+    {
+        RCLCPP_ERROR(this->get_logger(), "LQR parameters not found in YAML file");
+    }
+}
+
 
 
     rclcpp::TimerBase::SharedPtr control_timer_;
@@ -293,12 +279,13 @@ void loadLQRParams()
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr drone_pose_subscriber_;
     rclcpp::Subscription<angle_stamped_msg::msg::AngleStamped>::SharedPtr load_angle_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr drone_velocity_subscriber_;
+    rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr state_publisher_;
     geometry_msgs::msg::PoseStamped::SharedPtr drone_pose_;
     angle_stamped_msg::msg::AngleStamped::SharedPtr load_angle_;
     sensor_msgs::msg::Imu::SharedPtr load_imu_;
     geometry_msgs::msg::TwistStamped::SharedPtr drone_velocity_;
-    Eigen::MatrixXd K_x_;
-    Eigen::MatrixXd K_y_;
+    Eigen::VectorXd K_x_;
+    Eigen::VectorXd K_y_;
     Eigen::VectorXd state_x;
     Eigen::VectorXd state_y;
     double control_input_x;
@@ -311,7 +298,7 @@ void loadLQRParams()
     PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1);
     Eigen::Vector3d current_target_position_{0, 0, 10}; 
     Eigen::Vector3d desired_target_position_{10, 0, 10};
-    double step_size_ = 0.05;
+    double step_size_ = 0.025;
 
 };
 
