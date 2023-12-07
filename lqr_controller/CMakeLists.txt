@@ -22,9 +22,11 @@ find_package(Eigen3 REQUIRED)
 find_package(load_pose_stamped REQUIRED)
 find_package(drone_pose_stamped REQUIRED)
 find_package(angle_stamped_msg REQUIRED)
+find_package(yaml-cpp REQUIRED)
 add_executable(lqr_controller_node src/lqr_controller_node.cpp src/PIDController.cpp)
 ament_target_dependencies(lqr_controller_node rclcpp std_msgs geometry_msgs sensor_msgs mavros_msgs tf2 tf2_geometry_msgs Eigen3 load_pose_stamped drone_pose_stamped  angle_stamped_msg)
-target_link_libraries(lqr_controller_node ${Eigen_LIBRARIES})
+target_link_libraries(lqr_controller_node ${Eigen_LIBRARIES} yaml-cpp)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
