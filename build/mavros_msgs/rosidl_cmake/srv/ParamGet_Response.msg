@@ -1,3 +1,0 @@
-
-bool success
-ParamValue value

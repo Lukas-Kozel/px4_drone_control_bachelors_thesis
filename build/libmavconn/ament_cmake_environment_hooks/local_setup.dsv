@@ -1,3 +1,0 @@
-source;share/libmavconn/environment/ament_prefix_path.sh
-source;share/libmavconn/environment/library_path.sh
-source;share/libmavconn/environment/path.sh
