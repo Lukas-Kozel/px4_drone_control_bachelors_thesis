@@ -1,6 +1,4 @@
 scripts/px4_log.txt
-mavros
-px4_msgs
 log
 build
 install

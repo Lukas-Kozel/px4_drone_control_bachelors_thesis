@@ -1,1 +1,0 @@
-Invoking command in '/home/luky/mavros_ros2_ws/src/build/load_imu_subscriber': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/luky/ros2_ws/install/my_robot_controller:/opt/ros/humble /home/luky/.local/bin/cmake --build /home/luky/mavros_ros2_ws/src/build/load_imu_subscriber -- -j8 -l8
