@@ -44,6 +44,7 @@ class MyNode(Node):
         self.publisher_.publish(msg)
         self.get_logger().info(f'Publishing K matrix: {msg.data}')
 
+
     def calculate_dlqr(self):
         K,S,E = control.dlqr(self.matrix_A,self.matrix_B,self.matrix_Q,self.matrix_R)
         return K
