@@ -19,8 +19,8 @@ ConnectionManager::ConnectionManager(rclcpp::Node::SharedPtr node, QObject* pare
     set_mode_client_ = node_->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
     load_pose_subscriber_ = node_->create_subscription<load_pose_stamped::msg::LoadPoseStamped>(
         "/ros_load_pose", 10, std::bind(&ConnectionManager::onLoadPoseReceived, this, std::placeholders::_1));
-    drone_pose_subscriber_ = node_->create_subscription<drone_pose_stamped::msg::DronePoseStamped>(
-        "/ros_drone_pose", 10, std::bind(&ConnectionManager::onDronePoseReceived, this, std::placeholders::_1));
+    drone_pose_subscriber_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+        "/mavros/local_position/pose", qos, std::bind(&ConnectionManager::onDronePoseReceived, this, std::placeholders::_1));
     load_imu_subscriber_ = node_->create_subscription<sensor_msgs::msg::Imu>(
         "/load_imu", 10, std::bind(&ConnectionManager::onLoadImuReceived, this, std::placeholders::_1));
     load_angle_subscriber_ = node_->create_subscription<angle_stamped_msg::msg::AngleStamped>(
@@ -45,7 +45,7 @@ void ConnectionManager::onLoadPoseReceived(const load_pose_stamped::msg::LoadPos
     load_pose_received_ = true;
     emit loadPoseReceived(msg);
 }
-void ConnectionManager::onDronePoseReceived(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr msg)
+void ConnectionManager::onDronePoseReceived(const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
 {
     drone_pose_received_ = true;
     emit dronePoseReceived(msg);

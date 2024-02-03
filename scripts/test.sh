@@ -37,8 +37,8 @@ kill_gazebo_processes() {
 
 # Array to store PIDs
 declare -a pids
-PID_LIST_PATH="/home/luky/mavros_ros2_ws/src/scripts/pid_list.txt"
-SIMULATION_PID_PATH="/home/luky/mavros_ros2_ws/src/scripts/simulationPID.txt"
+PID_LIST_PATH="/home/luky/mavros_ros2_ws/scripts/pid_list.txt"
+SIMULATION_PID_PATH="/home/luky/mavros_ros2_ws/scripts/simulationPID.txt"
 #empty files
 > "$PID_LIST_PATH"
 > "$SIMULATION_PID_PATH"

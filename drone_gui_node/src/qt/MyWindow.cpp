@@ -114,7 +114,7 @@ MyWindow::~MyWindow()
     rclcpp::shutdown();
 }
 
-void MyWindow::updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg)
+void MyWindow::updateDronePose(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg)
 {
     drone_pose_x = msg->pose.position.x;
     drone_pose_y = msg->pose.position.y;
@@ -386,7 +386,7 @@ void MyWindow::handleProcessError(){
 
 void MyWindow::onEnvironmentSetup(){
     QProcess *process = new QProcess(this);
-    QString scriptPath = ("/home/luky/mavros_ros2_ws/src/scripts/test.sh");
+    QString scriptPath = ("/home/luky/mavros_ros2_ws/scripts/test.sh");
     QStringList arguments;
     arguments << "--" << "bash" << "-c" << scriptPath;
     process->start("gnome-terminal", arguments);
@@ -455,17 +455,17 @@ void MyWindow::buttonManager(){
 
 void MyWindow::onRestartSimulation(){
     QProcess *process = new QProcess(this);
-    QString scriptPath = "/home/luky/mavros_ros2_ws/src/scripts/restartSimulation.sh";
+    QString scriptPath = "/home/luky/mavros_ros2_ws/scripts/restartSimulation.sh";
     process->start("/bin/bash", QStringList() << scriptPath);
 }
 
 void MyWindow::closeEvent(QCloseEvent *event) {
     QProcess *process = new QProcess(this);
-    QString scriptPath = "/home/luky/mavros_ros2_ws/src/scripts/clean_up_script.sh";
+    QString scriptPath = "/home/luky/mavros_ros2_ws/scripts/clean_up_script.sh";
     process->start("/bin/bash", QStringList() << scriptPath);
     process->waitForFinished(-1);
     QMainWindow::closeEvent(event);
     std::ofstream ofs;
-    ofs.open("/home/luky/mavros_ros2_ws/src/scripts/px4_log.txt", std::ofstream::out | std::ofstream::trunc);
+    ofs.open("/home/luky/mavros_ros2_ws/scripts/px4_log.txt", std::ofstream::out | std::ofstream::trunc);
     ofs.close();   
 }
