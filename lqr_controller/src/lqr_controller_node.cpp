@@ -243,7 +243,7 @@ void publishStateVector(){
 
 void loadLQRParams()
 {
-    std::string file_path = "/home/luky/mavros_ros2_ws/src/lqr_controller/src/params.yaml";
+    std::string file_path = "/home/luky/mavros_ros2_ws/lqr_controller/src/params.yaml";
     YAML::Node config = YAML::LoadFile(file_path);
 
     if (config["lqr_params"])

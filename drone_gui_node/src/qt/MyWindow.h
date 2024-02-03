@@ -85,7 +85,7 @@ private:
     bool offboardMode = false;
 
 private slots:
-    void updateDronePose(const drone_pose_stamped::msg::DronePoseStamped::ConstSharedPtr& msg);
+    void updateDronePose(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg);
     void updateLoadImu(const sensor_msgs::msg::Imu::ConstSharedPtr& msg);
     void updateLoadAngle(const angle_stamped_msg::msg::AngleStamped::ConstSharedPtr& msg);
     void updateDroneVelocity(const geometry_msgs::msg::TwistStamped::ConstSharedPtr& msg);
