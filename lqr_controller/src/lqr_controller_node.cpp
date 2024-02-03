@@ -58,11 +58,13 @@ private:
 
     void on_K_matrix_received(const std_msgs::msg::Float64MultiArray::SharedPtr msg){
         if(msg == nullptr){
+            RCLCPP_INFO(this->get_logger(),"not updated");
             return;
         }
         Eigen::VectorXd K(msg->data.size());
         for(size_t i = 0; i < msg->data.size(); ++i) {
         K(i) = msg->data[i];
+        RCLCPP_INFO(this->get_logger(),"updated");
     }
     }
 
