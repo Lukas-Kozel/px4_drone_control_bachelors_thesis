@@ -40,6 +40,8 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
             "/load_angle", 10, std::bind(&LQRController::on_load_angle_received, this, std::placeholders::_1));
         drone_velocity_subscriber_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
             "/mavros/local_position/velocity_local", qos, std::bind(&LQRController::on_drone_velocity_received, this, std::placeholders::_1));
+        K_matrix_subscriber_ = this->create_subscription<std_msgs::msg::Float64MultiArray>(
+            "/dlq_k_matrix", 10, std::bind(&LQRController::on_K_matrix_received, this, std::placeholders::_1));
         attitude_publisher_ = this->create_publisher<mavros_msgs::msg::AttitudeTarget>("/mavros/setpoint_raw/attitude", 20);
         state_publisher_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("state_vector", 10);
         state_x = Eigen::VectorXd::Zero(4);
@@ -53,6 +55,16 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
     }
 
 private:
+
+    void on_K_matrix_received(const std_msgs::msg::Float64MultiArray::SharedPtr msg){
+        if(msg == nullptr){
+            return;
+        }
+        Eigen::VectorXd K(msg->data.size());
+        for(size_t i = 0; i < msg->data.size(); ++i) {
+        K(i) = msg->data[i];
+    }
+    }
 
     void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
@@ -159,8 +171,8 @@ void update_load_angular_velocity() {
         return;
         }
         create_state_vector();
-        control_input_x = -K_x_.dot(state_x);
-        control_input_y = -K_y_.dot(state_y);
+        control_input_x = -K.dot(state_x);
+        control_input_y = -K.dot(state_y);
         publishStateVector();
         yaw = getYawFromQuaternion(drone_pose_->pose.orientation);
         auto rotated_inputs = rotateControlInputs(control_input_x, control_input_y, yaw);
@@ -216,13 +228,8 @@ void updateTargetPositionGradually() {
 std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
     tf2::Matrix3x3 rotation_matrix;
     rotation_matrix.setRPY(0, 0, yaw);
-    RCLCPP_INFO(this->get_logger(), "anglex yaw for rotation:  %.2f",yaw);
     tf2::Vector3 inputs(input_x, input_y, 0);
-    RCLCPP_INFO(this->get_logger(), "[NOT ROTATED] Control input x: %.2f",input_x);
-    RCLCPP_INFO(this->get_logger(), "[NOT ROTATED] Control input y: %.2f",input_y);
     tf2::Vector3 rotated_inputs = rotation_matrix.transpose() * inputs;
-    RCLCPP_INFO(this->get_logger(), "[ALREADY ROTATED] Control input x: %.2f",rotated_inputs.x());
-    RCLCPP_INFO(this->get_logger(), "[ALREADY ROTATED] Control input y: %.2f",rotated_inputs.y());
     return {rotated_inputs.x(), rotated_inputs.y()};
 }
 
@@ -248,17 +255,14 @@ void loadLQRParams()
 
     if (config["lqr_params"])
     {
-        std::vector<double> K_x = config["lqr_params"]["K_x"].as<std::vector<double>>();
-        std::vector<double> K_y = config["lqr_params"]["K_y"].as<std::vector<double>>();
-        if (K_x.size() == 4 and K_y.size() == 4)
+        std::vector<double> K_ = config["lqr_params"]["K_x"].as<std::vector<double>>();
+        if (K_.size() == 4)
         {
-            K_x_ = Eigen::VectorXd(4);
-            K_y_ = Eigen::VectorXd(4);
+            K = Eigen::VectorXd(4);
 
             for (int i = 0; i < 4; ++i)
             {
-                K_x_(i) = K_x[i];
-                K_y_(i) = K_y[i];
+                K(i) = K_[i];
             }
         }
         else
@@ -279,13 +283,13 @@ void loadLQRParams()
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr drone_pose_subscriber_;
     rclcpp::Subscription<angle_stamped_msg::msg::AngleStamped>::SharedPtr load_angle_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr drone_velocity_subscriber_;
+    rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr K_matrix_subscriber_;
     rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr state_publisher_;
     geometry_msgs::msg::PoseStamped::SharedPtr drone_pose_;
     angle_stamped_msg::msg::AngleStamped::SharedPtr load_angle_;
     sensor_msgs::msg::Imu::SharedPtr load_imu_;
     geometry_msgs::msg::TwistStamped::SharedPtr drone_velocity_;
-    Eigen::VectorXd K_x_;
-    Eigen::VectorXd K_y_;
+    Eigen::VectorXd K;
     Eigen::VectorXd state_x;
     Eigen::VectorXd state_y;
     double control_input_x;
