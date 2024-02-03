@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
+from std_msgs.msg import Float64MultiArray
 import numpy as np
 import math
 import control
@@ -9,7 +9,7 @@ class MyNode(Node):
 
     def __init__(self):
         super().__init__('dlq_k_matrix_calculator')
-        self.publisher_ = self.create_publisher(Float32MultiArray, '/dlq_k_matrix', 10)
+        self.publisher_ = self.create_publisher(Float64MultiArray, '/dlq_k_matrix', 10)
         timer_period = 0.5 
         self.timer = self.create_timer(timer_period, self.timer_callback)
         x1max = 5
@@ -39,7 +39,7 @@ class MyNode(Node):
 
     def timer_callback(self):
         K = self.calculate_dlqr()
-        msg = Float32MultiArray()
+        msg = Float64MultiArray()
         msg.data = K.flatten().tolist()
         self.publisher_.publish(msg)
         self.get_logger().info(f'Publishing K matrix: {msg.data}')
