@@ -46,7 +46,7 @@ SIMULATION_PID_PATH="/home/luky/mavros_ros2_ws/scripts/simulationPID.txt"
 trap kill_processes SIGINT SIGTERM
 
 # Start processes and store their PIDs
-(cd /home/luky/PX4-Autopilot && make px4_sitl gz_x500) &
+(cd /home/luky/px4-autopilot/PX4-Autopilot && make px4_sitl gz_x500) &
 px4_pid=$!
     echo "$px4_pid" >> "$SIMULATION_PID_PATH"
 pids+=($px4_pid)

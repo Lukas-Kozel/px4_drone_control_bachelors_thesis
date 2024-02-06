@@ -56,17 +56,31 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 
 private:
 
-    void on_K_matrix_received(const std_msgs::msg::Float64MultiArray::SharedPtr msg){
-        if(msg == nullptr){
-            RCLCPP_INFO(this->get_logger(),"not updated");
+void on_K_matrix_received(const std_msgs::msg::Float64MultiArray::SharedPtr msg) {
+        if(msg == nullptr) {
+            RCLCPP_INFO(this->get_logger(), "Message is null");
             return;
         }
-        Eigen::VectorXd K(msg->data.size());
-        for(size_t i = 0; i < msg->data.size(); ++i) {
-        K(i) = msg->data[i];
-        RCLCPP_INFO(this->get_logger(),"updated");
+
+        // Check if sizes match to avoid out-of-bound errors
+        if(K.size() != static_cast<int>(msg->data.size())) {
+            RCLCPP_INFO(this->get_logger(), "Size mismatch, K not updated");
+            return;
+        }
+
+        // Convert std::vector to Eigen::VectorXd
+        Eigen::VectorXd incomingK = Eigen::Map<const Eigen::VectorXd>(msg->data.data(), msg->data.size());
+
+        // Check if K is equal to incomingK (for exact matches)
+        if(K == incomingK) {
+            RCLCPP_INFO(this->get_logger(), "K is equal to incoming data, no update needed");
+        } else {
+            // If they are not equal, you might want to update K here
+            K = incomingK;
+            RCLCPP_INFO(this->get_logger(), "K updated with new data");
+        }
     }
-    }
+    
 
     void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
@@ -135,18 +149,18 @@ void update_load_angular_velocity() {
         state_x(0) = drone_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
         state_x(2)= load_angle_-> angle.angle_x;
-        //state_x(3)= load_imu_->angular_velocity.x;
+        state_x(3)= load_imu_->angular_velocity.x;
 
 
         state_y(0) = drone_pose_->pose.position.y;
         state_y(1) = drone_velocity_->twist.linear.y;
         state_y(2)= load_angle_-> angle.angle_y;
-        //state_y(3)= load_imu_->angular_velocity.y;
+        state_y(3)= load_imu_->angular_velocity.y;
 
-        update_load_angular_velocity();
+        //update_load_angular_velocity();
         //updateTargetPositionGradually();
-        //state_x(0) = //drone_pose_->pose.position.x - current_target_position_(0);
-        //state_y(0) = //drone_pose_->pose.position.y - current_target_position_(1);
+        //state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
+        //state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
     }
@@ -158,7 +172,7 @@ void update_load_angular_velocity() {
         roll = -acceleration_y/g;
         pitch = +acceleration_x/g;
         // Saturation limits
-        double max_tilt_angle = 0.2617993878;  // 15 degrees in radians
+        double max_tilt_angle = 0.2617993878; 
 
         // Apply saturation
         roll = std::max(std::min(roll, max_tilt_angle), -max_tilt_angle);
@@ -172,7 +186,9 @@ void update_load_angular_velocity() {
         RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
         return;
         }
+        //updateTargetPositionGradually();
         create_state_vector();
+        RCLCPP_INFO(this->get_logger(), "K: [%f, %f, %f, %f]", K(0), K(1), K(2), K(3));
         control_input_x = -K.dot(state_x);
         control_input_y = -K.dot(state_y);
         publishStateVector();
