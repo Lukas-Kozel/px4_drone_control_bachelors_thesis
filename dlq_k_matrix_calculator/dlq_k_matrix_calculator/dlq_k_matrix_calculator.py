@@ -12,10 +12,10 @@ class MyNode(Node):
         self.publisher_ = self.create_publisher(Float64MultiArray, '/dlq_k_matrix', 10)
         timer_period = 0.5 
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        x1max = 5
-        x2max = 2.75
-        x3max = math.pi/60
-        x4max = 1.25
+        x1max = 10
+        x2max = 2.0
+        x3max = math.pi/30
+        x4max = 1.5
         umax = 1.5
         self.matrix_Q = np.array([
             [1/pow(x1max,2), 0,0, 0],
@@ -46,7 +46,7 @@ class MyNode(Node):
 
 
     def calculate_dlqr(self):
-        K,S,E = control.dlqr(self.matrix_A,self.matrix_B,self.matrix_Q,self.matrix_R)
+        K,_,_ = control.dlqr(self.matrix_A,self.matrix_B,self.matrix_Q,self.matrix_R)
         return K
 
 def main(args=None):

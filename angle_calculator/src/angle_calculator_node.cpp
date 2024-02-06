@@ -64,7 +64,7 @@ void calculate_angles()
     tf2::Matrix3x3(drone_orientation).getRPY(roll, pitch, yaw);
 
     tf2::Matrix3x3 rotation_matrix;
-    rotation_matrix.setRPY(0, 0, yaw);
+    rotation_matrix.setRPY(roll,pitch, yaw);
 
     // Load's position
     tf2::Vector3 load_position(
