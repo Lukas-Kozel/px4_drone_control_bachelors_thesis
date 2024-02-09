@@ -19,6 +19,8 @@ find_package(load_pose_stamped REQUIRED)
 find_package(drone_pose_stamped REQUIRED)
 find_package(angle_stamped_msg REQUIRED)
 
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Gui REQUIRED) 
@@ -50,7 +52,10 @@ ament_target_dependencies(gui
   load_pose_stamped 
   drone_pose_stamped 
   angle_stamped_msg
+  tf2
+  tf2_geometry_msgs
 )
+
 
 
 target_include_directories(gui PRIVATE
