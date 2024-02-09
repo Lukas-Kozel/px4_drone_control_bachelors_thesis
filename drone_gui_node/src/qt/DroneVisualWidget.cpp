@@ -122,12 +122,7 @@ void DroneVisualWidget::updateDronesOrientation(){
     transformRoll.rotate(roll);
     transformRoll.translate(-droneTop.center.x(), -droneTop.center.y());
 
-    droneTop.body->setTransform(transformRoll);
-    droneTop.motorHolder1->setTransform(transformRoll);
-    droneTop.motorHolder2->setTransform(transformRoll);
-    droneTop.motorLeft->setTransform(transformRoll);
-    droneTop.motorRight->setTransform(transformRoll);
-
+   droneTop.body->setTransform(transformRoll);
     // For droneBottom, using pitch for rotation
     QTransform transformPitch;
     transformPitch.translate(droneBottom.center.x(), droneBottom.center.y());
@@ -135,10 +130,6 @@ void DroneVisualWidget::updateDronesOrientation(){
     transformPitch.translate(-droneBottom.center.x(), -droneBottom.center.y());
 
     droneBottom.body->setTransform(transformPitch);
-    droneBottom.motorHolder1->setTransform(transformPitch);
-    droneBottom.motorHolder2->setTransform(transformPitch);
-    droneBottom.motorLeft->setTransform(transformPitch);
-    droneBottom.motorRight->setTransform(transformPitch);
 }
 
 
