@@ -47,6 +47,7 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
         loadLQRParams();
+        getInputParameters();
         setOffboardMode();
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
@@ -159,7 +160,7 @@ void update_load_angular_velocity() {
         state_y(3)= load_imu_->angular_velocity.y;
 
         //update_load_angular_velocity();
-        //updateTargetPositionGradually();
+        updateTargetPositionGradually();
         state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
         state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
@@ -242,6 +243,7 @@ void updateTargetPositionGradually() {
         position_difference = step_size_ * position_difference.normalized();
     }
     current_target_position_ += position_difference;
+    RCLCPP_INFO(this->get_logger(), "target X: %f, target Y: %f", desired_target_position_(1), desired_target_position_(2));
 }
 
 std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
@@ -301,6 +303,33 @@ void setOffboardMode(){
     auto set_mode_future = set_mode_client_->async_send_request(set_mode_request);
 }
 
+void getInputParameters() {
+    this->declare_parameter<std::string>("trajectory_type", "waypoint");
+    double waypoint_x, waypoint_y;
+    this->declare_parameter<double>("waypoint_x", 0.0);
+    this->declare_parameter<double>("waypoint_y", 0.0);
+    this->declare_parameter<double>("radius", 0.0);
+
+    std::string trajectory_type;
+    this->get_parameter("trajectory_type", trajectory_type);
+    RCLCPP_INFO(this->get_logger(), "Trajectory Type: %s", trajectory_type.c_str());
+
+    if(trajectory_type == "waypoint"){
+        this->get_parameter("waypoint_x", waypoint_x);
+        this->get_parameter("waypoint_y", waypoint_y);
+        double waypoint_z = 10.0;
+        desired_target_position_ = Eigen::Vector3d(waypoint_x, waypoint_y, waypoint_z);
+        RCLCPP_INFO(this->get_logger(), "Waypoint X: %f, Waypoint Y: %f", waypoint_x, waypoint_y);
+    }else if(trajectory_type == "radius"){
+        this->get_parameter("radius", radius);
+        RCLCPP_INFO(this->get_logger(), "Radius: %f", radius);
+    }
+    else{
+        RCLCPP_ERROR(this->get_logger(),"Error while passing the parameters");
+    }
+
+}
+
 
 
     rclcpp::TimerBase::SharedPtr control_timer_;
@@ -326,10 +355,11 @@ void setOffboardMode(){
     double roll = 0;
     rclcpp::Publisher<mavros_msgs::msg::AttitudeTarget>::SharedPtr attitude_publisher_;
     PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1);
-    Eigen::Vector3d current_target_position_{0, 0, 10}; 
-    Eigen::Vector3d desired_target_position_{10, 10, 10};
+    Eigen::Vector3d current_target_position_{0, 0, 10};
+    Eigen::Vector3d desired_target_position_;
     double step_size_ = 0.025;
-
+    std::string trajectory_type;
+    double radius;
 };
 
 

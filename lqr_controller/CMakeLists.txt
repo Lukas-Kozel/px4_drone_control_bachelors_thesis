@@ -43,4 +43,9 @@ install(TARGETS
   lqr_controller_node
   DESTINATION lib/${PROJECT_NAME}
 )
+install(DIRECTORY
+    launch
+    DESTINATION share/${PROJECT_NAME}/
+)
+
 ament_package()
