@@ -11,15 +11,30 @@
 #include "ConnectionManager.h"
 #include <rclcpp/rclcpp.hpp>
 #include <QGraphicsPolygonItem>
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2/LinearMath/Matrix3x3.h"
+
+
+#define radsToDeg(x) (x * 180.0 / M_PI)
 
 class DroneVisualWidget : public QWidget {
     Q_OBJECT
 
 public:
     explicit DroneVisualWidget(rclcpp::Node::SharedPtr node, ConnectionManager* connectionManager, QWidget *parent = nullptr);
+    struct DroneVisual {
+    QGraphicsRectItem* body;
+    QGraphicsRectItem* motorHolder1;
+    QGraphicsRectItem* motorHolder2;
+    QGraphicsRectItem* motorLeft;
+    QGraphicsRectItem* motorRight;
+    QPointF center;
+    };
 
 private:
     QTimer* timer;
+    DroneVisual droneTop;
+    DroneVisual droneBottom;
     rclcpp::Node::SharedPtr node;
     ConnectionManager* connectionManager;
     QGraphicsView *topView;
@@ -36,14 +51,19 @@ private:
     double loadPoseY=0;
     double loadPoseZ=0;
     bool isConnected = false;
+    double roll=0;
+    double pitch=0;
+
 
 
 private slots:
     void updateLoadPose(const load_pose_stamped::msg::LoadPoseStamped::ConstSharedPtr& msg);
+    void updateOrientation(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg);
     void checkConnectivity(bool connected);
 
 private:
     void updateGraphs();
+    void updateDronesOrientation();
     void addAxes(std::string axis1,std::string axis2, QGraphicsRectItem* parent, QGraphicsScene* parentScene, QPointF droneCenter, QPen axisPen);
 
 

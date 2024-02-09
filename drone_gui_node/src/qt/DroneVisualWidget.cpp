@@ -11,37 +11,38 @@ DroneVisualWidget::DroneVisualWidget(rclcpp::Node::SharedPtr node, ConnectionMan
     bottomScene = new QGraphicsScene(this);
 
     topView->setScene(topScene);
-    drone1 = topScene->addRect(-60, -5, 120, 10);
-    QGraphicsRectItem *motorHolder1 = topScene->addRect(-60, -5, 10, -20);
-    QGraphicsRectItem *motorHolder2 = topScene->addRect(50, -5, 10, -20);
-    QGraphicsRectItem *motorLeft = topScene->addRect(-75, -25, 40, -5);
-    QGraphicsRectItem *motorRight = topScene->addRect(35, -25, 40, -5);
-    QPointF droneCenter = drone1->rect().center();
-    motorHolder1->setParentItem(drone1);
-    motorHolder2->setParentItem(drone1);
-    motorLeft->setParentItem(drone1);
-    motorRight->setParentItem(drone1);
+    droneTop.body = topScene->addRect(-60, -5, 120, 10);
+    droneTop.motorHolder1 = topScene->addRect(-60, -5, 10, -20);
+    droneTop.motorHolder2 = topScene->addRect(50, -5, 10, -20);
+    droneTop.motorLeft = topScene->addRect(-75, -25, 40, -5);
+    droneTop.motorRight = topScene->addRect(35, -25, 40, -5);
+    droneTop.center = droneTop.body->rect().center();
+    droneTop.motorHolder1->setParentItem(droneTop.body);
+    droneTop.motorHolder2->setParentItem(droneTop.body);
+    droneTop.motorLeft->setParentItem(droneTop.body);
+    droneTop.motorRight->setParentItem(droneTop.body);
 
     QPen axisPen(Qt::red);
     axisPen.setWidth(2);
-    DroneVisualWidget::addAxes("x", "-z", drone1, topScene, droneCenter, axisPen);
+    DroneVisualWidget::addAxes("x", "-z", droneTop.body, topScene, droneTop.center, axisPen);
     load1 = topScene->addEllipse(0, 0, 30, 30);
     line1 = topScene->addLine(0, 5, 0, 0);
 
     bottomView->setScene(bottomScene);
-    drone2 = bottomScene->addRect(-60, -5, 120, 10);
-    QGraphicsRectItem *motorHolderBottom1 = bottomScene->addRect(-60, -5, 10, -20);
-    QGraphicsRectItem *motorHolderBottom2 = bottomScene->addRect(50, -5, 10, -20);
-    QGraphicsRectItem *motorLeftBottom = bottomScene->addRect(-75, -25, 40, -5);
-    QGraphicsRectItem *motorRightBottom = bottomScene->addRect(35, -25, 40, -5);
-    QPointF droneCenterBottom = drone2->rect().center();
-    motorHolderBottom1->setParentItem(drone2);
-    motorHolderBottom2->setParentItem(drone2);
-    motorLeftBottom->setParentItem(drone2);
-    motorRightBottom->setParentItem(drone2);
+
+    droneBottom.body = bottomScene->addRect(-60, -5, 120, 10);
+    droneBottom.motorHolder1 = bottomScene->addRect(-60, -5, 10, -20);
+    droneBottom.motorHolder2 = bottomScene->addRect(50, -5, 10, -20);
+    droneBottom.motorLeft = bottomScene->addRect(-75, -25, 40, -5);
+    droneBottom.motorRight = bottomScene->addRect(35, -25, 40, -5);
+    droneBottom.center = droneTop.body->rect().center();
+    droneBottom.motorHolder1->setParentItem(droneBottom.body);
+    droneBottom.motorHolder2->setParentItem(droneBottom.body);
+    droneBottom.motorLeft->setParentItem(droneBottom.body);
+    droneBottom.motorRight->setParentItem(droneBottom.body);
 
     axisPen.setColor(Qt::red);
-    DroneVisualWidget::addAxes("y", "-z", drone2, bottomScene, droneCenterBottom, axisPen);
+    DroneVisualWidget::addAxes("y", "-z", droneBottom.body, bottomScene, droneBottom.center, axisPen);
 
     load2 = bottomScene->addEllipse(0, 0, 30, 30);
     line2 = bottomScene->addLine(0, 5, 0, 0);
@@ -49,14 +50,15 @@ DroneVisualWidget::DroneVisualWidget(rclcpp::Node::SharedPtr node, ConnectionMan
     layout->addWidget(bottomView);
     this->setLayout(layout);
 
+    connect(connectionManager, &ConnectionManager::dronePoseReceived, this, &DroneVisualWidget::updateOrientation);
     connect(connectionManager, &ConnectionManager::loadPoseReceived, this, &DroneVisualWidget::updateLoadPose);
     connect(connectionManager, &ConnectionManager::connectionStatusChanged, this, &DroneVisualWidget::checkConnectivity);
 
-    // spinning node to update data every 0.1 sec
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, [this]()
             { rclcpp::spin_some(this->node); });
     connect(timer, &QTimer::timeout, this, &DroneVisualWidget::updateGraphs);
+    connect(timer, &QTimer::timeout, this, &DroneVisualWidget::updateDronesOrientation);
     timer->start(100);
 }
 
@@ -65,7 +67,21 @@ void DroneVisualWidget::updateLoadPose(const load_pose_stamped::msg::LoadPoseSta
     loadPoseX = msg->pose.position.x;
     loadPoseY = msg->pose.position.y;
     loadPoseZ = msg->pose.position.z;
+    
 }
+void DroneVisualWidget::updateOrientation(const geometry_msgs::msg::PoseStamped::ConstSharedPtr &msg){
+    tf2::Quaternion drone_orientation(
+        msg->pose.orientation.x,
+        msg->pose.orientation.y,
+        msg->pose.orientation.z,
+        msg->pose.orientation.w
+    );
+    drone_orientation.normalize();
+    double load_roll, load_pitch, load_yaw;
+    tf2::Matrix3x3(drone_orientation).getRPY(load_roll, load_pitch, load_yaw);
+    roll = radsToDeg(load_roll);
+    pitch = radsToDeg(load_pitch);
+    }
 
 void DroneVisualWidget::updateGraphs()
 {
@@ -93,28 +109,46 @@ void DroneVisualWidget::updateGraphs()
         line2->setLine(0, 5, loadPoseY, -loadPoseZ);
 
         topView->resetTransform();
-        topView->centerOn(drone1);
+        topView->centerOn(droneTop.body);
         bottomView->resetTransform();
-        bottomView->centerOn(drone2);
+        bottomView->centerOn(droneBottom.body);
     }
 }
+
+void DroneVisualWidget::updateDronesOrientation(){
+    // For droneTop, using roll for rotation
+    QTransform transformRoll;
+    transformRoll.translate(droneTop.center.x(), droneTop.center.y());
+    transformRoll.rotate(roll);
+    transformRoll.translate(-droneTop.center.x(), -droneTop.center.y());
+
+   droneTop.body->setTransform(transformRoll);
+    // For droneBottom, using pitch for rotation
+    QTransform transformPitch;
+    transformPitch.translate(droneBottom.center.x(), droneBottom.center.y());
+    transformPitch.rotate(pitch);
+    transformPitch.translate(-droneBottom.center.x(), -droneBottom.center.y());
+
+    droneBottom.body->setTransform(transformPitch);
+}
+
 
 void DroneVisualWidget::addAxes(std::string axis1, std::string axis2, QGraphicsRectItem *parent, QGraphicsScene *parentScene, QPointF droneCenter, QPen axisPen)
 {
     QGraphicsLineItem *xAxisLine = parentScene->addLine(droneCenter.x(), droneCenter.y(), droneCenter.x() + 100, droneCenter.y(), axisPen);
-    xAxisLine->setParentItem(parent);
+    //xAxisLine->setParentItem(parent);
 
     QPolygonF xArrowHead;
     xArrowHead << QPointF(droneCenter.x() + 100, droneCenter.y())
                << QPointF(droneCenter.x() + 90, droneCenter.y() - 5)
                << QPointF(droneCenter.x() + 90, droneCenter.y() + 5);
     QGraphicsPolygonItem *xArrowItem = parentScene->addPolygon(xArrowHead, axisPen, QBrush(Qt::red));
-    xArrowItem->setParentItem(parent);
+    //xArrowItem->setParentItem(parent);
 
     axisPen.setColor(Qt::blue);
 
     QGraphicsLineItem *zAxisLine = parentScene->addLine(droneCenter.x(), droneCenter.y(), droneCenter.x(), droneCenter.y() + 100, axisPen);
-    zAxisLine->setParentItem(parent);
+    //zAxisLine->setParentItem(parent);
 
     QPolygonF zArrowHead;
     zArrowHead << QPointF(droneCenter.x(), droneCenter.y() + 100)
@@ -122,7 +156,7 @@ void DroneVisualWidget::addAxes(std::string axis1, std::string axis2, QGraphicsR
                << QPointF(droneCenter.x() + 5, droneCenter.y() + 90);
 
     QGraphicsPolygonItem *zArrowItem = parentScene->addPolygon(zArrowHead, axisPen, QBrush(Qt::blue));
-    zArrowItem->setParentItem(parent);
+    //zArrowItem->setParentItem(parent);
 
     QGraphicsTextItem *xLabel = new QGraphicsTextItem(QString::fromStdString(axis1));
 
@@ -136,9 +170,9 @@ void DroneVisualWidget::addAxes(std::string axis1, std::string axis2, QGraphicsR
 
     zLabel->setPos(zLabelPos);
     parentScene->addItem(zLabel);
-    zLabel->setParentItem(parent);
+    //zLabel->setParentItem(parent);
     parentScene->addItem(xLabel);
-    xLabel->setParentItem(parent);
+    //xLabel->setParentItem(parent);
 }
 
 void DroneVisualWidget::checkConnectivity(bool connected)

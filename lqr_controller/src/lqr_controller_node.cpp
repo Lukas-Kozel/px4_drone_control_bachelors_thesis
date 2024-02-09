@@ -31,7 +31,7 @@ public:
     10
 ));
 qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
-
+        set_mode_client_ = this->create_client<mavros_msgs::srv::SetMode>("/mavros/set_mode");
         drone_pose_subscriber_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
             "/mavros/local_position/pose", qos, std::bind(&LQRController::on_drone_pose_received, this, std::placeholders::_1));
         load_imu_subscriber_ = this->create_subscription<sensor_msgs::msg::Imu>(
@@ -47,6 +47,7 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
         loadLQRParams();
+        setOffboardMode();
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
             std::chrono::milliseconds(20),  
@@ -146,21 +147,21 @@ void update_load_angular_velocity() {
         RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
         return;
     }
-        state_x(0) = drone_pose_->pose.position.x;
+        //state_x(0) = drone_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
         state_x(2)= load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
 
-        state_y(0) = drone_pose_->pose.position.y;
+        //state_y(0) = drone_pose_->pose.position.y;
         state_y(1) = drone_velocity_->twist.linear.y;
         state_y(2)= load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
 
         //update_load_angular_velocity();
         //updateTargetPositionGradually();
-        //state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
-        //state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
+        state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
+        state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
     }
@@ -182,11 +183,11 @@ void update_load_angular_velocity() {
     }
 
     void control(){
+        setOffboardMode();
         if (!drone_pose_) {
         RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
         return;
         }
-        //updateTargetPositionGradually();
         create_state_vector();
         RCLCPP_INFO(this->get_logger(), "K: [%f, %f, %f, %f]", K(0), K(1), K(2), K(3));
         control_input_x = -K.dot(state_x);
@@ -294,6 +295,12 @@ void loadLQRParams()
     }
 }
 
+void setOffboardMode(){
+    auto set_mode_request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
+    set_mode_request->custom_mode = "OFFBOARD";
+    auto set_mode_future = set_mode_client_->async_send_request(set_mode_request);
+}
+
 
 
     rclcpp::TimerBase::SharedPtr control_timer_;
@@ -303,6 +310,7 @@ void loadLQRParams()
     rclcpp::Subscription<geometry_msgs::msg::TwistStamped>::SharedPtr drone_velocity_subscriber_;
     rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr K_matrix_subscriber_;
     rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr state_publisher_;
+    rclcpp::Client<mavros_msgs::srv::SetMode>::SharedPtr set_mode_client_;
     geometry_msgs::msg::PoseStamped::SharedPtr drone_pose_;
     angle_stamped_msg::msg::AngleStamped::SharedPtr load_angle_;
     sensor_msgs::msg::Imu::SharedPtr load_imu_;
@@ -319,7 +327,7 @@ void loadLQRParams()
     rclcpp::Publisher<mavros_msgs::msg::AttitudeTarget>::SharedPtr attitude_publisher_;
     PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1);
     Eigen::Vector3d current_target_position_{0, 0, 10}; 
-    Eigen::Vector3d desired_target_position_{10, 0, 10};
+    Eigen::Vector3d desired_target_position_{10, 10, 10};
     double step_size_ = 0.025;
 
 };
