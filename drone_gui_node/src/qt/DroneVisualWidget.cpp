@@ -136,19 +136,19 @@ void DroneVisualWidget::updateDronesOrientation(){
 void DroneVisualWidget::addAxes(std::string axis1, std::string axis2, QGraphicsRectItem *parent, QGraphicsScene *parentScene, QPointF droneCenter, QPen axisPen)
 {
     QGraphicsLineItem *xAxisLine = parentScene->addLine(droneCenter.x(), droneCenter.y(), droneCenter.x() + 100, droneCenter.y(), axisPen);
-    xAxisLine->setParentItem(parent);
+    //xAxisLine->setParentItem(parent);
 
     QPolygonF xArrowHead;
     xArrowHead << QPointF(droneCenter.x() + 100, droneCenter.y())
                << QPointF(droneCenter.x() + 90, droneCenter.y() - 5)
                << QPointF(droneCenter.x() + 90, droneCenter.y() + 5);
     QGraphicsPolygonItem *xArrowItem = parentScene->addPolygon(xArrowHead, axisPen, QBrush(Qt::red));
-    xArrowItem->setParentItem(parent);
+    //xArrowItem->setParentItem(parent);
 
     axisPen.setColor(Qt::blue);
 
     QGraphicsLineItem *zAxisLine = parentScene->addLine(droneCenter.x(), droneCenter.y(), droneCenter.x(), droneCenter.y() + 100, axisPen);
-    zAxisLine->setParentItem(parent);
+    //zAxisLine->setParentItem(parent);
 
     QPolygonF zArrowHead;
     zArrowHead << QPointF(droneCenter.x(), droneCenter.y() + 100)
@@ -156,7 +156,7 @@ void DroneVisualWidget::addAxes(std::string axis1, std::string axis2, QGraphicsR
                << QPointF(droneCenter.x() + 5, droneCenter.y() + 90);
 
     QGraphicsPolygonItem *zArrowItem = parentScene->addPolygon(zArrowHead, axisPen, QBrush(Qt::blue));
-    zArrowItem->setParentItem(parent);
+    //zArrowItem->setParentItem(parent);
 
     QGraphicsTextItem *xLabel = new QGraphicsTextItem(QString::fromStdString(axis1));
 
@@ -170,9 +170,9 @@ void DroneVisualWidget::addAxes(std::string axis1, std::string axis2, QGraphicsR
 
     zLabel->setPos(zLabelPos);
     parentScene->addItem(zLabel);
-    zLabel->setParentItem(parent);
+    //zLabel->setParentItem(parent);
     parentScene->addItem(xLabel);
-    xLabel->setParentItem(parent);
+    //xLabel->setParentItem(parent);
 }
 
 void DroneVisualWidget::checkConnectivity(bool connected)
