@@ -246,6 +246,7 @@ void updateTargetPositionGradually() {
     current_target_position_ += position_difference;
     RCLCPP_INFO(this->get_logger(), "target X: %f, target Y: %f", desired_target_position_(0), desired_target_position_(1));
 }
+
 void updateCircleTargetPosition() {
     if (trajectory_type != "circle") return;
         if (!drone_pose_) {
