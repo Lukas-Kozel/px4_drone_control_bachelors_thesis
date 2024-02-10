@@ -37,6 +37,12 @@ def generate_launch_description():
             'radius': LaunchConfiguration('radius'),
         }],
     )
+    dlq_k_matrix_calculator = Node(
+        package='dlq_k_matrix_calculator',
+        executable='dlq_k_matrix_calculator',
+        name='dlq_k_matrix_calculator',
+        output='screen',
+    )
 
     return LaunchDescription([
         trajectory_type,
@@ -44,4 +50,5 @@ def generate_launch_description():
         waypoint_y,
         radius,
         lqr_controller_node,
+        dlq_k_matrix_calculator
     ])
