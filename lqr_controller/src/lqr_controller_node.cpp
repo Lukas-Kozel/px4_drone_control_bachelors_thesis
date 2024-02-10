@@ -220,9 +220,9 @@ void publish_control(double roll, double pitch, double yaw){
     double new_thrust = base_thrust + thrust_adjustment;
 
     new_thrust = std::max(0.0, std::min(1.0, new_thrust));
-
+    calculateRotation();
     tf2::Quaternion quaternion;
-    quaternion.setRPY(roll, pitch, yaw);
+    quaternion.setRPY(roll, pitch,rotation_towards_waypoint);
     quaternion.normalize();
 
     mavros_msgs::msg::AttitudeTarget attitude_msg;
@@ -244,7 +244,7 @@ void updateTargetPositionGradually() {
         position_difference = step_size_ * position_difference.normalized();
     }
     current_target_position_ += position_difference;
-    RCLCPP_INFO(this->get_logger(), "target X: %f, target Y: %f", desired_target_position_(1), desired_target_position_(2));
+    RCLCPP_INFO(this->get_logger(), "target X: %f, target Y: %f", desired_target_position_(0), desired_target_position_(1));
 }
 void updateCircleTargetPosition() {
     if (trajectory_type != "circle") return;
@@ -252,9 +252,8 @@ void updateCircleTargetPosition() {
         RCLCPP_ERROR(this->get_logger(), "Drone pose data not available");
         return;
     }
-
-    double center_x = drone_pose_->pose.position.x;
-    double center_y = drone_pose_->pose.position.y;
+    double center_x = 0;
+    double center_y = 0;
     static double angle = 0; 
     double angle_increment = M_PI / 180.0 * 0.25;
 
@@ -270,6 +269,45 @@ void updateCircleTargetPosition() {
         current_target_position_(0), current_target_position_(1), current_target_position_(2));
 }
 
+double normalizeAngle(double angle) {
+    angle = std::fmod(angle + M_PI, 2 * M_PI);
+    if (angle < 0) angle += 2 * M_PI;
+    angle -= M_PI;
+    return angle;
+}
+
+
+void calculateRotation(){
+    if(trajectory_type=="waypoint"){
+        calculateRotationTowardsWaypoint();
+    }
+    else if(trajectory_type=="circle"){
+        calculateRotationForCircle();
+    }
+    else{
+        rotation_towards_waypoint = yaw;
+    }
+}
+
+void calculateRotationTowardsWaypoint() {
+    double targetAngle = atan2(current_target_position_(1) - drone_pose_->pose.position.y, 
+                               current_target_position_(0) - drone_pose_->pose.position.x);
+    targetAngle = normalizeAngle(targetAngle);
+    
+    double distanceToTarget = sqrt(pow(current_target_position_(0) - drone_pose_->pose.position.x, 2) +
+                                   pow(current_target_position_(1) - drone_pose_->pose.position.y, 2));
+    RCLCPP_INFO(this->get_logger(), "distanceToTarget: %f",distanceToTarget);                
+    if (distanceToTarget > 1.25) { // Assuming 0.25 is the combined threshold for proximity.
+        rotation_towards_waypoint = targetAngle;
+    }
+}
+
+void calculateRotationForCircle() {
+    double targetAngle = atan2(current_target_position_(1) - drone_pose_->pose.position.y, 
+                               current_target_position_(0) - drone_pose_->pose.position.x);
+    targetAngle = normalizeAngle(targetAngle);
+    rotation_towards_waypoint = targetAngle;
+}
 
 std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
     tf2::Matrix3x3 rotation_matrix;
@@ -359,6 +397,7 @@ void getInputParameters() {
     double step_size_ = 0.025;
     std::string trajectory_type;
     double radius=0;
+    double rotation_towards_waypoint=0;
 };
 
 
