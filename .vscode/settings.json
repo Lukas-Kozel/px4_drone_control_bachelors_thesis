@@ -12,5 +12,6 @@
         "/home/luky/ros2_ws/install/my_robot_controller/lib/python3.10/site-packages",
         "/opt/ros/humble/lib/python3.10/site-packages",
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
-    ]
+    ],
+    "cmake.sourceDirectory": "/home/luky/mavros_ros2_ws/angle_calculator"
 }
