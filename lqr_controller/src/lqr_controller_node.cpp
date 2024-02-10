@@ -46,7 +46,7 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         state_publisher_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("state_vector", 10);
         state_x = Eigen::VectorXd::Zero(4);
         state_y = Eigen::VectorXd::Zero(4);
-        loadLQRParams();
+        getInputParameters();
         setOffboardMode();
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
@@ -147,19 +147,15 @@ void update_load_angular_velocity() {
         RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
         return;
     }
-        //state_x(0) = drone_pose_->pose.position.x;
         state_x(1) = drone_velocity_->twist.linear.x;
         state_x(2)= load_angle_-> angle.angle_x;
         state_x(3)= load_imu_->angular_velocity.x;
 
 
-        //state_y(0) = drone_pose_->pose.position.y;
         state_y(1) = drone_velocity_->twist.linear.y;
         state_y(2)= load_angle_-> angle.angle_y;
         state_y(3)= load_imu_->angular_velocity.y;
 
-        //update_load_angular_velocity();
-        //updateTargetPositionGradually();
         state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
         state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
@@ -187,6 +183,12 @@ void update_load_angular_velocity() {
         if (!drone_pose_) {
         RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
         return;
+        }
+        if (trajectory_type == "circle") {
+            updateCircleTargetPosition();
+        }
+        else{
+            updateTargetPositionGradually();
         }
         create_state_vector();
         RCLCPP_INFO(this->get_logger(), "K: [%f, %f, %f, %f]", K(0), K(1), K(2), K(3));
@@ -242,7 +244,32 @@ void updateTargetPositionGradually() {
         position_difference = step_size_ * position_difference.normalized();
     }
     current_target_position_ += position_difference;
+    RCLCPP_INFO(this->get_logger(), "target X: %f, target Y: %f", desired_target_position_(1), desired_target_position_(2));
 }
+void updateCircleTargetPosition() {
+    if (trajectory_type != "circle") return;
+        if (!drone_pose_) {
+        RCLCPP_ERROR(this->get_logger(), "Drone pose data not available");
+        return;
+    }
+
+    double center_x = drone_pose_->pose.position.x;
+    double center_y = drone_pose_->pose.position.y;
+    static double angle = 0; 
+    double angle_increment = M_PI / 180.0 * 0.25;
+
+    angle += angle_increment;
+    if (angle >= 2 * M_PI) angle -= 2 * M_PI; // Reset angle after full circle
+
+    // Calculate new target position
+    current_target_position_(0) = center_x + radius * cos(angle);
+    current_target_position_(1) = center_y + radius * sin(angle);
+
+    // Log the new target position for debugging
+    RCLCPP_INFO(this->get_logger(), "New target position for circle: X: %f, Y: %f, Z: %f",
+        current_target_position_(0), current_target_position_(1), current_target_position_(2));
+}
+
 
 std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
     tf2::Matrix3x3 rotation_matrix;
@@ -267,40 +294,41 @@ void publishStateVector(){
 
 }
 
-void loadLQRParams()
-{
-    std::string file_path = "/home/luky/mavros_ros2_ws/lqr_controller/src/params.yaml";
-    YAML::Node config = YAML::LoadFile(file_path);
-
-    if (config["lqr_params"])
-    {
-        std::vector<double> K_ = config["lqr_params"]["K_x"].as<std::vector<double>>();
-        if (K_.size() == 4)
-        {
-            K = Eigen::VectorXd(4);
-
-            for (int i = 0; i < 4; ++i)
-            {
-                K(i) = K_[i];
-            }
-        }
-        else
-        {
-            RCLCPP_ERROR(this->get_logger(), "Invalid size for K in LQR parameters");
-        }
-    }
-    else
-    {
-        RCLCPP_ERROR(this->get_logger(), "LQR parameters not found in YAML file");
-    }
-}
-
 void setOffboardMode(){
     auto set_mode_request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
     set_mode_request->custom_mode = "OFFBOARD";
     auto set_mode_future = set_mode_client_->async_send_request(set_mode_request);
 }
 
+void getInputParameters() {
+    this->declare_parameter<std::string>("trajectory_type", "waypoint");
+    double waypoint_x, waypoint_y;
+    this->declare_parameter<double>("waypoint_x", 0.0);
+    this->declare_parameter<double>("waypoint_y", 0.0);
+    this->declare_parameter<double>("radius", 0.0);
+
+    this->get_parameter("trajectory_type", trajectory_type);
+
+    if (trajectory_type == "waypoint") {
+        this->get_parameter("waypoint_x", waypoint_x);
+        this->get_parameter("waypoint_y", waypoint_y);
+        desired_target_position_ = Eigen::Vector3d(waypoint_x, waypoint_y, 10.0);
+        RCLCPP_INFO(this->get_logger(), "Waypoint X: %f, Waypoint Y: %f", waypoint_x, waypoint_y);
+    } else if (trajectory_type == "circle") {
+        this->get_parameter("radius", radius);
+        RCLCPP_INFO(this->get_logger(),"radius %f", radius);
+        double center_x = 0;
+        double center_y = 0;
+        double center_z = 10.0;
+        double initial_angle = 0;
+        current_target_position_ = Eigen::Vector3d(
+            center_x + radius * cos(initial_angle),
+            center_y + radius * sin(initial_angle),
+            center_z
+        );
+        RCLCPP_INFO(this->get_logger(), "Circle Center X: %f, Y: %f, Radius: %f", center_x, center_y, radius);
+    }
+}
 
 
     rclcpp::TimerBase::SharedPtr control_timer_;
@@ -315,7 +343,7 @@ void setOffboardMode(){
     angle_stamped_msg::msg::AngleStamped::SharedPtr load_angle_;
     sensor_msgs::msg::Imu::SharedPtr load_imu_;
     geometry_msgs::msg::TwistStamped::SharedPtr drone_velocity_;
-    Eigen::VectorXd K;
+    Eigen::VectorXd K=Eigen::VectorXd::Zero(4);
     Eigen::VectorXd state_x;
     Eigen::VectorXd state_y;
     double control_input_x;
@@ -326,10 +354,11 @@ void setOffboardMode(){
     double roll = 0;
     rclcpp::Publisher<mavros_msgs::msg::AttitudeTarget>::SharedPtr attitude_publisher_;
     PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1);
-    Eigen::Vector3d current_target_position_{0, 0, 10}; 
-    Eigen::Vector3d desired_target_position_{10, 10, 10};
+    Eigen::Vector3d current_target_position_{0, 0, 10};
+    Eigen::Vector3d desired_target_position_;
     double step_size_ = 0.025;
-
+    std::string trajectory_type;
+    double radius=0;
 };
 
 
