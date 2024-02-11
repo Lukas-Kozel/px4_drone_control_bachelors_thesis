@@ -185,6 +185,7 @@ void update_load_angular_velocity() {
         return;
         }
         if (trajectory_type == "circle") {
+            circleTrajectorySetup();
             updateCircleTargetPosition();
         }
         else{
@@ -200,8 +201,6 @@ void update_load_angular_velocity() {
 
         double control_input_x_rotated = rotated_inputs.first; 
         double control_input_y_rotated = rotated_inputs.second;
-        RCLCPP_INFO(this->get_logger(), "Control input x: %.2f",control_input_x_rotated);
-        RCLCPP_INFO(this->get_logger(), "Control input y: %.2f",control_input_y_rotated);
         compute_attitude(control_input_x_rotated,control_input_y_rotated);
         publish_control(roll, pitch, yaw);
     }
@@ -246,7 +245,30 @@ void updateTargetPositionGradually() {
     current_target_position_ += position_difference;
     RCLCPP_INFO(this->get_logger(), "target X: %f, target Y: %f", desired_target_position_(0), desired_target_position_(1));
 }
+
+
+void circleTrajectorySetup() {
+    if (!initial_position_captured_ && drone_pose_) {
+        initial_position_ = Eigen::Vector3d(
+            drone_pose_->pose.position.x,
+            drone_pose_->pose.position.y,
+            drone_pose_->pose.position.z
+        );
+        // Directly set the circle's center if known, or calculate based on the initial position and desired conditions
+        circle_center_ = Eigen::Vector3d(circle_center_offset_(0),circle_center_offset_(1), 0);
+
+        // Calculate initial angle based on the drone's position and the circle center
+        initial_angle = atan2(initial_position_.y() - circle_center_.y(), initial_position_.x() - circle_center_.x());
+        // Ensure the drone starts at the calculated initial angle on the circle
+        current_target_position_ = circle_center_ + Eigen::Vector3d(radius * cos(initial_angle), radius * sin(initial_angle), 0);
+
+        initial_position_captured_ = true;
+    }
+}
+
+
 void updateCircleTargetPosition() {
+    if (!initial_position_captured_) return;
     if (trajectory_type != "circle") return;
         if (!drone_pose_) {
         RCLCPP_ERROR(this->get_logger(), "Drone pose data not available");
@@ -254,15 +276,17 @@ void updateCircleTargetPosition() {
     }
     double center_x = 0;
     double center_y = 0;
-    static double angle = 0; 
+    static double angle = initial_angle; 
     double angle_increment = M_PI / 180.0 * 0.25;
 
     angle += angle_increment;
-    if (angle >= 2 * M_PI) angle -= 2 * M_PI; // Reset angle after full circle
+    if (angle >= 2 * M_PI){  
+        angle -= 2 * M_PI; // Reset angle after full circle
+    }
 
     // Calculate new target position
-    current_target_position_(0) = center_x + radius * cos(angle);
-    current_target_position_(1) = center_y + radius * sin(angle);
+    current_target_position_(0) = circle_center_(0) + radius * cos(angle);
+    current_target_position_(1) = circle_center_(1) + radius * sin(angle);
 
     // Log the new target position for debugging
     RCLCPP_INFO(this->get_logger(), "New target position for circle: X: %f, Y: %f, Z: %f",
@@ -364,6 +388,7 @@ void getInputParameters() {
             center_y + radius * sin(initial_angle),
             center_z
         );
+        circle_center_offset_=Eigen::Vector3d(radius, 0, 10.0);
         RCLCPP_INFO(this->get_logger(), "Circle Center X: %f, Y: %f, Radius: %f", center_x, center_y, radius);
     }
 }
@@ -390,14 +415,21 @@ void getInputParameters() {
     double pitch = 0;
     double yaw =0;
     double roll = 0;
+    double circle_counter=0;
     rclcpp::Publisher<mavros_msgs::msg::AttitudeTarget>::SharedPtr attitude_publisher_;
     PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1);
     Eigen::Vector3d current_target_position_{0, 0, 10};
     Eigen::Vector3d desired_target_position_;
-    double step_size_ = 0.025;
+    double step_size_ = 0.01;
     std::string trajectory_type;
     double radius=0;
     double rotation_towards_waypoint=0;
+    Eigen::Vector3d initial_position_;
+    bool initial_position_captured_ = false;
+    Eigen::Vector3d circle_center_;
+    Eigen::Vector3d circle_center_offset_;
+    double initial_angle=0;
+
 };
 
 
