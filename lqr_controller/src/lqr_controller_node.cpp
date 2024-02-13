@@ -277,7 +277,7 @@ void updateCircleTargetPosition() {
     double center_x = 0;
     double center_y = 0;
     static double angle = initial_angle; 
-    double angle_increment = M_PI / 180.0 * 0.25;
+    double angle_increment = M_PI / 180.0 * 0.15;
 
     angle += angle_increment;
     if (angle >= 2 * M_PI){  
@@ -321,7 +321,7 @@ void calculateRotationTowardsWaypoint() {
     double distanceToTarget = sqrt(pow(current_target_position_(0) - drone_pose_->pose.position.x, 2) +
                                    pow(current_target_position_(1) - drone_pose_->pose.position.y, 2));
     RCLCPP_INFO(this->get_logger(), "distanceToTarget: %f",distanceToTarget);                
-    if (distanceToTarget > 1.25) { // Assuming 0.25 is the combined threshold for proximity.
+    if (distanceToTarget > 1.25) {
         rotation_towards_waypoint = targetAngle;
     }
 }
@@ -351,7 +351,7 @@ double getYawFromQuaternion(const geometry_msgs::msg::Quaternion& q) {
 
 void publishStateVector(){
     std_msgs::msg::Float64MultiArray state_msg;
-    state_msg.data = {state_x(0), state_x(1), state_x(2), state_x(3), state_y(0), state_y(1), state_y(2), state_y(3)};
+    state_msg.data = {state_x(0), state_x(1), state_x(2), state_x(3), state_y(0), state_y(1), state_y(2), state_y(3),drone_pose_->pose.position.x,drone_pose_->pose.position.y};
     state_publisher_->publish(state_msg);
 
 }
@@ -420,7 +420,7 @@ void getInputParameters() {
     PIDController pid = PIDController(1.2, 0.1, 0.45, -1,1);
     Eigen::Vector3d current_target_position_{0, 0, 10};
     Eigen::Vector3d desired_target_position_;
-    double step_size_ = 0.01;
+    double step_size_ = 0.0075;
     std::string trajectory_type;
     double radius=0;
     double rotation_towards_waypoint=0;
