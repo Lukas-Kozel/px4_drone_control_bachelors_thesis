@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def sanitize_column_name(col_name):
     return col_name.replace('/', '_').replace('[', '').replace(']', '')
 
-filepath = "/home/luky/Desktop/bakalarka/csv_grafy/let na pozici 10 10/init_angle_7/data.csv"
+filepath = "/home/luky/Desktop/bakalarka/csv_grafy/let na pozici 10 10/init_angle_12/data.csv"
 
 # Load the data from CSV file
 data = pd.read_csv(filepath)
@@ -48,7 +48,7 @@ for plot_name, info in plot_structure.items():
     plt.tight_layout()
     
     sanitized_plot_name = sanitize_column_name(plot_name)
-    filename = f'./graphs/{sanitized_plot_name}.svg'
+    filename = f'./graphs/init12/{sanitized_plot_name}.svg'
     plt.savefig(filename)  # Save the figure with the plot name
     plt.show()
     plt.close(fig)  # Close the figure after displaying
