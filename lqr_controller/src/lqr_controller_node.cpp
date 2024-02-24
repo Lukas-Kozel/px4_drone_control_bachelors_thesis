@@ -53,7 +53,6 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
             std::chrono::milliseconds(20),  
             std::bind(&LQRController::control, this)
         );
-        previous = tf2::Quaternion(0,0,0,1);
     }
 
 private:
@@ -63,21 +62,14 @@ void on_K_matrix_received(const std_msgs::msg::Float64MultiArray::SharedPtr msg)
             RCLCPP_INFO(this->get_logger(), "Message is null");
             return;
         }
-
-        // Check if sizes match to avoid out-of-bound errors
         if(K.size() != static_cast<int>(msg->data.size())) {
             RCLCPP_INFO(this->get_logger(), "Size mismatch, K not updated");
             return;
         }
-
-        // Convert std::vector to Eigen::VectorXd
         Eigen::VectorXd incomingK = Eigen::Map<const Eigen::VectorXd>(msg->data.data(), msg->data.size());
-
-        // Check if K is equal to incomingK (for exact matches)
         if(K == incomingK) {
             RCLCPP_INFO(this->get_logger(), "K is equal to incoming data, no update needed");
         } else {
-            // If they are not equal, you might want to update K here
             K = incomingK;
             RCLCPP_INFO(this->get_logger(), "K updated with new data");
         }
@@ -89,23 +81,7 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     if (msg == nullptr) {
         return;
     }
-   /* tf2::Quaternion current(msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w);
-    tf2::Quaternion adjusted_current = adjustQuaternionSign(current, previous); // Adjust the sign before using it
-    RCLCPP_INFO(this->get_logger(), "Raw Quaternion: [%f, %f, %f, %f]", 
-                msg->pose.orientation.x, 
-                msg->pose.orientation.y, 
-                msg->pose.orientation.z, 
-                msg->pose.orientation.w);
-    previous = adjusted_current; // Update the previous quaternion after adjustment
-    previous.normalize();
-
-    double roll_test, pitch_test, yaw_test;
-    tf2::Matrix3x3(previous).getRPY(roll_test, pitch_test, yaw_test);
-
-    RCLCPP_INFO(this->get_logger(), "Euler Angles: Roll: %f, Pitch: %f, Yaw: %f", 
-                roll, pitch, yaw);
-    */
-   drone_pose_ = msg; // Use the adjusted quaternion for further processing
+   drone_pose_ = msg;
 }
 
     void on_load_imu_received(const sensor_msgs::msg::Imu::SharedPtr msg)
@@ -143,12 +119,9 @@ void update_load_angular_velocity() {
         load_imu_->orientation.w
     );
     load_orientation.normalize();
-    double load_roll, load_pitch, load_yaw;
-    tf2::Matrix3x3(load_orientation).getRPY(load_roll, load_pitch, load_yaw);
     tf2::Matrix3x3 rotation_matrix;
-    rotation_matrix.setRPY(load_roll, load_pitch, load_yaw);
-        
-    // Obtain angular velocity from IMU data
+    rotation_matrix = tf2::Matrix3x3(load_orientation);
+
     tf2::Vector3 local_angular_velocity(
         load_imu_->angular_velocity.x,
         load_imu_->angular_velocity.y,
@@ -164,17 +137,14 @@ void update_load_angular_velocity() {
         RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
         return;
     }
+        state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
         state_x(1) = drone_velocity_->twist.linear.x;
         state_x(2)= load_angle_-> angle.angle_x;
-        //state_x(3)= 0; //load_imu_->angular_velocity.x;
 
-
+        state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         state_y(1) = drone_velocity_->twist.linear.y;
         state_y(2)= load_angle_-> angle.angle_y;
-        //state_y(3)= 0; //load_imu_->angular_velocity.y;
         update_load_angular_velocity();
-        state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
-        state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
     }
@@ -185,10 +155,7 @@ void update_load_angular_velocity() {
         double acceleration_y = control_input_y/system_mass;
         roll = -acceleration_y/g;
         pitch = +acceleration_x/g;
-        // Saturation limits
         double max_tilt_angle = 0.2617993878; 
-
-        // Apply saturation
         roll = std::max(std::min(roll, max_tilt_angle), -max_tilt_angle);
         pitch = std::max(std::min(pitch, max_tilt_angle), -max_tilt_angle);
     }
@@ -212,23 +179,12 @@ void control(){
         control_input_y = -K.dot(state_y);
         publishStateVector();
         calculateRotation();
-        double interpolation_parameter = 0.5; // for halfway interpolation
-        tf2::Quaternion current(drone_pose_->pose.orientation.x, 
+        tf2::Quaternion drone_orientation(drone_pose_->pose.orientation.x, 
                         drone_pose_->pose.orientation.y, 
                         drone_pose_->pose.orientation.z, 
                         drone_pose_->pose.orientation.w);
-        current = adjustQuaternionSign(current, previous);
-        tf2::Quaternion interpolated_quaternion = slerpQuaternion(previous, current, interpolation_parameter);
-        previous = interpolated_quaternion;
-        double new_yaw = getYawFromQuaternion(previous);
-        new_yaw = unwrap(previous_yaw, new_yaw); // Unwrap the new angle
-        previous_yaw = new_yaw;
-        yaw = new_yaw;
-        //yaw = getYawFromQuaternion(previous);
-        //yaw = normalizeAngle(yaw);
-        RCLCPP_INFO(this->get_logger(), "DEBUG yaw: %.2f",yaw);
-        auto rotated_inputs = rotateControlInputs(control_input_x, control_input_y, yaw);
-        RCLCPP_INFO(this->get_logger(), "ENU - DEBUG rotating control inputs: %.2f",yaw);
+                        
+        auto rotated_inputs = rotateControlInputs(control_input_x, control_input_y, drone_orientation);
         double control_input_x_rotated = rotated_inputs.first; 
         double control_input_y_rotated = rotated_inputs.second;
         RCLCPP_INFO(this->get_logger(), "DEBUG final control inputs: %.2f, %.2f",control_input_x_rotated,control_input_y_rotated);
@@ -237,11 +193,11 @@ void control(){
     }
 
 void publish_control(double roll, double pitch, double yaw){
+
         if (!drone_pose_) {
         RCLCPP_ERROR(this->get_logger(), "Drone pose not available for control");
         return;
     }
-
     double desired_altitude = 10;
     double altitude_error = desired_altitude - drone_pose_->pose.position.z;
     double dt = 0.02;
@@ -266,6 +222,7 @@ void publish_control(double roll, double pitch, double yaw){
     attitude_publisher_->publish(attitude_msg);
 }
 
+
 void updateTargetPositionGradually() {
     Eigen::Vector3d position_difference = desired_target_position_ - current_target_position_;
 
@@ -275,6 +232,7 @@ void updateTargetPositionGradually() {
     current_target_position_ += position_difference;
 }
 
+
 void circleTrajectorySetup() {
     if (!initial_position_captured_ && drone_pose_) {
         initial_position_ = Eigen::Vector3d(
@@ -282,14 +240,10 @@ void circleTrajectorySetup() {
             drone_pose_->pose.position.y,
             drone_pose_->pose.position.z
         );
-        // Directly set the circle's center if known, or calculate based on the initial position and desired conditions
         circle_center_ = Eigen::Vector3d(circle_center_offset_(0),circle_center_offset_(1), 0); // radius, 0,0
 
-        // Calculate initial angle based on the drone's position and the circle center
         initial_angle = atan2(initial_position_.y() - circle_center_.y(), initial_position_.x() - circle_center_.x());
-        // Ensure the drone starts at the calculated initial angle on the circle
         current_target_position_ = circle_center_ + Eigen::Vector3d(radius * cos(initial_angle), radius * sin(initial_angle), 0);
-
         initial_position_captured_ = true;
     }
 }
@@ -314,6 +268,7 @@ void updateCircleTargetPosition() {
     current_target_position_(1) = circle_center_(1) + radius * sin(angle);
 }
 
+
 double normalizeAngle(double angle) {
     angle = std::fmod(angle + M_PI, 2.0 * M_PI);
     if (angle < 0) angle += 2.0 * M_PI;
@@ -321,23 +276,6 @@ double normalizeAngle(double angle) {
     return angle;
 }
 
-double unwrap(double previous_angle, double new_angle) {
-    double delta = new_angle - previous_angle;
-    if (delta > M_PI) {
-        new_angle -= 2 * M_PI;
-    } else if (delta < -M_PI) {
-        new_angle += 2 * M_PI;
-    }
-    return new_angle;
-}
-
-
-tf2::Quaternion adjustQuaternionSign(const tf2::Quaternion& current, const tf2::Quaternion& previous) {
-    if (previous.dot(current) < 0) {
-        return tf2::Quaternion(-current.x(), -current.y(), -current.z(), -current.w());
-    }
-    return current;
-}
 
 void calculateRotation(){
     if(trajectory_type=="waypoint"){
@@ -350,6 +288,7 @@ void calculateRotation(){
         rotation_towards_waypoint = yaw;
     }
 }
+
 
 void calculateRotationTowardsWaypoint() {
     double targetAngle = atan2(current_target_position_(1) - drone_pose_->pose.position.y, 
@@ -364,6 +303,7 @@ void calculateRotationTowardsWaypoint() {
     }
 }
 
+
 void calculateRotationForCircle() {
     double targetAngle = atan2(current_target_position_(1) - drone_pose_->pose.position.y, 
                                current_target_position_(0) - drone_pose_->pose.position.x);
@@ -371,60 +311,15 @@ void calculateRotationForCircle() {
     rotation_towards_waypoint = targetAngle;
 }
 
-std::pair<double, double> rotateControlInputs(double input_x, double input_y, double yaw) {
-    tf2::Matrix3x3 rotation_matrix;
-   /* tf2::Quaternion drone_orientation;
-    tf2::convert(drone_pose_->pose.orientation, drone_orientation);
-    drone_orientation.normalize();
 
-    double roll, pitch, yaw;
-    tf2::Matrix3x3(drone_orientation).getRPY(roll, pitch, yaw);
-    */
-    rotation_matrix.setRPY(0, 0, yaw);
+std::pair<double, double> rotateControlInputs(double input_x, double input_y, tf2::Quaternion drone_orientation) {
+    drone_orientation.normalize();
+    tf2::Matrix3x3 rotation_matrix = tf2::Matrix3x3(drone_orientation);
     tf2::Vector3 inputs(input_x, input_y, 0);
     tf2::Vector3 rotated_inputs = rotation_matrix.transpose() * inputs;
     return {rotated_inputs.x(), rotated_inputs.y()};
 }
 
-double getYawFromQuaternion(const tf2::Quaternion& q) { //const geometry_msgs::msg::Quaternion& q
-    //tf2::Quaternion tf_q(q.x, q.y, q.z, q.w);
-    tf2::Matrix3x3 m(q);
-    double roll, pitch, yaw;
-    m.getRPY(roll, pitch, yaw);
-    return yaw;
-}
-
-tf2::Quaternion slerpQuaternion(const tf2::Quaternion& q1, const tf2::Quaternion& q2, double t) {
-    tf2::Quaternion qa = q1.normalized();
-    tf2::Quaternion qb = q2.normalized();
-    double dot = qa.dot(qb);
-
-    if (dot < 0.0) {
-        qb = tf2::Quaternion(-qb.x(), -qb.y(), -qb.z(), -qb.w());
-        dot = -dot;
-    }
-
-
-    if (dot > 0.9995) {
-        tf2::Quaternion result = qa + (qb - qa) * t;
-        return result.normalized();
-    }
-
-    double halfTheta = acos(dot);
-    double sinHalfTheta = sqrt(1.0 - dot * dot);
-
-    if (fabs(sinHalfTheta) < 0.001) {
-        tf2::Quaternion qm; 
-        qm = (qa + qb) * 0.5;
-        return qm.normalized();
-    }
-
-    double ratioA = sin((1 - t) * halfTheta) / sinHalfTheta;
-    double ratioB = sin(t * halfTheta) / sinHalfTheta;
-
-    tf2::Quaternion qm = (qa * ratioA + qb * ratioB).normalized();
-    return qm;
-}
 
 void publishStateVector(){
     std_msgs::msg::Float64MultiArray state_msg;
@@ -433,11 +328,13 @@ void publishStateVector(){
 
 }
 
+
 void setOffboardMode(){
     auto set_mode_request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
     set_mode_request->custom_mode = "OFFBOARD";
     auto set_mode_future = set_mode_client_->async_send_request(set_mode_request);
 }
+
 
 void getInputParameters() {
     this->declare_parameter<std::string>("trajectory_type", "waypoint");
@@ -506,8 +403,6 @@ void getInputParameters() {
     Eigen::Vector3d circle_center_;
     Eigen::Vector3d circle_center_offset_;
     double initial_angle=0;
-    tf2::Quaternion previous;
-    double previous_yaw = 0;
 
 };
 

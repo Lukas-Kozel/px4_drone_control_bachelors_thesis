@@ -13,7 +13,7 @@
 class AngleCalculator : public rclcpp::Node
 {
 public:
-    AngleCalculator() : Node("angle_calculator"), previous(0,0,0,1)
+    AngleCalculator() : Node("angle_calculator")
     {
                 auto qos = rclcpp::QoS(rclcpp::QoSInitialization(
     RMW_QOS_POLICY_HISTORY_KEEP_LAST,
@@ -33,7 +33,6 @@ private:
     void on_load_pose_received(const load_pose_stamped::msg::LoadPoseStamped::SharedPtr msg)
     {
         load_pose_ = msg;
-        //calculate_angles();
     }
 
     void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
@@ -41,9 +40,6 @@ private:
         if (msg == nullptr) {
             return;
         }
-        tf2::Quaternion current(msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w);
-        current = adjustQuaternionSign(current, previous);
-        previous = current; 
         drone_pose_ = msg; 
         calculate_angles();
     }
@@ -60,18 +56,8 @@ void calculate_angles()
     }
 
     tf2::Quaternion drone_orientation;
-
     tf2::convert(drone_pose_->pose.orientation, drone_orientation);
-    drone_orientation = previous;
     drone_orientation.normalize();
-
-    double roll, pitch, yaw;
-    tf2::Matrix3x3(drone_orientation).getRPY(roll, pitch, yaw);
-
-   /* tf2::Matrix3x3 rotation_matrix;
-    rotation_matrix.setRPY(roll,pitch, yaw);
-*/
-    // Load's position
     tf2::Matrix3x3 rotation_matrix(drone_orientation);
     tf2::Vector3 load_position(
         load_pose_->pose.position.x,
@@ -88,10 +74,8 @@ void calculate_angles()
             x, y, z);
     double projection_xy_magnitude = std::sqrt(x * x + y * y);
 
-    RCLCPP_INFO(this->get_logger(), "pitch: %.2f ; roll: %.2f",
-            pitch, roll);
-    double theta_x_rad = std::atan(x/(z)); // +pitch; 
-    double theta_y_rad = std::atan(y/(z));//-roll;
+    double theta_x_rad = std::atan(x/(z));
+    double theta_y_rad = std::atan(y/(z));
     double theta_z_rad = std::atan(projection_xy_magnitude/z);
 
     RCLCPP_INFO(this->get_logger(), "Theta: θ_x = %.2f rad, θ_y = %.2f rad, θ_z = %.2f rad",
@@ -105,14 +89,6 @@ void calculate_angles()
     load_angle_publisher_->publish(angle_msg);
 }
 
-
-    tf2::Quaternion adjustQuaternionSign(const tf2::Quaternion& current, const tf2::Quaternion& previous) {
-        if (current.dot(previous) < 0) {
-            return tf2::Quaternion(-current.x(), -current.y(), -current.z(), -current.w());
-        }
-        return current;
-    }
-
     rclcpp::Subscription<load_pose_stamped::msg::LoadPoseStamped>::SharedPtr load_pose_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr drone_pose_subscriber_;
     rclcpp::Subscription<rosgraph_msgs::msg::Clock>::SharedPtr clock_subscriber_;
@@ -120,7 +96,6 @@ void calculate_angles()
     load_pose_stamped::msg::LoadPoseStamped::SharedPtr load_pose_;
     geometry_msgs::msg::PoseStamped::SharedPtr drone_pose_;
     builtin_interfaces::msg::Time latest_clock_;
-    tf2::Quaternion previous;
 };
 
 int main(int argc, char * argv[])
