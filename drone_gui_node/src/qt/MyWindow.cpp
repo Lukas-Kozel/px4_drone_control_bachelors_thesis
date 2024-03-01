@@ -90,6 +90,10 @@ MyWindow::MyWindow(rclcpp::Node::SharedPtr node, ConnectionManager* connectionMa
     setMenuBar(menuBar);
     setCentralWidget(centralWidget);
     resize(1500, 750);
+    statusMessageLabel = new QLabel(this);
+    statusMessageLabel->setStyleSheet("background-color: lightgrey; border-radius: 5px; padding: 2px 5px;");
+    statusMessageLabel->setAlignment(Qt::AlignCenter);
+    statusMessageLabel->hide();
 
     connect(connectionManager, &ConnectionManager::dronePoseReceived, this, &MyWindow::updateDronePose);
     connect(connectionManager, &ConnectionManager::loadImuReceived, this, &MyWindow::updateLoadImu);
@@ -267,11 +271,11 @@ void MyWindow::onSwitchToOffboardMode()
     {
         switchOffboardModeButton->setDisabled(true);
         turnOffboardModeOffButton->setDisabled(false);
-        qDebug() << "Successfully switched to offboard mode";
+        showStatusMessage("Successfully switched to offboard mode.");
     }
     else
     {
-        qDebug() << "Failed to switch to offboard mode";
+        showStatusMessage("Failed to switch to offboard mode");
     }
     }
     else{
@@ -288,27 +292,27 @@ void MyWindow::turnOffboardModeOff(){
         turnOffTheController();
         switchOffboardModeButton->setDisabled(false);
         turnOffboardModeOffButton->setDisabled(true);
-        qDebug() << "Successfully switched off the offboard mode";
+        showStatusMessage("Successfully switched off the offboard mode.");
     }
     else
     {
-        qDebug() << "Failed to switch off the offboard mode";
+        showStatusMessage("Failed to switch off the offboard mode.");
     }
 }
 
 void MyWindow::onSwitchToArmedMode()
 {
     if (connectionManager->switchToArmedMode())
-    {
+    {   
+        showStatusMessage("Successfully switched to armed mode.");
         isArmed = true;
         controllerButton->setDisabled(false);
         landingButton->setDisabled(false);
         takeoffButton->setDisabled(false);
-        qDebug() << "Successfully switched to armed mode";
     }
     else
     {
-        qDebug() << "Failed to switch to armed mode";
+        showStatusMessage("Failed to switch to armed mode.");
     }
 }
 
@@ -423,14 +427,19 @@ void MyWindow::onControllerStart(){
 if(leftRadio->isChecked()) {
     double radius = radiusText->text().toDouble(); // Convert text to double
     command = QString("ros2 launch lqr_controller lqr_controller_launch.py trajectory_type:=circle radius:=%1").arg(QString::number(radius, 'f', 1)); // Convert back to QString with one decimal place
+    QString message = QString("Successfully started controller with circle trajectory of radius %1.").arg(radius, 0, 'f', 2);
+    showStatusMessage(message);
 } else {
     double xCoord = xCoordText->text().toDouble(); // Convert x coordinate text to double
     double yCoord = yCoordText->text().toDouble(); // Convert y coordinate text to double
     command = QString("ros2 launch lqr_controller lqr_controller_launch.py trajectory_type:=waypoint waypoint_x:=%1 waypoint_y:=%2")
                 .arg(QString::number(xCoord, 'f', 1)) // Convert back to QString with one decimal place
                 .arg(QString::number(yCoord, 'f', 1)); // Convert back to QString with one decimal place
+    QString message = QString("Successfully started controller with waypoint trajectory of coordinates [%1,%2].")
+                  .arg(xCoord, 0, 'f', 2)
+                  .arg(yCoord, 0, 'f', 2);
+    showStatusMessage(message);
 }
-
         QProcess::startDetached("gnome-terminal", QStringList() << "--" << "/bin/bash" << "-c" << command);
         popup->accept(); // Close the popup after running the command
     });
@@ -440,14 +449,6 @@ if(leftRadio->isChecked()) {
     popup->setLayout(mainLayout);
     popup->exec();
 }
-
-/*
-    QProcess *process = new QProcess(this);
-    QStringList arguments;
-    process->start("ros2", arguments << "run" << "lqr_controller" << "lqr_controller_node");
-    connect(process, &QProcess::errorOccurred, this, &MyWindow::handleProcessError);
-*/
-
 
 void MyWindow::turnOffTheController() {
     QProcess process;
@@ -490,7 +491,7 @@ void MyWindow::onEnvironmentSetup(){
     process->start("gnome-terminal", arguments);
     connect(process, &QProcess::errorOccurred, this, &MyWindow::handleScriptExecutionError);
     connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &MyWindow::onProcessFinished); //QProcess::finished has 2 overloads. The correct one needs to be specified
-
+    showStatusMessage("Environment setup started successfully.");
 }
 void MyWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus){
     qDebug() << exitCode << " + " << exitStatus;
@@ -498,7 +499,6 @@ void MyWindow::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus){
         armButton->setDisabled(false);
     }
 }
-
 
 void MyWindow::handleScriptExecutionError(){
     QMessageBox msgBox;
@@ -510,15 +510,15 @@ void MyWindow::handleScriptExecutionError(){
 void MyWindow::onTakeOffMode(){
     if (connectionManager->takeOffMode())
     {
+        showStatusMessage("Successfully switched to TakeOff mode.");
         isArmed = true;
         switchOffboardModeButton->setDisabled(false);
         landingButton->setDisabled(false);
         controllerButton->setDisabled(false);
-        qDebug() << "Successfully switched to takeoff mode";
     }
     else
     {
-        qDebug() << "Failed to switch to takeoff mode";
+        showStatusMessage("Failed to switched to TakeOff mode.");
     }   
 }
 
@@ -528,11 +528,11 @@ void MyWindow::onLandingMode(){
         controllerButton->setDisabled(true);
         landingButton->setDisabled(true);
         armButton->setDisabled(false);
-        qDebug() << "Successfully switched to landing mode";
+        showStatusMessage("Successfully switched to landing mode.");
     }
     else
     {
-        qDebug() << "Failed to switch to landing mode";
+        showStatusMessage("Failed to switched to landing mode.");
     } 
 }
 void MyWindow::buttonManager(){
@@ -555,7 +555,27 @@ void MyWindow::onRestartSimulation(){
     QProcess *process = new QProcess(this);
     QString scriptPath = "/home/luky/mavros_ros2_ws/scripts/restartSimulation.sh";
     process->start("/bin/bash", QStringList() << scriptPath);
+    showStatusMessage("Successfully restarted simulation.");
 }
+
+void MyWindow::showStatusMessage(const QString &message, int timeoutMs) {
+    statusMessageLabel->setText(message);
+    statusMessageLabel->adjustSize(); 
+    statusMessageLabel->move(10, this->height() - statusMessageLabel->height() - 10);
+
+    if (message.contains("Failed")) {
+        // Set text color to white and background color to darker red
+        statusMessageLabel->setStyleSheet("QLabel { color: #ffffff; background-color: #8B0000; }");
+    } else {
+        // Set text color to white and background color to darker green
+        statusMessageLabel->setStyleSheet("QLabel { color: #ffffff; background-color: #006400; }");
+    }
+
+    statusMessageLabel->show();
+    QTimer::singleShot(timeoutMs, statusMessageLabel, &QLabel::hide);
+}
+
+
 
 void MyWindow::closeEvent(QCloseEvent *event) {
     QProcess *process = new QProcess(this);

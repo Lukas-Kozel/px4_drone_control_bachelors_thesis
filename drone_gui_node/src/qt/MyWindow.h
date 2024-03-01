@@ -74,6 +74,7 @@ private:
     QtCharts::QBarSet* loadAngularVelocitySetZ;
     QtCharts::QChartView* droneVelocityGraph;
     QtCharts::QChartView* loadAngularVelocityGraph;
+    QLabel *statusMessageLabel;
     double drone_pose_x = 0.0;
     double drone_pose_y = 0.0;
     double drone_pose_z = 0.0;
@@ -115,6 +116,7 @@ private slots:
 
 private:
     void graphSetup();
+    void showStatusMessage(const QString &message,int timeout=3000);
     void turnOffTheController();
     void setupAxis(QtCharts::QChart* chart, QtCharts::QBarSeries* series, const QString &AxisText, qreal rangeStart, qreal rangeEnd);
     QMenuBar* setupMenuBar();
