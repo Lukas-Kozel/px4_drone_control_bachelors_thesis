@@ -345,11 +345,109 @@ QMenuBar* MyWindow::setupMenuBar()
 }
 
 void MyWindow::onControllerStart(){
+    QDialog *popup = new QDialog(this);
+    popup->setWindowTitle("Controller settings");
+
+    // Main layout
+    QVBoxLayout *mainLayout = new QVBoxLayout(popup);
+    QRegExpValidator *validator = new QRegExpValidator(QRegExp("^-?((100(\\.0{1,2})?)|([1-9]?\\d(\\.\\d{1,2})?))$"), this);
+
+    // Setup for the left side (Circle)
+    QGroupBox *leftGroup = new QGroupBox("Circle Settings", popup);
+    QVBoxLayout *leftLayout = new QVBoxLayout();
+    QRadioButton *leftRadio = new QRadioButton("Circle", leftGroup);
+    QHBoxLayout *leftInputLayout = new QHBoxLayout();
+    QLabel *radiusLabel = new QLabel("Radius [m]:", leftGroup);
+    QLineEdit *radiusText = new QLineEdit();
+    radiusText->setValidator(validator); 
+
+    leftInputLayout->addWidget(radiusLabel);
+    leftInputLayout->addWidget(radiusText);
+    leftLayout->addWidget(leftRadio);
+    leftLayout->addLayout(leftInputLayout);
+    leftGroup->setLayout(leftLayout);
+
+    // Setup for the right side (Waypoint)
+    QGroupBox *rightGroup = new QGroupBox("Waypoint Settings", popup);
+    QVBoxLayout *rightLayout = new QVBoxLayout();
+    QRadioButton *rightRadio = new QRadioButton("Waypoint", rightGroup);
+    QHBoxLayout *rightInput1Layout = new QHBoxLayout();
+    QLabel *xCoordLabel = new QLabel("Coordinate x [m]:", rightGroup);
+    QLineEdit *xCoordText = new QLineEdit();
+    xCoordText->setValidator(validator);
+    QHBoxLayout *rightInput2Layout = new QHBoxLayout();
+    QLabel *yCoordLabel = new QLabel("Coordinate y [m]:", rightGroup);
+    QLineEdit *yCoordText = new QLineEdit();
+    yCoordText->setValidator(validator);
+
+    rightInput1Layout->addWidget(xCoordLabel);
+    rightInput1Layout->addWidget(xCoordText);
+    rightInput2Layout->addWidget(yCoordLabel);
+    rightInput2Layout->addWidget(yCoordText);
+    rightLayout->addWidget(rightRadio);
+    rightLayout->addLayout(rightInput1Layout);
+    rightLayout->addLayout(rightInput2Layout);
+    rightGroup->setLayout(rightLayout);
+
+    mainLayout->addWidget(leftGroup);
+    mainLayout->addWidget(rightGroup);
+
+    // Buttons layout
+    QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    QPushButton *runButton = new QPushButton("Run", popup);
+    QPushButton *cancelButton = new QPushButton("Cancel", popup);
+    buttonsLayout->addWidget(runButton);
+    buttonsLayout->addWidget(cancelButton);
+    mainLayout->addLayout(buttonsLayout); // Add buttons under the sections
+
+    // Ensure mutual exclusivity of radio buttons
+    QButtonGroup *buttonGroup = new QButtonGroup(popup);
+    buttonGroup->addButton(leftRadio);
+    buttonGroup->addButton(rightRadio);
+
+    // Initially disable text fields
+    radiusText->setEnabled(false);
+    xCoordText->setEnabled(false);
+    yCoordText->setEnabled(false);
+
+    // Enable text fields when the corresponding radio button is selected
+    connect(leftRadio, &QRadioButton::toggled, radiusText, &QLineEdit::setEnabled);
+    connect(rightRadio, &QRadioButton::toggled, [xCoordText, yCoordText](bool checked){
+        xCoordText->setEnabled(checked);
+        yCoordText->setEnabled(checked);
+    });
+
+    // Button click actions
+    connect(runButton, &QPushButton::clicked, [this, popup, radiusText, leftRadio, xCoordText, yCoordText](){
+        QString command;
+if(leftRadio->isChecked()) {
+    double radius = radiusText->text().toDouble(); // Convert text to double
+    command = QString("ros2 launch lqr_controller lqr_controller_launch.py trajectory_type:=circle radius:=%1").arg(QString::number(radius, 'f', 1)); // Convert back to QString with one decimal place
+} else {
+    double xCoord = xCoordText->text().toDouble(); // Convert x coordinate text to double
+    double yCoord = yCoordText->text().toDouble(); // Convert y coordinate text to double
+    command = QString("ros2 launch lqr_controller lqr_controller_launch.py trajectory_type:=waypoint waypoint_x:=%1 waypoint_y:=%2")
+                .arg(QString::number(xCoord, 'f', 1)) // Convert back to QString with one decimal place
+                .arg(QString::number(yCoord, 'f', 1)); // Convert back to QString with one decimal place
+}
+
+        QProcess::startDetached("gnome-terminal", QStringList() << "--" << "/bin/bash" << "-c" << command);
+        popup->accept(); // Close the popup after running the command
+    });
+
+    connect(cancelButton, &QPushButton::clicked, popup, &QDialog::reject);
+
+    popup->setLayout(mainLayout);
+    popup->exec();
+}
+
+/*
     QProcess *process = new QProcess(this);
     QStringList arguments;
     process->start("ros2", arguments << "run" << "lqr_controller" << "lqr_controller_node");
     connect(process, &QProcess::errorOccurred, this, &MyWindow::handleProcessError);
-}
+*/
+
 
 void MyWindow::turnOffTheController() {
     QProcess process;
