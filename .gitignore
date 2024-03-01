@@ -1,4 +1,6 @@
 scripts/px4_log.txt
+scripts/pid_list.txt
+scripts/simulationPID.txt
 log
 build
 install
