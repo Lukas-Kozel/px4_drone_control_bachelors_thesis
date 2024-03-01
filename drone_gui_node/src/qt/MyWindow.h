@@ -11,6 +11,7 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsLineItem>
 #include <QHBoxLayout>
+#include <QRegExpValidator>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDebug>
@@ -23,6 +24,11 @@
 #include <QtCharts/QBarSet>
 #include <QtCharts/QBarSeries>
 #include <QtCharts/QValueAxis>
+#include <QDialog>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QButtonGroup>
+#include <QLineEdit>
 #include <QMenuBar>
 #include <QWidget>
 #include <QSplitter>
