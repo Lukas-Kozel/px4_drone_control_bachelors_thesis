@@ -10,13 +10,13 @@ class MyNode(Node):
     def __init__(self):
         super().__init__('dlq_k_matrix_calculator')
         self.publisher_ = self.create_publisher(Float64MultiArray, '/dlq_k_matrix', 10)
-        timer_period = 0.5 
+        timer_period = 0.05 
         self.timer = self.create_timer(timer_period, self.timer_callback)
         x1max = 4
         x2max = 2.0
-        x3max = math.pi/35
+        x3max = math.pi/16
         x4max = 1.5
-        umax = 2.4
+        umax = 2.3
         self.matrix_Q = np.array([
             [1/pow(x1max,2), 0,0, 0],
             [0, 1/pow(x2max,2), 0, 0],

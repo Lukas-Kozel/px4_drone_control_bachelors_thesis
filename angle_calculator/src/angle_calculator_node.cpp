@@ -1,6 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include <tf2/LinearMath/Quaternion.h>
+#include <random>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include "geometry_msgs/msg/vector3.hpp"
@@ -32,7 +33,15 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
 private:
     void on_load_pose_received(const load_pose_stamped::msg::LoadPoseStamped::SharedPtr msg)
     {
-        load_pose_ = msg;
+        if (msg == nullptr) {
+            return;
+        }
+    // Specify standard deviations for IMU readings based on their range
+    double pose_stddev = 0.0001;
+    //msg->pose.position.x += generateWhiteNoise(pose_stddev);
+    //msg->pose.position.y += generateWhiteNoise(pose_stddev);
+    //msg->pose.position.z += generateWhiteNoise(pose_stddev);
+    load_pose_ = msg;
     }
 
     void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
@@ -40,6 +49,11 @@ private:
         if (msg == nullptr) {
             return;
         }
+    // Specify standard deviations for IMU readings based on their range
+    double pose_stddev = 0.0001;
+    //msg->pose.position.x += generateWhiteNoise(pose_stddev);
+    //msg->pose.position.y += generateWhiteNoise(pose_stddev);
+    //msg->pose.position.z += generateWhiteNoise(pose_stddev);
         drone_pose_ = msg; 
         calculate_angles();
     }
@@ -88,6 +102,14 @@ void calculate_angles()
     angle_msg.angle.angle_z = theta_z_rad;
     load_angle_publisher_->publish(angle_msg);
 }
+
+double generateWhiteNoise(double stddev) {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    std::normal_distribution<> d{0, stddev};
+    return d(gen);
+}
+
 
     rclcpp::Subscription<load_pose_stamped::msg::LoadPoseStamped>::SharedPtr load_pose_subscriber_;
     rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr drone_pose_subscriber_;

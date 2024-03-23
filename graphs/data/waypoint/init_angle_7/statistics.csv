@@ -1,0 +1,24 @@
+Series,Current,Min,Max,Average
+Start Time,-1.79769e+308
+End Time,1.79769e+308
+Current Time,1.70938e+09
+/mavros/local_position/pose/header/stamp/nanosec,416653212,000000,164298,000000,996798651,000000,499625602,842857
+/mavros/local_position/pose/header/stamp/sec,1709380831,000000,1709380787,000000,1709380831,000000,1709380808,894444
+/mavros/local_position/pose/pose/orientation/w,-0,918035,-0,990124,-0,900863,-0,925165
+/mavros/local_position/pose/pose/orientation/x,0,001252,-0,021526,0,037600,0,001043
+/mavros/local_position/pose/pose/orientation/y,0,001486,-0,038168,0,011592,-0,002171
+/mavros/local_position/pose/pose/orientation/z,-0,396494,-0,434099,-0,138910,-0,374071
+/mavros/local_position/pose/pose/position/x,10,077427,-0,834507,10,077427,5,525608
+/mavros/local_position/pose/pose/position/y,9,970324,-0,047632,9,981596,5,579574
+/mavros/local_position/pose/pose/position/z,9,750973,9,746276,9,801338,9,768805
+/state_vector/data[0],0,077427,-2,249028,0,077427,-1,101307
+/state_vector/data[1],0,025041,-0,436280,0,688948,0,240608
+/state_vector/data[2],-0,003300,-0,038399,0,130620,0,000748
+/state_vector/data[3],0,005285,-0,076720,0,121676,0,001869
+/state_vector/data[4],-0,029676,-1,414480,-0,018404,-1,039006
+/state_vector/data[5],-0,002877,-0,236565,0,694534,0,228630
+/state_vector/data[6],-0,003149,-0,105027,0,059729,-0,002560
+/state_vector/data[7],0,000890,-0,083520,0,071293,-0,001928
+/state_vector/data[8],10,077427,-0,834507,10,077427,5,373515
+/state_vector/data[9],9,970324,-0,052413,9,981596,5,435817
+/state_vector/layout/data_offset,0,000000,0,000000,0,000000,0,000000

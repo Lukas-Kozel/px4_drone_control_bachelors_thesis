@@ -4,6 +4,7 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2/LinearMath/Matrix3x3.h"
+#include <random>
 #include "Eigen/Dense"
 #include <cmath>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -18,7 +19,7 @@
 #include "angle_stamped_msg/msg/angle_stamped.hpp"
 #include "mavros_msgs/msg/attitude_target.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
-
+#include <cstdlib>
 
 
 class LQRController : public rclcpp::Node
@@ -50,7 +51,7 @@ qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         setOffboardMode();
         system_mass = 2.25;
         control_timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(20),  
+            std::chrono::milliseconds(33),  
             std::bind(&LQRController::control, this)
         );
     }
@@ -67,6 +68,8 @@ void on_K_matrix_received(const std_msgs::msg::Float64MultiArray::SharedPtr msg)
             return;
         }
         Eigen::VectorXd incomingK = Eigen::Map<const Eigen::VectorXd>(msg->data.data(), msg->data.size());
+        if(!recording_started) startROS2BagRecording();
+        K_matrix_loaded=true;
         if(K == incomingK) {
             RCLCPP_INFO(this->get_logger(), "K is equal to incoming data, no update needed");
         } else {
@@ -81,7 +84,11 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     if (msg == nullptr) {
         return;
     }
-   drone_pose_ = msg;
+    double pose_stddev = 0.05;
+    msg->pose.position.x += generateWhiteNoise(pose_stddev);
+    msg->pose.position.y += generateWhiteNoise(pose_stddev);
+    msg->pose.position.z += generateWhiteNoise(pose_stddev);
+    drone_pose_ = msg;
 }
 
     void on_load_imu_received(const sensor_msgs::msg::Imu::SharedPtr msg)
@@ -89,6 +96,16 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     if (msg == nullptr) {
         return;
     }
+
+    // Specify standard deviations for IMU readings based on their range
+    double angular_velocity_stddev = 0.002;
+
+    // Add noise to angular velocity
+    msg->angular_velocity.x += generateWhiteNoise(angular_velocity_stddev);
+    msg->angular_velocity.y += generateWhiteNoise(angular_velocity_stddev);
+    msg->angular_velocity.z += generateWhiteNoise(angular_velocity_stddev);
+
+
     load_imu_ = msg;   
     }
     void on_load_angle_received(const angle_stamped_msg::msg::AngleStamped::SharedPtr msg)
@@ -96,6 +113,9 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     if (msg == nullptr) {
         return;
     }
+    double angle_stddev = 0.0523598776; //3 deg
+    msg->angle.angle_x += generateWhiteNoise(angle_stddev);
+    msg->angle.angle_y += generateWhiteNoise(angle_stddev);
     load_angle_ = msg;
 }
     void on_drone_velocity_received(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
@@ -103,7 +123,14 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     if (msg == nullptr) {
         return;
     }
+    // Specify standard deviations for IMU readings based on their range
+    double velocity_stddev = 0.002;
+    msg->twist.linear.x += generateWhiteNoise(velocity_stddev);
+    msg->twist.linear.y += generateWhiteNoise(velocity_stddev);
+    msg->twist.linear.z += generateWhiteNoise(velocity_stddev);
+
     drone_velocity_ = msg;
+
 }
 
 void update_load_angular_velocity() {
@@ -139,11 +166,13 @@ void update_load_angular_velocity() {
     }
         state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
         state_x(1) = drone_velocity_->twist.linear.x;
-        state_x(2)= load_angle_-> angle.angle_x;
+        state_x(2)= load_angle_->angle.angle_x;
 
         state_y(0) = drone_pose_->pose.position.y - current_target_position_(1);
         state_y(1) = drone_velocity_->twist.linear.y;
-        state_y(2)= load_angle_-> angle.angle_y;
+        state_y(2)= load_angle_->angle.angle_y;
+        //state_x(3) = 0;
+        //state_y(3) = 0;
         update_load_angular_velocity();
         RCLCPP_INFO(this->get_logger(), "State x: [%f, %f, %f, %f]", state_x(0), state_x(1), state_x(2), state_x(3));
         RCLCPP_INFO(this->get_logger(), "State y: [%f, %f, %f, %f]", state_y(0), state_y(1), state_y(2), state_y(3));
@@ -224,7 +253,7 @@ void publish_control(double roll, double pitch, double yaw){
 
 
 void updateTargetPositionGradually() {
-    Eigen::Vector3d position_difference = desired_target_position_ - current_target_position_;
+        Eigen::Vector3d position_difference = desired_target_position_ - current_target_position_;
 
     if (position_difference.norm() > step_size_) {
         position_difference = step_size_ * position_difference.normalized();
@@ -367,6 +396,37 @@ void getInputParameters() {
     }
 }
 
+void startROS2BagRecording() {
+    recording_started = true;
+    // Specify the desired output directory and filename for the ROS bag
+    const char* outputDirectory = "/home/luky/mavros_ros2_ws/rosbags";
+    const char* bagName = "circle_white_noise"; // The name for your ROS bag without extension
+
+    // Construct the command with the specified output directory and bag name
+    // Adjust the command according to your terminal emulator and file path requirements
+    std::string command = "gnome-terminal -- bash -c 'ros2 bag record -a -o ";
+    command += outputDirectory;
+    command += "/";
+    command += bagName;
+    command += "; exec bash'";
+
+    // Execute the command
+    int result = system(command.c_str());
+
+    if(result != 0) {
+        // Handle error
+    }
+}
+
+double generateWhiteNoise(double stddev) {
+    static std::random_device rd{};
+    static std::mt19937 gen{rd()};
+    std::normal_distribution<> d{0, stddev};
+    //return 0;
+    return d(gen);
+}
+
+
 
     rclcpp::TimerBase::SharedPtr control_timer_;
     rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr load_imu_subscriber_;
@@ -403,6 +463,8 @@ void getInputParameters() {
     Eigen::Vector3d circle_center_;
     Eigen::Vector3d circle_center_offset_;
     double initial_angle=0;
+    bool recording_started=false;
+    bool K_matrix_loaded=false;
 
 };
 

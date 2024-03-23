@@ -7,7 +7,7 @@ def sanitize_column_name(col_name):
     return col_name.replace('/', '_').replace('[', '').replace(']', '')
 
 # Load the data
-filepath = "/home/luky/Desktop/bakalarka/csv_grafy/kruznice/init_8/data.csv"
+filepath = "/home/luky/Desktop/bakalarka/csv_grafy/noise/data.csv"
 data = pd.read_csv(filepath)
 
 # Replace infinity values with NaN and drop them
@@ -26,19 +26,19 @@ data.columns = [sanitize_column_name(col) for col in data.columns]
 # Updated plot_structure to include plot1 and plot2 as well
 plot_structure_sanitized = {
     'plot1': {'columns': ['_state_vector_data0', '_state_vector_data4'],
-              'titles': ['Odchylka polohy dronu ve směru osy x', 'Odchylka polohy dronu ve směru osy y'],
-              'y_labels': ['x [m]', 'y [m]'],
+              'figure_title': 'Odchylka polohy dronu',
+              'y_labels': [r'$\Delta x [m]$', r'$\Delta y [m]$'],
               'labels': [r"$x_1$", r"$y_1$"]},
     'plot2': {'columns': ['_state_vector_data1', '_state_vector_data5'],
-              'titles': ['Rychlost dronu ve směru osy x', 'Rychlost dronu ve směru osy y'],
+              'figure_title': 'Rychlost dronu',
               'y_labels': [r"$x' [m \cdot s^{-1}]$", r"$y' [m \cdot s^{-1}]$"],
               'labels': [r"$x_2$", r"$y_2$"]},
     'plot3': {'columns': ['_state_vector_data2', '_state_vector_data6'],
-              'titles': ['Výchylka nákladu ve směru osy x', 'Výchylka nákladu ve směru osy y'],
+              'figure_title': 'Výchylka nákladu',
               'y_labels': [r'$\theta_x$ [rad]', r'$\theta_y$ [rad]'],
               'labels': [r"$x_3$", r"$y_3$"]},
     'plot4': {'columns': ['_state_vector_data3', '_state_vector_data7'],
-              'titles': ['Úhlová rychlost nákladu ve směru osy x', 'Úhlová rychlost nákladu ve směru osy y'],
+              'figure_title': 'Úhlová rychlost nákladu',
               'y_labels': [r"$\theta_x' [rad \cdot s^{-1}]$", r"$\theta_y' [rad \cdot s^{-1}]$"],
               'labels': [r"$x_4$", r"$y_4$"]},
 }
@@ -47,28 +47,24 @@ plot_structure_sanitized = {
 for plot_name, info in plot_structure_sanitized.items():
     fig, axs = plt.subplots(2, 1, figsize=(10, 8))  # Two subplots in one column
     
+    fig.suptitle(info['figure_title'])  # Set single title for the figure
+    
     for idx, col in enumerate(info['columns']):
-        # Drop rows where the specific column for the plot has NaN, to ensure continuity
         plot_data = data.dropna(subset=[col]).sort_values(by='__time')
-        
-        # Convert Pandas Series to NumPy arrays explicitly to avoid multi-dimensional indexing issues
         time_data = plot_data['__time'].to_numpy()
         col_data = plot_data[col].to_numpy()
         
-        # Plot the data, connecting each point with the next
         axs[idx].plot(time_data, col_data, 'o-', label=info['labels'][idx], linewidth=2, markersize=1)
-        
-        axs[idx].set_title(info['titles'][idx])
         axs[idx].set_xlabel('čas (s)')
         axs[idx].set_ylabel(info['y_labels'][idx])
         axs[idx].grid(True)
-        axs[idx].legend(loc='upper right', shadow=True, bbox_to_anchor=(1, 0.9))
+        axs[idx].legend(loc='best', shadow=True)
     
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     sanitized_plot_name = sanitize_column_name(plot_name)
-    filename = f'./graphs/circle/{sanitized_plot_name}.pdf'
+    filename = f'./graphs/final/noise/{sanitized_plot_name}.pdf'
     plt.savefig(filename)  # Save the figure with the plot name
-    #plt.show()
+    plt.show()
     plt.close(fig)
 
 fig, ax = plt.subplots(figsize=(10, 8))  # Create a new figure and a single subplot
@@ -87,7 +83,7 @@ ax.grid(True)
 ax.legend(loc='best')
 
 plt.tight_layout()
-filename = f'./graphs/circle/plot5.pdf'
+filename = f'./graphs/final/noise/trajectory.pdf'
 #plt.savefig(filename)  # Uncomment to save the figure
 #plt.show()
 plt.close(fig)  # Close the figure after displaying
@@ -104,7 +100,7 @@ column_y = '_state_vector_data9'
 fig, ax = plt.subplots(figsize=(10, 8))
 
 # Plot actual position with blue dots using sanitized column names
-ax.plot(data[column_x].values, data[column_y].values, 'bo-', label='Skutečná trajektorie', linewidth=1, markersize=1)
+ax.plot(data[column_x].values, data[column_y].values, 'bo-', label='Skutečná trajektorie', linewidth=2, markersize=1)
 
 # Plotting a circle as the ideal trajectory
 center_x, center_y = 5, 0  # Center of the circle
@@ -127,6 +123,6 @@ ax.legend(loc='best')
 
 plt.tight_layout()
 # Uncomment the next line to save the figure
-plt.savefig('./graphs/circle/plot5.pdf')
+plt.savefig('./graphs/final/noise/circle_trajectory.pdf')
 plt.show()
 plt.close(fig)
