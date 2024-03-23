@@ -8,3 +8,8 @@ install
 mavros
 px4_msgs
 rosbags/
+gz-plugins/gz_pose_plugin/build
+gz-plugins/gz_pose_plugin/install
+gz-plugins/gz_pose_plugin/log
+gz-plugins/gz_pose_plugin/.vscode
+gz-plugins/drone_pose_plugin/build
