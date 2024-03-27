@@ -84,7 +84,9 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     if (msg == nullptr) {
         return;
     }
-    double pose_stddev = 0.05;
+    double pose_stddev = 0.1;
+    init_pose_x =msg->pose.position.x;
+    init_pose_y =msg->pose.position.y; 
     msg->pose.position.x += generateWhiteNoise(pose_stddev);
     msg->pose.position.y += generateWhiteNoise(pose_stddev);
     msg->pose.position.z += generateWhiteNoise(pose_stddev);
@@ -114,6 +116,8 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
         return;
     }
     double angle_stddev = 0.0523598776; //3 deg
+    original_angle_x = msg->angle.angle_x;
+    original_angle_y = msg->angle.angle_y;
     msg->angle.angle_x += generateWhiteNoise(angle_stddev);
     msg->angle.angle_y += generateWhiteNoise(angle_stddev);
     load_angle_ = msg;
@@ -163,7 +167,9 @@ void update_load_angular_velocity() {
         if (!drone_pose_ || !load_imu_ || !load_angle_ || !drone_velocity_) {
         RCLCPP_ERROR(this->get_logger(), "Missing required data for state vector creation");
         return;
-    }
+    }   
+        original_position_x  = init_pose_x - current_target_position_(0);
+        original_position_y  = init_pose_y - current_target_position_(1);
         state_x(0) = drone_pose_->pose.position.x - current_target_position_(0);
         state_x(1) = drone_velocity_->twist.linear.x;
         state_x(2)= load_angle_->angle.angle_x;
@@ -352,9 +358,9 @@ std::pair<double, double> rotateControlInputs(double input_x, double input_y, tf
 
 void publishStateVector(){
     std_msgs::msg::Float64MultiArray state_msg;
-    state_msg.data = {state_x(0), state_x(1), state_x(2), state_x(3), state_y(0), state_y(1), state_y(2), state_y(3),drone_pose_->pose.position.x,drone_pose_->pose.position.y};
+    //state_msg.data = {state_x(0), state_x(1), state_x(2), state_x(3), state_y(0), state_y(1), state_y(2), state_y(3),drone_pose_->pose.position.x,drone_pose_->pose.position.y,original_angle_x,original_angle_y, original_position_x,original_position_y};
+    state_msg.data = {state_x(0), state_x(1), state_x(2), state_x(3), state_y(0), state_y(1), state_y(2), state_y(3),init_pose_x,init_pose_y,original_angle_x,original_angle_y, original_position_x,original_position_y};
     state_publisher_->publish(state_msg);
-
 }
 
 
@@ -400,7 +406,7 @@ void startROS2BagRecording() {
     recording_started = true;
     // Specify the desired output directory and filename for the ROS bag
     const char* outputDirectory = "/home/luky/mavros_ros2_ws/rosbags";
-    const char* bagName = "circle_white_noise"; // The name for your ROS bag without extension
+    const char* bagName = "waypoint_trajectory"; // The name for your ROS bag without extension
 
     // Construct the command with the specified output directory and bag name
     // Adjust the command according to your terminal emulator and file path requirements
@@ -465,7 +471,12 @@ double generateWhiteNoise(double stddev) {
     double initial_angle=0;
     bool recording_started=false;
     bool K_matrix_loaded=false;
-
+    double original_angle_x;
+    double original_angle_y;
+    double original_position_x;
+    double original_position_y;
+    double init_pose_x;
+    double init_pose_y;
 };
 
 

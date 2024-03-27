@@ -7,7 +7,7 @@ def sanitize_column_name(col_name):
     return col_name.replace('/', '_').replace('[', '').replace(']', '')
 
 # Load the data
-filepath = "/home/luky/Desktop/bakalarka/csv_grafy/testing/data.csv"
+filepath = "/home/luky/Desktop/bakalarka/csv_grafy/noise/data.csv"
 data = pd.read_csv(filepath)
 
 # Replace infinity values with NaN and drop them
@@ -25,45 +25,65 @@ data.columns = [sanitize_column_name(col) for col in data.columns]
 
 # Updated plot_structure to include plot1 and plot2 as well
 plot_structure_sanitized = {
-    'plot1': {'columns': ['_state_vector_data0', '_state_vector_data4'],
+    'plot1': {'columns': ['_state_vector_data0', '_state_vector_data4', '_state_vector_data12', '_state_vector_data13'],
               'figure_title': 'Odchylka polohy dronu',
               'y_labels': [r'$\Delta x [m]$', r'$\Delta y [m]$'],
-              'labels': [r"$x_1$", r"$y_1$"]},
+              'labels': [r"$x_1$ se šumem",r"$x_1$ skutečný", r"$y_1$ se šumem",  r"$y_1$ skutečný"]},
     'plot2': {'columns': ['_state_vector_data1', '_state_vector_data5'],
               'figure_title': 'Rychlost dronu',
               'y_labels': [r"$x' [m \cdot s^{-1}]$", r"$y' [m \cdot s^{-1}]$"],
               'labels': [r"$x_2$", r"$y_2$"]},
-    'plot3': {'columns': ['_state_vector_data2', '_state_vector_data6'],
+    'plot3': {'columns': ['_state_vector_data2', '_state_vector_data6', '_state_vector_data10', '_state_vector_data11'],
               'figure_title': 'Výchylka nákladu',
               'y_labels': [r'$\theta_x$ [rad]', r'$\theta_y$ [rad]'],
-              'labels': [r"$x_3$", r"$y_3$"]},
+              'labels': [r"$x_3$ se šumem",r"$x_3$ skutečný", r"$y_3$ se šumem",  r"$y_3$ skutečný"]},
     'plot4': {'columns': ['_state_vector_data3', '_state_vector_data7'],
               'figure_title': 'Úhlová rychlost nákladu',
               'y_labels': [r"$\theta_x' [rad \cdot s^{-1}]$", r"$\theta_y' [rad \cdot s^{-1}]$"],
               'labels': [r"$x_4$", r"$y_4$"]},
 }
 
+
 # Plotting all graphs
 for plot_name, info in plot_structure_sanitized.items():
     fig, axs = plt.subplots(2, 1, figsize=(10, 8))  # Two subplots in one column
-    
     fig.suptitle(info['figure_title'])  # Set single title for the figure
-    
-    for idx, col in enumerate(info['columns']):
-        plot_data = data.dropna(subset=[col]).sort_values(by='__time')
-        time_data = plot_data['__time'].to_numpy()
-        col_data = plot_data[col].to_numpy()
-        
-        axs[idx].plot(time_data, col_data, 'o-', label=info['labels'][idx], linewidth=2, markersize=1)
-        axs[idx].set_xlabel('čas (s)')
-        axs[idx].set_ylabel(info['y_labels'][idx])
-        axs[idx].grid(True)
-        axs[idx].legend(loc='best', shadow=True)
+
+    if plot_name == 'plot3' or plot_name=='plot1':
+        # Adjusted to combine _state_vector_data2 with _state_vector_data10, and _state_vector_data6 with _state_vector_data11
+        pairs = [(info['columns'][0], info['columns'][2]), (info['columns'][1], info['columns'][3])]  # Pairing columns for combined plots
+        for idx, (col1, col2) in enumerate(pairs):
+            plot_data1 = data.dropna(subset=[col1]).sort_values(by='__time')
+            plot_data2 = data.dropna(subset=[col2]).sort_values(by='__time')
+            
+            time_data1 = plot_data1['__time'].to_numpy()
+            col_data1 = plot_data1[col1].to_numpy()
+            time_data2 = plot_data2['__time'].to_numpy()
+            col_data2 = plot_data2[col2].to_numpy()
+            
+            # Plotting both data series in the same subplot
+            axs[idx].plot(time_data1, col_data1, 'o-', label=info['labels'][2*idx], linewidth=2, markersize=1)
+            axs[idx].plot(time_data2, col_data2, 's-', label=info['labels'][2*idx + 1], linewidth=2, markersize=1)
+            axs[idx].set_xlabel('čas (s)')
+            axs[idx].set_ylabel(info['y_labels'][idx])  # Adjusted to match the labels appropriately
+            axs[idx].grid(True)
+            axs[idx].legend(loc='best', shadow=True)
+    else:
+        for idx, col in enumerate(info['columns']):
+            plot_data = data.dropna(subset=[col]).sort_values(by='__time')
+            time_data = plot_data['__time'].to_numpy()
+            col_data = plot_data[col].to_numpy()
+            
+            axs[idx].plot(time_data, col_data, 'o-', label=info['labels'][idx], linewidth=2, markersize=1)
+            axs[idx].set_xlabel('čas (s)')
+            axs[idx].set_ylabel(info['y_labels'][idx])
+            axs[idx].grid(True)
+            axs[idx].legend(loc='best', shadow=True)
     
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     sanitized_plot_name = sanitize_column_name(plot_name)
-    filename = f'./graphs/final/circle/{sanitized_plot_name}.pdf'
-    plt.savefig(filename)  # Save the figure with the plot name
+    filename = f'./graphs/final/noise/{sanitized_plot_name}.pdf'
+    plt.savefig(filename)  # Uncomment this to save the figure with the plot name
     plt.show()
     plt.close(fig)
 
@@ -83,9 +103,9 @@ ax.grid(True)
 ax.legend(loc='best')
 
 plt.tight_layout()
-filename = f'./graphs/final/waypoint/waypoint_trajectory.pdf'
+filename = f'./graphs/final/noise/trajectory.pdf'
 #plt.savefig(filename)  # Uncomment to save the figure
-plt.show()
+#plt.show()
 plt.close(fig)  # Close the figure after displaying
 
 
@@ -123,6 +143,6 @@ ax.legend(loc='best')
 
 plt.tight_layout()
 # Uncomment the next line to save the figure
-plt.savefig('./graphs/final/circle/circle_trajectory.pdf')
+plt.savefig('./graphs/final/noise/circle_trajectory.pdf')
 plt.show()
 plt.close(fig)
