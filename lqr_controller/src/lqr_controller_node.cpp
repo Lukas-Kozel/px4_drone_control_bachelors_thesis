@@ -100,7 +100,7 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
     }
 
     // Specify standard deviations for IMU readings based on their range
-    double angular_velocity_stddev = 0.002;
+    double angular_velocity_stddev = 0.02;
 
     // Add noise to angular velocity
     msg->angular_velocity.x += generateWhiteNoise(angular_velocity_stddev);
@@ -128,7 +128,7 @@ void on_drone_pose_received(const geometry_msgs::msg::PoseStamped::SharedPtr msg
         return;
     }
     // Specify standard deviations for IMU readings based on their range
-    double velocity_stddev = 0.002;
+    double velocity_stddev = 0.02;
     msg->twist.linear.x += generateWhiteNoise(velocity_stddev);
     msg->twist.linear.y += generateWhiteNoise(velocity_stddev);
     msg->twist.linear.z += generateWhiteNoise(velocity_stddev);
