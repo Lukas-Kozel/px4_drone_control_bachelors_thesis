@@ -235,7 +235,7 @@ void publish_control(double roll, double pitch, double yaw){
     }
     double desired_altitude = 10;
     double altitude_error = desired_altitude - drone_pose_->pose.position.z;
-    double dt = 0.02;
+    double dt = 0.033;
     double thrust_adjustment = pid.compute(altitude_error, dt);
     double base_thrust = 0.6;
     double new_thrust = base_thrust + thrust_adjustment;
